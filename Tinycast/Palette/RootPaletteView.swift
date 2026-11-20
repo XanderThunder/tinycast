@@ -10,8 +10,6 @@ struct RootPaletteView: View {
     @Environment(CalculatorHistoryStore.self) private var calcHistory
     /// Observed so the card re-evaluates when a snapshot lands or consent changes.
     @Environment(CurrencyRateStore.self) private var currencyRates
-    @Environment(EmojiIndex.self) private var emojiIndex
-    @Environment(FrequentEmojiStore.self) private var frequentEmoji
     @Environment(FileSearchSession.self) private var fileSearch
     @Environment(DictionarySession.self) private var dictionary
     @Environment(MenuSearchSession.self) private var menuSearch
@@ -67,11 +65,6 @@ struct RootPaletteView: View {
             return SnippetEditorScreen(
                 coordinator: core.snippetCoordinator, openMenuCorner: menuCorner,
                 openInputMenu: openInputOptions)
-        case .emoji:
-            return EmojiScreen(
-                index: emojiIndex, frequent: frequentEmoji, pinned: core.pinnedEmoji, core: core, vm: vm,
-                tone: settings.emojiSkinTone, defaultColumns: settings.emojiGridColumns,
-                openActions: openActions)
         case .fileSearch:
             return FileSearchScreen(
                 session: fileSearch, core: core, vm: vm, openActions: openActions)
@@ -142,19 +135,6 @@ struct RootPaletteView: View {
             })
     }
 
-    /// All Categories stays above the divider; the remaining rows match their section order.
-    private var emojiCategoryContent: PopoverMenuContent {
-        PopoverMenuContent(
-            items: EmojiCategoryFilter.allCases.enumerated().map { index, filter in
-                PopoverMenuItem(
-                    title: filter.title, systemImage: filter.systemImage,
-                    startsSection: index == 1
-                ) {
-                    vm.emojiCategoryFilter = filter
-                }
-            })
-    }
-
     private var dictionaryScopeContent: PopoverMenuContent {
         PopoverMenuContent(
             items: DictionaryScope.allCases.map { scope in
@@ -211,8 +191,6 @@ struct RootPaletteView: View {
                 clipboardFilterContent, width: metrics.size.clipboardFilterMenuWidth)
         case .fileSearchFilter:
             return headerMenu(fileSearchFilterContent, width: metrics.size.fileSearchFilterMenuWidth)
-        case .emojiCategory:
-            return headerMenu(emojiCategoryContent, width: metrics.size.emojiCategoryMenuWidth)
         case .dictionaryScope:
             return headerMenu(dictionaryScopeContent, width: metrics.size.fileSearchFilterMenuWidth)
         case .argumentOptions:
@@ -301,36 +279,10 @@ struct RootPaletteView: View {
         .padding(renderingOutset)
     }
 
-    /// The emoji grid's observers, split out so `stateObservers` stays within type-checker reach.
-    @ViewBuilder
-    private func emojiObservers(_ content: some View) -> some View {
-        content
-            .onChange(of: vm.emojiCategoryFilter) { land() }
-            .onChange(of: core.pinnedEmoji.revision) { emojiGridChanged() }
-            .onChange(of: (screen as? EmojiScreen)?.frequentlyUsed) { old, new in
-                guard let old, let new else { return }
-                (screen as? EmojiScreen)?.frequentlyUsedChanged(from: old, to: new)
-                emojiGridChanged()
-            }
-            .onChange(of: vm.emojiGridColumnsOverride) { emojiGridChanged() }
-            .onChange(of: settings.emojiGridColumns) { emojiGridChanged() }
-            .onChange(of: vm.emojiGridZoomToken) {
-                guard let zoom = vm.emojiGridZoom else { return }
-                (screen as? EmojiScreen)?.zoom(zoom)
-            }
-    }
-
-    /// Pins and density move cells under the selection, and can change an open Actions menu's rows.
-    private func emojiGridChanged() {
-        guard vm.mode == .emoji else { return }
-        scroll = ScrollIntent(kind: .follow)
-        refreshActionsMenu()
-    }
-
     /// Split from `body` for the same reason `keyHandlers` is: one chain cannot carry them all.
     @ViewBuilder
     private func stateObservers(_ content: some View) -> some View {
-        emojiObservers(content)
+        content
             // Every show bumps focusToken so the search field refocuses.
             .onChange(of: vm.focusToken) {
                 resetCompactSelection()
@@ -365,8 +317,6 @@ struct RootPaletteView: View {
             .onChange(of: vm.mode) {
                 vm.clipboardFilter = .all
                 vm.fileSearchFilter = .all
-                vm.emojiCategoryFilter = .all
-                vm.emojiGridColumnsOverride = nil
                 if menuOpen { closeMenus() }
                 land(restoringSelection: true)
                 searchFocused = !screen.hidesSearchField
@@ -717,15 +667,6 @@ struct RootPaletteView: View {
                     help: String(localized: "Filter by type  ⌘P"),
                     action: toggleFileSearchFilter)
             }
-            if !isCollapsed, vm.mode == .emoji {
-                headerGutter(width: metrics.spacing.md)
-                HeaderMenuButton(
-                    title: vm.emojiCategoryFilter.title,
-                    systemImage: vm.emojiCategoryFilter.systemImage,
-                    isOpen: openMenu == .emojiCategory,
-                    help: String(localized: "Filter by category  ⌘P"),
-                    action: toggleEmojiCategory)
-            }
             if !isCollapsed, vm.mode == .dictionary, dictionary.hasThesaurus {
                 headerGutter(width: metrics.spacing.md)
                 HeaderMenuButton(
@@ -942,20 +883,10 @@ struct RootPaletteView: View {
         switch PaletteFilterAction.resolve(collapsed: isCollapsed, mode: vm.mode) {
         case .clipboardFilter: toggleClipboardFilter()
         case .fileSearchFilter: toggleFileSearchFilter()
-        case .emojiCategory: toggleEmojiCategory()
         case .dictionaryScope: toggleDictionaryScope()
         case .ignored: return false
         }
         return true
-    }
-
-    private func toggleEmojiCategory() {
-        if openMenu == .emojiCategory {
-            closeMenus()
-            return
-        }
-        let active = EmojiCategoryFilter.allCases.firstIndex(of: vm.emojiCategoryFilter) ?? 0
-        open(.emojiCategory, highlighting: active)
     }
 
     private func toggleDictionaryScope() {
@@ -1132,7 +1063,7 @@ struct RootPaletteView: View {
         case .actions: .bottomTrailing
         case .argumentOptions: .belowHeaderTrailing
         case .inputOptions(let corner): corner
-        case .clipboardFilter, .fileSearchFilter, .emojiCategory, .dictionaryScope:
+        case .clipboardFilter, .fileSearchFilter, .dictionaryScope:
             .belowHeaderTrailing
         case nil: nil
         }
@@ -1181,19 +1112,15 @@ struct RootPaletteView: View {
         return true
     }
 
-    /// Claimed whole on the launcher and emoji grid, so a press at an end cannot reach the caret.
+    /// Claimed whole on the launcher, so a press at an end cannot reach the caret.
     private func movePinnedOrFavorite(
         _ delta: Int, modifiers: SwiftUI.EventModifiers
     ) -> KeyPress.Result? {
         guard modifiers.contains(.command), modifiers.contains(.option), !isCollapsed else {
             return nil
         }
-        if let launcher = screen as? LauncherScreen {
-            if launcher.moveFavorite(delta, at: selection(in: launcher)), menuOpen { closeMenus() }
-            return .handled
-        }
-        guard let emoji = screen as? EmojiScreen else { return nil }
-        emoji.movePin(delta, at: selection(in: emoji))
+        guard let launcher = screen as? LauncherScreen else { return nil }
+        if launcher.moveFavorite(delta, at: selection(in: launcher)), menuOpen { closeMenus() }
         return .handled
     }
 
@@ -1345,7 +1272,6 @@ private enum OpenMenu: Equatable {
     case app
     case clipboardFilter
     case fileSearchFilter
-    case emojiCategory
     case dictionaryScope
 }
 

@@ -105,19 +105,6 @@ final class PaletteWindowController: NSObject, NSWindowDelegate {
             ?? event.charactersIgnoringModifiers?.lowercased()
     }
 
-    /// Shift is allowed, since ⌘+ is a shifted = on most layouts; the base key decides.
-    private static func emojiGridZoom(from event: NSEvent) -> EmojiGridZoom? {
-        guard !event.isARepeat, event.modifierFlags.isDisjoint(with: [.option, .control]) else {
-            return nil
-        }
-        switch ASCIIKeyboardLayout.character(for: event) {
-        case "0": return .actualSize
-        case "=", "+": return .zoomIn
-        case "-": return .zoomOut
-        default: return nil
-        }
-    }
-
     func hide(restoreFocus: Bool) {
         NotesPanel.refusesInheritedKey = previousOwnWindow?.isVisible != true
         panel?.orderOut(nil)
@@ -389,10 +376,6 @@ final class PaletteWindowController: NSObject, NSWindowDelegate {
                     core.customCommandCoordinator.saveCustomCommand()
                 default: break
                 }
-                return true
-            }
-            if self.core.palette.mode == .emoji, let zoom = Self.emojiGridZoom(from: event) {
-                self.core.palette.noteEmojiGridZoom(zoom)
                 return true
             }
             guard Self.commandCharacter(from: event) != nil else { return false }

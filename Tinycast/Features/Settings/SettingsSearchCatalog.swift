@@ -108,7 +108,7 @@ enum SettingsSearchCatalog {
     static let entries: [SettingsSearchEntry] =
         general + applications + systemSettings + systemActions + commands + quicklinks
         + appleShortcuts + fallbacks + clipboard + snippets + fileSearch + windowManagement
-        + navigation + notes + emoji + permissions
+        + navigation + notes + permissions
         + backup + about
 
     private static let general: [SettingsSearchEntry] = [
@@ -148,7 +148,7 @@ enum SettingsSearchCatalog {
             keywords: ["compact", "expanded", "slim", "search bar", "small"]),
         .init(
             group: .generalCompactShortcuts, "Compact Shortcuts",
-            keywords: ["slots", "buttons", "reorder", "clipboard", "emoji", "notes", "schedule"]),
+            keywords: ["slots", "buttons", "reorder", "clipboard", "notes"]),
         .init(
             .generalAppearance, "Follow the cursor across displays",
             keywords: ["monitor", "screen", "pointer", "multi display"]),
@@ -455,21 +455,6 @@ enum SettingsSearchCatalog {
         .init(
             .clipboardDisabledApplications, "Clear history",
             keywords: ["delete", "erase", "wipe"])
-    ]
-
-    private static let emoji: [SettingsSearchEntry] = [
-        .init(
-            pane: .emoji,
-            keywords: ["picker", "character", "unicode", "smiley"]),
-        .init(
-            group: .emojiCommands, "Emoji commands",
-            keywords: ["shortcut", "hotkey", "launcher", "picker"]),
-        .init(
-            .emojiAppearance, "Emoji Skin Tone",
-            keywords: ["colour", "color", "fitzpatrick", "default"]),
-        .init(
-            .emojiAppearance, "Column Count",
-            keywords: ["columns", "density", "zoom", "six", "eight", "ten"])
     ]
 
     private static let permissions: [SettingsSearchEntry] = [

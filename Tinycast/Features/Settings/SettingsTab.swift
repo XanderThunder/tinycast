@@ -1,7 +1,7 @@
 enum SettingsTab: CaseIterable, Identifiable {
     case general, applications, systemSettings, systemActions, commands, quicklinks,
         appleShortcuts,
-        fallbacks, clipboard, snippets, fileSearch, windowManagement, navigation, notes, emoji,
+        fallbacks, clipboard, snippets, fileSearch, windowManagement, navigation, notes,
         permissions, backup, about
     /// The case, never an index: a selectable `List` flattens section and row IDs together.
     var id: Self { self }
@@ -28,7 +28,6 @@ enum SettingsTab: CaseIterable, Identifiable {
         case .windowManagement: "window-management"
         case .navigation: "navigation"
         case .notes: "notes"
-        case .emoji: "emoji"
         case .permissions: "permissions"
         case .backup: "backup"
         case .about: "about"
@@ -51,7 +50,6 @@ enum SettingsTab: CaseIterable, Identifiable {
         case .navigation: return String(localized: "Navigation")
         case .windowManagement: return String(localized: "Window Management")
         case .clipboard: return String(localized: "Clipboard")
-        case .emoji: return String(localized: "Emoji & Symbols")
         case .permissions: return String(localized: "Permissions")
         case .backup: return String(localized: "Backup")
         case .about: return String(localized: "About")
@@ -74,7 +72,6 @@ enum SettingsTab: CaseIterable, Identifiable {
         case .navigation: return "arrow.left.arrow.right"
         case .windowManagement: return "macwindow"
         case .clipboard: return "list.clipboard.fill"
-        case .emoji: return "face.smiling.inverse"
         case .permissions: return "lock.shield.fill"
         case .backup: return "arrow.up.arrow.down.circle.fill"
         case .about: return "info.circle.fill"
@@ -89,7 +86,7 @@ enum SettingsTab: CaseIterable, Identifiable {
         case .applications, .backup: return .cyan
         case .windowManagement: return .mint
         case .notes: return .yellow
-        case .systemActions, .emoji: return .orange
+        case .systemActions: return .orange
         case .appleShortcuts: return .pink
         case .clipboard: return .indigo
         case .snippets: return .brown
@@ -122,8 +119,7 @@ enum SettingsSection: CaseIterable, Identifiable {
             ]
         case .features:
             return [
-                .clipboard, .snippets, .fileSearch, .windowManagement, .navigation, .notes,
-                .emoji
+                .clipboard, .snippets, .fileSearch, .windowManagement, .navigation, .notes
             ]
         case .advanced: return [.backup, .about]
         }

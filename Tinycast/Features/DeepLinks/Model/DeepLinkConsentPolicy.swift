@@ -47,7 +47,7 @@ enum DeepLinkConsentPolicy {
             .captureWindowLayout, .openInBrowser,
             .runShellCommand, .quit:
             true
-        case .calculatorHistory, .clipboardHistory, .searchEmoji, .searchFiles,
+        case .calculatorHistory, .clipboardHistory, .searchFiles,
             .searchMenuItems, .switchWindows, .switchWindowsBackwards, .createCustomCommand,
             .searchCustomCommands, .define, .showNotes, .createNote,
             .searchNotes, .createWindowLayout, .switchRoom, .createRoom, .createQuicklink,

@@ -116,9 +116,6 @@ enum SettingsFileSchema {
         case .clipboardDefaultAction: return bind(settings, \.clipboardDefaultAction)
         case .clipboardDisabledApps: return bind(settings, \.clipboardDisabledApps)
         case .clipboardCommands: return launcher.commandsBinding(for: key, owner: .clipboard)
-        case .emojiSkinTone: return bind(settings, \.emojiSkinTone)
-        case .emojiGridColumns: return bind(settings, \.emojiGridColumns)
-        case .emojiCommands: return launcher.commandsBinding(for: key, owner: .emoji)
         }
     }
 
@@ -142,8 +139,6 @@ extension SearchSensitivity: SettingsFileRawValue {}
 extension WindowCycle: SettingsFileRawValue {}
 extension ClipboardDefaultAction: SettingsFileRawValue {}
 extension SnippetDefaultAction: SettingsFileRawValue {}
-extension EmojiSkinTone: SettingsFileRawValue {}
-extension EmojiGridColumns: SettingsFileRawValue {}
 
 extension ClipboardRetention: SettingsFileToken {
     var settingsToken: SettingsFileJSON {

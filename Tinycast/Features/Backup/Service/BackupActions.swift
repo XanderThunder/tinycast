@@ -294,9 +294,6 @@ enum BackupActions {
         if s.favorites > 0 { parts.append(String(localized: "\(s.favorites) favorites")) }
         if s.hiddenItems > 0 { parts.append(String(localized: "\(s.hiddenItems) hidden items")) }
         if s.aliases > 0 { parts.append(String(localized: "\(s.aliases) aliases")) }
-        if s.pinnedEmoji > 0 {
-            parts.append(String(localized: "\(s.pinnedEmoji) pinned emoji and symbols"))
-        }
         if s.customCommands > 0 {
             parts.append(String(localized: "\(s.customCommands) custom commands"))
         }

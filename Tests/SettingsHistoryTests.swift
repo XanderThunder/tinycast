@@ -66,7 +66,7 @@ struct SettingsHistoryTests {
     static func roundTrips() {
         var history = SettingsHistory(current: .general)
         history.select(.snippets)
-        history.select(.emoji)
+        history.select(.fileSearch)
 
         history.goBack()
         expect(history.current == .snippets, "Back walks one entry at a time")
@@ -77,14 +77,14 @@ struct SettingsHistoryTests {
 
         history.goForward()
         history.goForward()
-        expect(history.current == .emoji, "Forward retraces the same path")
+        expect(history.current == .fileSearch, "Forward retraces the same path")
         expect(!history.canGoForward, "and stops where we had got to")
     }
 
     static func aNewBranchDiscardsTheOldOne() {
         var history = SettingsHistory(current: .general)
         history.select(.snippets)
-        history.select(.emoji)
+        history.select(.fileSearch)
         history.goBack()
         history.goBack()
 
@@ -151,8 +151,7 @@ struct SettingsHistoryTests {
             ("caps lock", .general),
             ("launch at login", .general),
             ("paste history", .clipboard),
-            ("window manage", .windowManagement),
-            ("skin tone", .emoji)
+            ("window manage", .windowManagement)
         ]
         for (query, tab) in cases {
             let found = SettingsSearchCatalog.results(for: query).first

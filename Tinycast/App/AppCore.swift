@@ -43,9 +43,6 @@ final class AppCore {
     let calcHistory = CalculatorHistoryStore()
     let currencyRates = CurrencyRateStore()
     let regionNumberFormat = RegionNumberFormatMonitor()
-    let emojiIndex = EmojiIndex()
-    let frequentEmoji = FrequentEmojiStore()
-    let pinnedEmoji = PinnedEmojiStore()
     let runningApps = RunningAppsMonitor()
     let palette = PaletteState()
     let fileIndexer = FileIndexer()
@@ -146,9 +143,6 @@ final class AppCore {
         clipboardStore: clipboardStore, clipboardManager: clipboardManager, settings: settings,
         appIndex: appIndex, palette: palette, windowController: windowController,
         paletteCoordinator: paletteCoordinator, core: self)
-    @ObservationIgnored private(set) lazy var emojiCoordinator = EmojiCoordinator(
-        frequentEmoji: frequentEmoji, settings: settings, windowController: windowController,
-        paletteCoordinator: paletteCoordinator)
     @ObservationIgnored private(set) lazy var calculatorCoordinator = CalculatorCoordinator(
         calcHistory: calcHistory, paletteCoordinator: paletteCoordinator, core: self)
     @ObservationIgnored private(set) lazy var fileSearchCoordinator = FileSearchCoordinator(
@@ -215,9 +209,6 @@ final class AppCore {
             applyAppearance()
             applyMotion()
             observeEffectiveAppearance()
-            pinnedEmoji.onPersistenceFailure = { [weak self] in
-                self?.showMessage(String(localized: "Couldn't save Emoji & Symbols pins"), tone: .danger)
-            }
 
             appIndex.start(settings: settings)
             clipboardCoordinator.applyEnabled()
@@ -262,7 +253,6 @@ final class AppCore {
                 }
             }
             Task { await appIndex.refresh() }
-            Task { await emojiIndex.load(languages: SystemLanguages.preferred) }
             currencyRates.start()
 
             hyperKey.healthTicker = healthTicker

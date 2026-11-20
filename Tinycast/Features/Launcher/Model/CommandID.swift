@@ -4,7 +4,6 @@ enum CommandID: String, CaseIterable, Sendable {
     case calculatorHistory = "command:calculator-history"
     case clipboardHistory = "command:clipboard-history"
     case pasteSequentially = "command:paste-sequentially"
-    case searchEmoji = "command:search-emoji"
     case searchFiles = "command:search-files"
     case searchMenuItems = "command:search-menu-items"
     case switchWindows = "command:switch-windows"
@@ -36,7 +35,7 @@ enum CommandID: String, CaseIterable, Sendable {
     case quit = "command:quit"
 
     static let defaultCompactBarCommands: [CommandID] = [
-        .clipboardHistory, .searchEmoji, .searchFiles, .searchQuicklinks
+        .clipboardHistory, .searchFiles, .searchQuicklinks
     ]
 
     static let compactBarOptions: [CommandID] =
@@ -66,7 +65,6 @@ enum CommandID: String, CaseIterable, Sendable {
         case .calculatorHistory: return "Calculator History"
         case .clipboardHistory: return "Clipboard History"
         case .pasteSequentially: return "Paste Sequentially"
-        case .searchEmoji: return "Search Emoji & Symbols"
         case .searchFiles: return "Search Files"
         case .searchMenuItems: return "Search Menu Bar Items"
         case .switchWindows: return "Switch Windows"
@@ -104,7 +102,6 @@ enum CommandID: String, CaseIterable, Sendable {
         case .calculatorHistory: return "plus.forwardslash.minus"
         case .clipboardHistory: return "list.clipboard.fill"
         case .pasteSequentially: return "arrow.right.doc.on.clipboard"
-        case .searchEmoji: return "face.smiling.inverse"
         case .searchFiles: return "doc.text.magnifyingglass"
         case .searchMenuItems: return "menubar.rectangle"
         case .switchWindows, .switchWindowsBackwards: return "macwindow.on.rectangle"
@@ -138,7 +135,6 @@ enum CommandID: String, CaseIterable, Sendable {
         switch self {
         case .clipboardHistory, .pasteSequentially: return .indigo
         case .calculatorHistory: return .green
-        case .searchEmoji: return .orange
         case .searchFiles, .openInBrowser, .createQuicklink, .searchQuicklinks, .importQuicklinks,
             .exportQuicklinks:
             return .blue
@@ -162,7 +158,6 @@ enum CommandID: String, CaseIterable, Sendable {
         switch self {
         case .clipboardHistory: 80
         case .searchFiles: 70
-        case .searchEmoji: 50
         case .createQuicklink, .createSnippet: 30
         default: nil
         }

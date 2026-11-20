@@ -146,8 +146,6 @@ final class LauncherCoordinator {
             paletteCoordinator.togglePalette(mode: .clipboard)
         case .pasteSequentially:
             core.clipboardCoordinator.pasteNextInSequence()
-        case .searchEmoji:
-            paletteCoordinator.togglePalette(mode: .emoji)
         case .searchFiles:
             fileSearchCoordinator.show()
         case .searchMenuItems:

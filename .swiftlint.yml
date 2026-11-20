@@ -5,7 +5,6 @@ included:
 excluded:
   - Tinycast/DesignSystem/Scrolling/EdgeDissolve.swift
   - Tinycast/DesignSystem/Scrolling/ThinScrollbar.swift
-  - Tinycast/Features/Emoji/Model/EmojiData.generated.swift
   - Tinycast/Features/Calculator/Model/CurrencyData.generated.swift
 
 disabled_rules:

@@ -16,9 +16,6 @@ struct RaycastImportSelection: View {
         .init(option: .favorites, symbol: "star", label: String(localized: "Favorites")),
         .init(
             option: .aliases, symbol: "character.cursor.ibeam", label: String(localized: "Aliases")),
-        .init(
-            option: .emojiSkinTone, symbol: "face.smiling",
-            label: String(localized: "Emoji skin tone")),
         .init(option: .launchAtLogin, symbol: "power", label: String(localized: "Launch at login")),
         .init(
             option: .menuBarVisibility, symbol: "menubar.rectangle",

@@ -61,7 +61,6 @@ extension SettingsTab {
         case .windowManagement:
             [.createWindowLayout, .captureWindowLayout, .switchRoom, .createRoom]
         case .clipboard: [.clipboardHistory, .pasteSequentially]
-        case .emoji: [.searchEmoji]
         default: []
         }
     }

@@ -41,9 +41,6 @@ struct PaletteNavigationTests {
             "a pushed screen opens as fresh as a prepared one")
         expect(vm.canGoBack, "the screen it was pushed over is still there to return to")
 
-        vm.emojiCategoryFilter = .pinned
-        vm.emojiGridColumnsOverride = .six
-
         expect(vm.pop(), "a pushed screen has a step back")
         expect(
             vm.mode == .launcher && vm.query == "clipboard" && vm.selection == 3,
@@ -54,20 +51,12 @@ struct PaletteNavigationTests {
             vm.mode == .launcher && vm.query == "clipboard",
             "a refused back step leaves the screen untouched")
 
-        let freshEmoji = searchingLauncher()
-        freshEmoji.emojiCategoryFilter = .category(.flags)
-        freshEmoji.emojiGridColumnsOverride = .ten
-        freshEmoji.prepare(mode: .emoji)
-        expect(
-            freshEmoji.emojiCategoryFilter == .all && freshEmoji.emojiGridColumnsOverride == nil,
-            "a fresh emoji screen restores all categories and the configured grid default")
-
         // A list snapped to the top would throw away the very selection being restored.
         let tokens = searchingLauncher()
-        tokens.push(mode: .emoji)
+        tokens.push(mode: .fileSearch)
         let reset = tokens.resetToken
         let follow = tokens.followToken
-        expect(tokens.pop(), "the emoji screen goes back to the launcher")
+        expect(tokens.pop(), "the file search screen goes back to the launcher")
         expect(tokens.resetToken == reset, "a back step does not snap the restored list to the top")
         expect(tokens.followToken != follow, "it scrolls the restored row into view instead")
 
@@ -196,7 +185,7 @@ struct PaletteNavigationTests {
 
         let summoned = searchingLauncher()
         summoned.push(mode: .clipboard)
-        summoned.prepare(mode: .emoji)
+        summoned.prepare(mode: .fileSearch)
         expect(!summoned.canGoBack, "a summon is a new root, not a step onto the old stack")
 
         let ringed = searchingLauncher()

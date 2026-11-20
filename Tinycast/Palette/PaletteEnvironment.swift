@@ -25,8 +25,6 @@ extension View {
             .environment(core.fallbacks)
             .environment(core.calcHistory)
             .environment(core.currencyRates)
-            .environment(core.emojiIndex)
-            .environment(core.frequentEmoji)
             .environment(core.fileSearch)
             .environment(core.dictionary)
             .environment(core.menuSearch)

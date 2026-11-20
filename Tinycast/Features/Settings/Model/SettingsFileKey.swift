@@ -81,9 +81,6 @@ enum SettingsFileKey: String, CaseIterable, Sendable {
     case clipboardDefaultAction = "clipboard.defaultAction"
     case clipboardDisabledApps = "clipboard.disabledApps"
     case clipboardCommands = "clipboard.commands"
-    case emojiSkinTone = "emoji.skinTone"
-    case emojiGridColumns = "emoji.gridColumns"
-    case emojiCommands = "emoji.commands"
 
     var section: String { String(rawValue.prefix { $0 != "." }) }
 

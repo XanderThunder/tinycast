@@ -286,7 +286,6 @@ final class DeepLinkCoordinator {
     private func open(_ id: CommandID, with text: String) -> Bool {
         switch id {
         case .clipboardHistory: paletteCoordinator.togglePalette(mode: .clipboard, seeding: text)
-        case .searchEmoji: paletteCoordinator.togglePalette(mode: .emoji, seeding: text)
         case .calculatorHistory:
             paletteCoordinator.togglePalette(mode: .calculatorHistory, seeding: text)
         case .searchQuicklinks: paletteCoordinator.togglePalette(mode: .quicklinks, seeding: text)

@@ -4,7 +4,6 @@ import Foundation
 struct BackupBundle: Sendable {
     enum LearningPart: String, CaseIterable, Sendable {
         case ranking
-        case emoji
         case calculator
     }
 
