@@ -1063,7 +1063,6 @@
 		1AE6A34F46D8970090CA0489 /* DictationMel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictationMel.swift; sourceTree = "<group>"; };
 		1B865FF16D3C395A8D509B94 /* QuicklinkLauncher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuicklinkLauncher.swift; sourceTree = "<group>"; };
 		1C8F318681FA5313677A14DA /* InstalledAIProbe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstalledAIProbe.swift; sourceTree = "<group>"; };
-		1D08950D93473A469DD94704 /* TinycastCloud.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TinycastCloud.entitlements; sourceTree = "<group>"; };
 		1D2472AA0A370E1D5A3C4025 /* EmojiKeywords */ = {isa = PBXFileReference; lastKnownFileType = folder; name = EmojiKeywords; path = Tinycast/Resources/EmojiKeywords; sourceTree = SOURCE_ROOT; };
 		1D85BC3DABE5D072E59B65EA /* MathFormula.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MathFormula.swift; sourceTree = "<group>"; };
 		1DE1B6753513C787B3FFE423 /* AIConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIConnection.swift; sourceTree = "<group>"; };
@@ -3485,7 +3484,6 @@
 				4DA7B926405DAC632C056418 /* Info.plist */,
 				45D4BA6E1BD8EB1F96A8927F /* Tinycast.entitlements */,
 				6621A88681E993D49EEF07A3 /* tinycast.icon */,
-				1D08950D93473A469DD94704 /* TinycastCloud.entitlements */,
 			);
 			path = Tinycast;
 			sourceTree = "<group>";
@@ -5140,7 +5138,6 @@
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "$(TINYCAST_BUNDLE_IDENTIFIER)";
 				PRODUCT_NAME = "Tinycast Dev";
-				PROVISIONING_PROFILE_SPECIFIER = "$(TINYCAST_PROVISIONING_PROFILE)";
 				SDKROOT = macosx;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 			};
@@ -5206,7 +5203,6 @@
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "$(TINYCAST_BUNDLE_IDENTIFIER)";
-				PROVISIONING_PROFILE_SPECIFIER = "$(TINYCAST_PROVISIONING_PROFILE)";
 				SDKROOT = macosx;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 			};
@@ -5279,11 +5275,8 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_VERSION = 6.0;
-				TINYCAST_APS_ENVIRONMENT = development;
 				TINYCAST_BUNDLE_IDENTIFIER = com.xanderthunder.tinycast.dev;
-				TINYCAST_CLOUDKIT_ENVIRONMENT = Development;
 				TINYCAST_ENTITLEMENTS = Tinycast/Tinycast.entitlements;
-				TINYCAST_PROVISIONING_PROFILE = "";
 				TINYCAST_URL_SCHEME = "tinycast-dev";
 			};
 			name = Debug;
@@ -5404,11 +5397,8 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_VERSION = 6.0;
-				TINYCAST_APS_ENVIRONMENT = production;
 				TINYCAST_BUNDLE_IDENTIFIER = com.xanderthunder.tinycast;
-				TINYCAST_CLOUDKIT_ENVIRONMENT = Production;
 				TINYCAST_ENTITLEMENTS = Tinycast/Tinycast.entitlements;
-				TINYCAST_PROVISIONING_PROFILE = "";
 				TINYCAST_URL_SCHEME = tinycast;
 			};
 			name = Release;
