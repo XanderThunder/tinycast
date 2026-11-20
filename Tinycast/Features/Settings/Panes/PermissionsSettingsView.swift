@@ -63,7 +63,7 @@ struct PermissionsSettingsView: View {
                             .accessibilityHidden(true)
                         VStack(alignment: .leading, spacing: Theme.Spacing.xxs) {
                             SettingsRowTitle(.permissionsFullDiskAccess, "Full Disk Access")
-                            Text("Allows File Search and finding protected app leftovers.")
+                            Text("Allows File Search to index protected folders.")
                                 .foregroundStyle(.secondary)
                         }
                     }

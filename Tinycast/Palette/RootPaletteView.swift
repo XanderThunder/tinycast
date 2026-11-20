@@ -17,7 +17,6 @@ struct RootPaletteView: View {
     @Environment(MenuSearchSession.self) private var menuSearch
     @Environment(WindowSwitchSession.self) private var windowSwitch
     /// Observed so the join card's countdown redraws on the minute boundary.
-    @Environment(UninstallSession.self) private var uninstall
     @Environment(QuicklinkStore.self) private var quicklinks
     @Environment(SnippetsStore.self) private var snippets
     @Environment(AppSettings.self) private var settings
@@ -53,9 +52,6 @@ struct RootPaletteView: View {
                 currencyRates: currencyRates, core: core, vm: vm, running: selectionIsRunning,
                 openActions: openActions, openArgumentOptions: openArgumentOptions,
                 scrollToFollow: { scroll = ScrollIntent(kind: .follow) })
-        case .uninstall:
-            return UninstallScreen(
-                session: uninstall, core: core, vm: vm, openActions: openActions)
         case .quicklinks:
             return QuicklinkListScreen(
                 store: quicklinks, core: core, vm: vm, openActions: openActions,
@@ -374,7 +370,6 @@ struct RootPaletteView: View {
                 if menuOpen { closeMenus() }
                 land(restoringSelection: true)
                 searchFocused = !screen.hidesSearchField
-                if vm.mode != .uninstall { uninstall.cancel() }
                 // Entering with no query is the blank screen's own request for recents.
                 if vm.mode == .fileSearch {
                     fileSearch.search(vm.query, filter: vm.fileSearchFilter)
@@ -844,11 +839,6 @@ struct RootPaletteView: View {
             }
     }
 
-    /// The Uninstall screen's primary action is destructive, so its pill isn't white.
-    private var pillTint: Color {
-        vm.mode == .uninstall ? Theme.Colors.destructive : .primary
-    }
-
     private func bottomBar(
         pillLabel: String, showActionGroup: Bool, formPrimaryShortcut: Bool,
         primaryActionEnabled: Bool, showActions: Bool
@@ -884,7 +874,7 @@ struct RootPaletteView: View {
                 HStack(spacing: metrics.spacing.sm) {
                     Text(pillLabel)
                         .font(metrics.typography.bar)
-                        .foregroundStyle(pillTint)
+                        .foregroundStyle(.primary)
                     if formPrimaryShortcut {
                         HStack(spacing: metrics.spacing.xxs) {
                             KeyCapChip(text: "⌘", style: .outline)

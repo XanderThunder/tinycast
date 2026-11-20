@@ -481,7 +481,7 @@ enum SettingsSearchCatalog {
             keywords: ["paste", "keystrokes", "privacy", "grant"]),
         .init(
             .permissionsFullDiskAccess, "Full Disk Access",
-            keywords: ["files", "folders", "uninstall", "leftovers", "privacy", "grant", "fda"]),
+            keywords: ["files", "folders", "privacy", "grant", "fda"]),
 
     ]
 

@@ -54,7 +54,6 @@ final class AppCore {
     let menuSearch = MenuSearchSession()
     let windowSwitch = WindowSwitchSession()
     let activationPolicy = ActivationPolicy()
-    let uninstall = UninstallSession()
     let notesStore: NotesStore
 
     /// Set when a layout editor should open with Settings; the pane consumes it.
@@ -85,10 +84,6 @@ final class AppCore {
         core: self)
     @ObservationIgnored private(set) lazy var systemActionCoordinator = SystemActionCoordinator(
         paletteCoordinator: paletteCoordinator, core: self)
-    @ObservationIgnored private(set) lazy var uninstallCoordinator = UninstallCoordinator(
-        session: uninstall, palette: palette, paletteCoordinator: paletteCoordinator,
-        appIndex: appIndex, runningApps: runningApps, hotKeys: hotKeys, favorites: favorites,
-        visibility: visibility, ranking: launcherRanking, aliases: aliases, core: self)
     @ObservationIgnored private(set) lazy var windowCommandCoordinator = WindowCommandCoordinator(
         settings: settings, paletteCoordinator: paletteCoordinator, windowMover: windowMover,
         spaceSwitcher: spaceSwitcher, customSizes: customWindowSizes)
