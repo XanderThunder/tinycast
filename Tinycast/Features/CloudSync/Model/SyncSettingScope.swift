@@ -19,7 +19,7 @@ enum SyncSettingScope {
         // A feature's switch is enabled per Mac, and a folder, scope or device names this Mac.
         case .language, .applicationsEnabled, .searchScopes, .systemSettingsEnabled,
             .systemActionsEnabled, .builtInCommandsEnabled, .customCommandsEnabled,
-            .quicklinksEnabled, .appleShortcutsEnabled, .aiEnabled, .dictationModel,
+            .quicklinksEnabled, .appleShortcutsEnabled, .dictationModel,
             .dictationMicrophone, .fileSearchEnabled, .fileSearchScopes, .notesEnabled,
             .notesFolder, .snippetsFolder, .navigationEnabled, .windowManagementEnabled,
             .clipboardEnabled:
@@ -28,8 +28,6 @@ enum SyncSettingScope {
         case .appearance, .animationsEnabled: .appearance
         case .interfaceSize: .interfaceSize
         case .compactMode, .compactBarCommands: .windowMode
-        case .aiSystemPrompt, .aiSystemPromptEnabled: .aiCommands
-        case .aiRetention: .aiChats
         case .dictationMode, .dictationPlaysSounds, .dictationDestination,
             .dictationAdaptsCapitalization, .dictationLiveInsertion, .dictationIdleRelease,
             .dictationLanguage:
@@ -37,7 +35,7 @@ enum SyncSettingScope {
         case .customWindowSizes, .windowLayouts, .windowRooms: .windowLayouts
         case .launcherShortcut, .hyperKey, .hyperKeyIncludesShift, .hyperKeyQuickPress,
             .hyperKeySecureInputCompatibility, .applications, .systemSettings, .systemActions,
-            .builtInCommands, .quicklinkCommands, .aiCommands, .dictationShortcut, .fileSearchCommands, .notesCommands, .snippetsCommands,
+            .builtInCommands, .quicklinkCommands, .dictationShortcut, .fileSearchCommands, .notesCommands, .snippetsCommands,
             .navigationCommands, .windowShortcuts, .windowAliases, .windowManagementCommands,
             .clipboardCommands, .emojiCommands, .calendarCommands:
             .hotkeysAndAliases
@@ -45,9 +43,7 @@ enum SyncSettingScope {
             .autoSwitchInputSource, .openOnCursorScreen, .paletteDraggable,
             .calcNumberStyle, .launcherShowsSuggestions, .rootSearchSensitivity,
             .customCommandsShowInLauncher, .quicklinksShowInLauncher, .quicklinkOpensNewWindow,
-            .quicklinkPassesSelectedText, .quicklinkConfirmsBeforeDelete, .aiWebSearch,
-            .aiChoices, .aiExpandsReasoning, .aiOpensTo, .aiNewChatAfter, .aiToolRounds,
-            .fileSearchIncludesHiddenFiles, .fileSearchIgnorePatterns,
+            .quicklinkPassesSelectedText, .quicklinkConfirmsBeforeDelete, .fileSearchIncludesHiddenFiles, .fileSearchIgnorePatterns,
             .fileSearchRemovedDefaultPatterns, .fileSearchShowInLauncher, .notesRendersMarkdown,
             .notesShowsFormattingBar, .notesShowsInMenuBar, .snippetsShowInLauncher,
             .snippetDefaultAction, .menuSearchShowsAppleMenu, .menuSearchDisabledApps,

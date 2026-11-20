@@ -1,9 +1,6 @@
 import Foundation
 
 enum CommandID: String, CaseIterable, Sendable {
-    /// The palette's chat keeps the id it shipped with, so its hotkeys and fallback still reach it.
-    case quickAI = "command:ai-chat"
-    case aiChat = "command:ai-chat-window"
     case calculatorHistory = "command:calculator-history"
     case clipboardHistory = "command:clipboard-history"
     case pasteSequentially = "command:paste-sequentially"
@@ -49,7 +46,7 @@ enum CommandID: String, CaseIterable, Sendable {
 
     static let compactBarOptions: [CommandID] =
         defaultCompactBarCommands + [
-            .searchSnippets, .showNotes, .mySchedule, .quickAI
+            .searchSnippets, .showNotes, .mySchedule
         ]
 
     static let compactBarLimit = 4
@@ -71,8 +68,6 @@ enum CommandID: String, CaseIterable, Sendable {
 
     private var nameResource: LocalizedStringResource {
         switch self {
-        case .quickAI: return "Quick AI"
-        case .aiChat: return "AI Chat"
         case .calculatorHistory: return "Calculator History"
         case .clipboardHistory: return "Clipboard History"
         case .pasteSequentially: return "Paste Sequentially"
@@ -116,8 +111,6 @@ enum CommandID: String, CaseIterable, Sendable {
 
     var sfSymbol: String {
         switch self {
-        case .quickAI: return "sparkles"
-        case .aiChat: return "bubble.left.and.bubble.right.fill"
         case .calculatorHistory: return "plus.forwardslash.minus"
         case .clipboardHistory: return "list.clipboard.fill"
         case .pasteSequentially: return "arrow.right.doc.on.clipboard"
@@ -158,7 +151,6 @@ enum CommandID: String, CaseIterable, Sendable {
 
     var tint: IconTint {
         switch self {
-        case .quickAI, .aiChat: return .purple
         case .clipboardHistory, .pasteSequentially: return .indigo
         case .calculatorHistory: return .green
         case .searchEmoji: return .orange
@@ -179,13 +171,7 @@ enum CommandID: String, CaseIterable, Sendable {
     }
 
     /// Queries this command wins until the user opens a rival more.
-    var boostedTerms: Set<String> {
-        switch self {
-        case .quickAI: ["ai"]
-        case .aiChat: ["chat"]
-        default: []
-        }
-    }
+    var boostedTerms: Set<String> { [] }
 
     /// Suggested, highest first, until the user's own habits fill the section.
     var suggestionPriority: Int? {

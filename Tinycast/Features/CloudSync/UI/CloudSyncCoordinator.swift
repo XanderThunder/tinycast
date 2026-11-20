@@ -293,7 +293,6 @@ final class CloudSyncCoordinator {
                 snippetFolder: core.snippetsStore.snippetsDirectory,
                 homeDirectory: FileManager.default.homeDirectoryForCurrentUser)
         }
-        let aiIsOn = { core.settings.aiEnabled }
         let rows = {
             Set(core.appIndex.apps.map(\.id))
                 .union(core.quicklinks.quicklinks.map(\.entryID))
@@ -310,13 +309,7 @@ final class CloudSyncCoordinator {
                 favorites: core.favorites, fallbacks: core.fallbacks, entryKeys: entryKeys),
             SnippetSyncSource(store: core.snippetsStore),
             NoteSyncSource(store: core.notesStore),
-            QuicklinkSyncSource(store: core.quicklinks),
-            ChatSyncSource(
-                store: core.chatHistory, isActive: aiIsOn, answering: { core.aiChats.answeringIDs }),
-            RecordSyncSource.chatPresets(core.chatPresets, isActive: aiIsOn),
-            RecordSyncSource.mcpServers(
-                { core.mcpSettings.servers }, apply: { core.mcpCoordinator.applySynced($0) },
-                remove: { (try? core.mcpCoordinator.remove($0)) != nil })
+            QuicklinkSyncSource(store: core.quicklinks)
         ]
     }
 }

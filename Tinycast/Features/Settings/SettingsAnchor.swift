@@ -46,17 +46,6 @@ extension SettingsAnchor {
 
     static let fallbacksFallbacks = Self(tab: .fallbacks, title: "Fallbacks")
 
-    static let aiAI = Self(tab: .ai, title: "AI")
-    static let aiProviders = Self(tab: .ai, title: "Providers")
-    static let aiDefault = Self(tab: .ai, title: "Default")
-    static let aiChat = Self(tab: .ai, title: "Chat")
-    static let aiConversations = Self(tab: .ai, title: "Conversations")
-    static let aiSystemPrompt = Self(tab: .ai, title: "System prompt")
-    static let aiChatPresets = Self(tab: .ai, title: "Chat Presets")
-    static let aiMCPServers = Self(tab: .ai, title: "MCP Servers")
-    static let aiCommands = Self(tab: .ai, title: "Commands")
-
-
     static let dictationDictation = Self(tab: .dictation, title: "Dictation")
     static let dictationCommands = Self(tab: .dictation, title: "Commands")
     static let dictationModel = Self(tab: .dictation, title: "Model")
@@ -105,7 +94,6 @@ extension SettingsAnchor {
     static let calendarJoining = Self(tab: .calendar, title: "Joining")
     static let calendarMenuBar = Self(tab: .calendar, title: "Menu Bar")
     static let calendarCalendars = Self(tab: .calendar, title: "Calendars")
-
 
     static let permissionsAccessibility = Self(tab: .permissions, title: "Accessibility")
     static let permissionsFullDiskAccess = Self(tab: .permissions, title: "Full Disk Access")

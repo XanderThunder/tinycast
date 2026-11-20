@@ -407,13 +407,6 @@ extension View {
             .environment(core.customWindowSizes)
             .environment(core.customWindowSizeCoordinator)
             .environment(core.calendarStore)
-            .environment(core.aiSettings)
-            .environment(core.mcpSettings)
-            .environment(core.mcpCoordinator)
-            .environment(core.chatPresets)
-            .environment(core.aiChatCoordinator)
-            .environment(core.chatGPTSubscription)
-            .environment(core.installedAI)
             .scrollContentBackground(.hidden)
             .motionScope()
     }

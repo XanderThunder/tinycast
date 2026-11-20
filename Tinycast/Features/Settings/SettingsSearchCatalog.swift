@@ -108,7 +108,7 @@ enum SettingsSearchCatalog {
     static let entries: [SettingsSearchEntry] =
         general + iCloudSync + applications + systemSettings + systemActions + commands + quicklinks
         + appleShortcuts + fallbacks + clipboard + snippets + fileSearch + windowManagement
-        + navigation + notes + calendar + emoji + ai + dictation + permissions
+        + navigation + notes + calendar + emoji + dictation + permissions
         + backup + about
 
     private static let general: [SettingsSearchEntry] = [
@@ -148,7 +148,7 @@ enum SettingsSearchCatalog {
             keywords: ["compact", "expanded", "slim", "search bar", "small"]),
         .init(
             group: .generalCompactShortcuts, "Compact Shortcuts",
-            keywords: ["slots", "buttons", "reorder", "clipboard", "emoji", "notes", "schedule", "quick ai"]),
+            keywords: ["slots", "buttons", "reorder", "clipboard", "emoji", "notes", "schedule"]),
         .init(
             .generalAppearance, "Follow the cursor across displays",
             keywords: ["monitor", "screen", "pointer", "multi display"]),
@@ -275,52 +275,6 @@ enum SettingsSearchCatalog {
         .init(
             pane: .fallbacks,
             keywords: ["no results", "empty", "search web", "order"])
-    ]
-
-    private static let ai: [SettingsSearchEntry] = [
-        .init(
-            pane: .ai, keywords: ["chat", "quick ai", "llm", "model", "openai", "anthropic"]),
-        .init(.aiAI, "Enable AI", keywords: ["chat", "llm"]),
-        .init(
-            .aiProviders, "Providers",
-            keywords: [
-                "sign in", "connect", "codex", "claude", "grok", "xai", "opencode", "cursor", "agent",
-                "api key", "connection", "base url", "openai", "anthropic", "ollama", "models",
-                "hide models"
-            ]),
-        .init(.aiDefault, "Default model", keywords: ["llm", "gpt", "claude", "grok"]),
-        .init(.aiDefault, "Reasoning effort", keywords: ["thinking", "effort", "deepseek"]),
-        .init(.aiChat, "Web search", keywords: ["browse", "internet"]),
-        .init(.aiChat, "Suggested replies", keywords: ["choices", "chips", "follow-up", "buttons"]),
-        .init(.aiChat, "Expand thinking", keywords: ["reasoning", "thoughts", "collapse", "fold", "unfold"]),
-        .init(.aiChat, "Tool call rounds", keywords: ["mcp", "tools", "limit", "loop", "agent", "unlimited"]),
-        .init(
-            .aiConversations, "Opens to",
-            keywords: ["new chat", "last", "summon", "resume", "window", "quick ai"]),
-        .init(
-            .aiConversations, "Start a new conversation after",
-            keywords: ["idle", "timeout", "fresh"]),
-        .init(
-            .aiConversations, "Keep conversations",
-            keywords: ["retention", "delete", "history", "privacy"]),
-        .init(
-            .aiSystemPrompt, "Send a system prompt",
-            keywords: ["instructions", "persona"]),
-        .init(
-            group: .aiChatPresets, "Chat Presets",
-            keywords: ["persona", "instructions", "system prompt"]),
-        .init(
-            .aiChatPresets, "Add Chat Preset",
-            keywords: ["new", "persona", "instructions", "system prompt"]),
-        .init(
-            .aiMCPServers, "Enable MCP servers",
-            keywords: ["tools", "model context protocol"]),
-        .init(
-            .aiMCPServers, "Add MCP Server",
-            keywords: ["tools", "model context protocol", "stdio"]),
-        .init(
-            group: .aiCommands, "AI commands",
-            keywords: ["shortcut", "launcher", "chat"])
     ]
 
     private static let dictation: [SettingsSearchEntry] = [

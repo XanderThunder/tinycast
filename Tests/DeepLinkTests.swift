@@ -289,12 +289,7 @@ struct DeepLinkTests {
         for name in [".", "..", "%2E%2E"] {
             expect(parse("tinycast://note/\(name)") == nil, "\(name) is never a note")
         }
-        let chat = UUID()
-        expect(
-            DeepLink.url(forChat: chat, scheme: scheme).flatMap { DeepLink(url: $0, scheme: scheme) }
-                == .chat(id: chat),
-            "a chat's link reads back as its ID")
-        expect(parse("tinycast://chat/nope") == nil, "a chat link needs a UUID")
+        let quicklinkID = UUID()
         expect(
             parse("tinycast://system-action/set-volume?fallbackText=40")
                 == .entry(
@@ -302,8 +297,8 @@ struct DeepLinkTests {
                     DeepLinkInput(fallbackText: "40")),
             "set-volume carries its level as input")
         expect(
-            DeepLinkSource.outside.mayRun(.quicklink(id: chat)), "a link from outside may open a quicklink")
-        expect(!DeepLinkSource.tinycast.mayRun(.quicklink(id: chat)), "a quicklink may not open a quicklink")
+            DeepLinkSource.outside.mayRun(.quicklink(id: quicklinkID)), "a link from outside may open a quicklink")
+        expect(!DeepLinkSource.tinycast.mayRun(.quicklink(id: quicklinkID)), "a quicklink may not open a quicklink")
         expect(
             DeepLinkSource.tinycast.mayRun(.command(.searchFiles)),
             "a quicklink may open anything else")

@@ -19,7 +19,7 @@ struct CompactBarTests {
         check(
             defaults == [.clipboardHistory, .searchEmoji, .searchFiles, .searchQuicklinks],
             "the always-on commands lead the default")
-        check(CommandID.compactBarOptions.count == 8, "eight supported destinations")
+        check(CommandID.compactBarOptions.count == 7, "seven supported destinations")
         for count in 0...CommandID.compactBarLimit {
             let commands = Array(defaults.prefix(count))
             var selection = CompactBarSelection()
@@ -45,7 +45,7 @@ struct CompactBarTests {
         check(selection.command == defaults.first, "an obsolete selection starts from Search")
 
         check(CommandID.compactBarCommands(from: []) == [], "empty means no shortcuts")
-        let chosen: [CommandID] = [.quickAI, .searchEmoji, .mySchedule, .showNotes]
+        let chosen: [CommandID] = [.searchSnippets, .searchEmoji, .mySchedule, .showNotes]
         check(
             CommandID.compactBarCommands(from: chosen.map(\.rawValue)) == chosen,
             "all additional destinations retain their order")
@@ -89,7 +89,7 @@ struct CompactBarTests {
             "settings JSON round trip retains identifiers")
         for invalid: SettingsFileJSON in [
             .array([.string("unknown")]), .array([.string(CommandID.quit.rawValue)]),
-            .array([.string(CommandID.quickAI.rawValue), .string(CommandID.quickAI.rawValue)]),
+            .array([.string(CommandID.showNotes.rawValue), .string(CommandID.showNotes.rawValue)]),
             Array(CommandID.compactBarOptions.prefix(5)).settingsJSON, .bool(false)
         ] {
             check(
