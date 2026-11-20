@@ -248,27 +248,6 @@ final class AppSettings {
         }
     }
 
-    var notesEnabled: Bool {
-        didSet { defaults.set(notesEnabled, forKey: Key.notesEnabled.rawValue) }
-    }
-
-    var notesRendersMarkdown: Bool {
-        didSet { defaults.set(notesRendersMarkdown, forKey: Key.notesRendersMarkdown.rawValue) }
-    }
-
-    var notesShowsFormattingBar: Bool {
-        didSet { defaults.set(notesShowsFormattingBar, forKey: Key.notesShowsFormattingBar.rawValue) }
-    }
-
-    var notesShowsInMenuBar: Bool {
-        didSet { defaults.set(notesShowsInMenuBar, forKey: Key.notesShowsInMenuBar.rawValue) }
-    }
-
-    /// The notes folder as the user wrote it, `~` allowed; nil keeps it in Application Support.
-    var notesFolder: String? {
-        didSet { defaults.set(notesFolder, forKey: Key.notesFolder.rawValue) }
-    }
-
     var customCommandsEnabled: Bool {
         didSet { defaults.set(customCommandsEnabled, forKey: Key.customCommandsEnabled.rawValue) }
     }
@@ -512,15 +491,6 @@ final class AppSettings {
         fileSearchShowInLauncher = defaults.bool(forKey: Key.fileSearchShowInLauncher.rawValue)
         fileSearchIncludesHiddenFiles = defaults.bool(
             forKey: Key.fileSearchIncludesHiddenFiles.rawValue)
-        notesEnabled = defaults.bool(forKey: Key.notesEnabled.rawValue)
-        notesRendersMarkdown =
-            defaults.object(forKey: Key.notesRendersMarkdown.rawValue) == nil
-            || defaults.bool(forKey: Key.notesRendersMarkdown.rawValue)
-        notesShowsFormattingBar =
-            defaults.object(forKey: Key.notesShowsFormattingBar.rawValue) == nil
-            || defaults.bool(forKey: Key.notesShowsFormattingBar.rawValue)
-        notesShowsInMenuBar = defaults.bool(forKey: Key.notesShowsInMenuBar.rawValue)
-        notesFolder = defaults.string(forKey: Key.notesFolder.rawValue)
         customCommandsEnabled = defaults.bool(forKey: Key.customCommandsEnabled.rawValue)
         // These default on, so absence must be distinguished from a stored `false`.
         customCommandsShowInLauncher =

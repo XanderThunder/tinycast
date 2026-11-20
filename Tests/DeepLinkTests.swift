@@ -280,15 +280,6 @@ struct DeepLinkTests {
     }
 
     static func routeInputChecks() {
-        let note = "Groceries & plans?.md"
-        expect(
-            DeepLink.url(forNote: note, scheme: scheme).flatMap { DeepLink(url: $0, scheme: scheme) }
-                == .note(name: note),
-            "a note's link reads back as its file name")
-        expect(parse("tinycast://note/a/b.md") == nil, "a note name is one segment")
-        for name in [".", "..", "%2E%2E"] {
-            expect(parse("tinycast://note/\(name)") == nil, "\(name) is never a note")
-        }
         let quicklinkID = UUID()
         expect(
             parse("tinycast://system-action/set-volume?fallbackText=40")

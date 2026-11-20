@@ -19,7 +19,7 @@ struct CompactBarTests {
         check(
             defaults == [.clipboardHistory, .searchFiles, .searchQuicklinks],
             "the always-on commands lead the default")
-        check(CommandID.compactBarOptions.count == 5, "five supported destinations")
+        check(CommandID.compactBarOptions.count == 4, "four supported destinations")
         for count in 0...CommandID.compactBarLimit {
             let commands = Array(defaults.prefix(count))
             var selection = CompactBarSelection()
@@ -40,19 +40,19 @@ struct CompactBarTests {
         check(selection.command == .searchFiles, "reordering preserves the selected command")
         selection.reconcile(commands: [.clipboardHistory])
         check(selection.command == nil, "removing or disabling the selected command returns to Search")
-        selection.command = .showNotes
+        selection.command = .searchSnippets
         selection.move(by: 1, commands: defaults)
         check(selection.command == defaults.first, "an obsolete selection starts from Search")
 
         check(CommandID.compactBarCommands(from: []) == [], "empty means no shortcuts")
-        let chosen: [CommandID] = [.searchSnippets, .searchFiles, .clipboardHistory, .showNotes]
+        let chosen: [CommandID] = [.searchSnippets, .searchFiles, .clipboardHistory]
         check(
             CommandID.compactBarCommands(from: chosen.map(\.rawValue)) == chosen,
             "all additional destinations retain their order")
         for invalid in [
             ["unknown"], [CommandID.quit.rawValue],
             [CommandID.searchFiles.rawValue, CommandID.searchFiles.rawValue],
-            Array(CommandID.compactBarOptions.prefix(5)).map(\.rawValue)
+            (CommandID.compactBarOptions + [CommandID.compactBarOptions[0]]).map(\.rawValue)
         ] {
             check(
                 CommandID.compactBarCommands(from: invalid) == nil,
@@ -89,8 +89,8 @@ struct CompactBarTests {
             "settings JSON round trip retains identifiers")
         for invalid: SettingsFileJSON in [
             .array([.string("unknown")]), .array([.string(CommandID.quit.rawValue)]),
-            .array([.string(CommandID.showNotes.rawValue), .string(CommandID.showNotes.rawValue)]),
-            Array(CommandID.compactBarOptions.prefix(5)).settingsJSON, .bool(false)
+            .array([.string(CommandID.searchFiles.rawValue), .string(CommandID.searchFiles.rawValue)]),
+            (CommandID.compactBarOptions + [CommandID.compactBarOptions[0]]).settingsJSON, .bool(false)
         ] {
             check(
                 !binding.write(invalid).isEmpty && state.value == chosen,

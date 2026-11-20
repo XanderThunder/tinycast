@@ -16,7 +16,6 @@ final class LauncherCoordinator {
     private let fileSearchCoordinator: FileSearchCoordinator
     private let menuSearchCoordinator: MenuSearchCoordinator
     private let windowSwitchCoordinator: WindowSwitchCoordinator
-    private let notesCoordinator: NotesCoordinator
     /// The backup commands only, which need the live stores to gather from and apply to.
     private unowned let core: AppCore
 
@@ -34,7 +33,6 @@ final class LauncherCoordinator {
         fileSearchCoordinator: FileSearchCoordinator,
         menuSearchCoordinator: MenuSearchCoordinator,
         windowSwitchCoordinator: WindowSwitchCoordinator,
-        notesCoordinator: NotesCoordinator,
         core: AppCore
     ) {
         self.ranking = ranking
@@ -50,7 +48,6 @@ final class LauncherCoordinator {
         self.fileSearchCoordinator = fileSearchCoordinator
         self.menuSearchCoordinator = menuSearchCoordinator
         self.windowSwitchCoordinator = windowSwitchCoordinator
-        self.notesCoordinator = notesCoordinator
         self.core = core
     }
 
@@ -161,15 +158,6 @@ final class LauncherCoordinator {
             core.dictionaryCoordinator.show()
         case .openInBrowser, .runShellCommand:
             break  // Query-driven: each runs where the typed text is, never through this funnel.
-        case .showNotes:
-            dismissPalette()
-            notesCoordinator.toggle()
-        case .createNote:
-            dismissPalette()
-            notesCoordinator.createNote()
-        case .searchNotes:
-            dismissPalette()
-            notesCoordinator.searchNotes()
         case .searchQuicklinks:
             paletteCoordinator.togglePalette(mode: .quicklinks)
         case .searchSnippets:

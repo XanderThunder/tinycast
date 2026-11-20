@@ -49,8 +49,7 @@ enum DeepLinkConsentPolicy {
             true
         case .calculatorHistory, .clipboardHistory, .searchFiles,
             .searchMenuItems, .switchWindows, .switchWindowsBackwards, .createCustomCommand,
-            .searchCustomCommands, .define, .showNotes, .createNote,
-            .searchNotes, .createWindowLayout, .switchRoom, .createRoom, .createQuicklink,
+            .searchCustomCommands, .define, .createWindowLayout, .switchRoom, .createRoom, .createQuicklink,
             .searchQuicklinks, .importQuicklinks, .exportQuicklinks, .searchSnippets, .createSnippet,
             .exportSettings, .importSettings, .importFromRaycast, .settings, .about:
             false

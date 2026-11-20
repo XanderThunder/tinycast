@@ -14,9 +14,6 @@ enum CommandID: String, CaseIterable, Sendable {
     case createCustomCommand = "command:create-custom-command"
     case searchCustomCommands = "command:search-custom-commands"
     case define = "command:define"
-    case showNotes = "command:show-notes"
-    case createNote = "command:create-note"
-    case searchNotes = "command:search-notes"
     case createWindowLayout = "command:create-window-layout"
     case captureWindowLayout = "command:capture-window-layout"
     case switchRoom = "command:switch-room"
@@ -40,7 +37,7 @@ enum CommandID: String, CaseIterable, Sendable {
 
     static let compactBarOptions: [CommandID] =
         defaultCompactBarCommands + [
-            .searchSnippets, .showNotes
+            .searchSnippets
         ]
 
     static let compactBarLimit = 4
@@ -75,9 +72,6 @@ enum CommandID: String, CaseIterable, Sendable {
         case .createCustomCommand: return "Create Custom Command"
         case .searchCustomCommands: return "Search Custom Commands"
         case .define: return "Define Word"
-        case .showNotes: return "Show Notes"
-        case .createNote: return "Create Note"
-        case .searchNotes: return "Search Notes"
         case .createWindowLayout: return "Create Window Layout"
         case .captureWindowLayout: return "Create Layout from Current Windows"
         case .switchRoom: return "Switch Room"
@@ -109,9 +103,6 @@ enum CommandID: String, CaseIterable, Sendable {
         case .openInBrowser: return "globe"
         case .runShellCommand, .createCustomCommand, .searchCustomCommands: return "terminal.fill"
         case .define: return "book.closed.fill"
-        case .showNotes: return "text.page.fill"
-        case .createNote: return "note.text.badge.plus"
-        case .searchNotes: return "text.magnifyingglass"
         case .createWindowLayout: return "plus.rectangle.on.rectangle.fill"
         case .captureWindowLayout: return "macwindow.badge.plus"
         case .switchRoom: return "door.left.hand.open"
@@ -144,7 +135,6 @@ enum CommandID: String, CaseIterable, Sendable {
         case .openCamera, .settings, .about: return .gray
         case .define, .searchSnippets, .createSnippet: return .brown
         case .quit: return .red
-        case .showNotes, .createNote, .searchNotes: return .yellow
         case .createWindowLayout, .captureWindowLayout, .switchRoom, .createRoom: return .mint
         case .exportSettings, .importSettings, .importFromRaycast: return .cyan
         }
