@@ -1,50 +1,34 @@
 import Foundation
 
-/// Decodes the rate feeds into one snapshot. Pure, so the harness covers it; the store does the IO.
+/// Decodes Coinbase's exchange-rate feed into one snapshot. Pure; the store does the IO.
 enum CurrencyFeed {
-    /// Fiat quotes are keyed `<base><code>` and omit the base's own row.
-    private struct FiatPayload: Decodable {
-        let success: Bool
-        let source: String
-        let quotes: [String: Double]
+    /// Every rate is units of `currency` per one base, as a decimal string, fiat and coins alike.
+    private struct Payload: Decodable {
+        struct Body: Decodable {
+            let currency: String
+            let rates: [String: String]
+        }
+
+        let data: Body
     }
 
-    /// Crypto is quoted the other way round — one unit costs this much of `target`.
-    private struct CryptoPayload: Decodable {
-        let success: Bool
-        let target: String
-        let rates: [String: Double]
-    }
-
-    /// One units-per-base table from both feeds; `complete` is false when the coins didn't land.
-    static func snapshot(
-        fiat: Data, crypto: Data?, now: Date
-    ) throws -> (rates: CurrencyRates, complete: Bool) {
-        let payload = try JSONDecoder().decode(FiatPayload.self, from: fiat)
-        let base = payload.source
-        guard payload.success, base.count == 3 else { throw URLError(.cannotParseResponse) }
+    /// One units-per-base table; `complete` is false when no coin was priced.
+    static func snapshot(_ feed: Data, now: Date) throws -> (rates: CurrencyRates, complete: Bool) {
+        let body = try JSONDecoder().decode(Payload.self, from: feed).data
+        let base = body.currency
+        guard base.count == 3 else { throw URLError(.cannotParseResponse) }
 
         var rates: [String: Double] = [:]
-        rates.reserveCapacity(payload.quotes.count + 1)
-        for (pair, rate) in payload.quotes where usable(rate) {
-            guard pair.count == 6, pair.hasPrefix(base) else { continue }
-            rates[String(pair.dropFirst(3))] = rate
+        rates.reserveCapacity(body.rates.count + 1)
+        for (code, text) in body.rates {
+            guard let rate = Double(text), usable(rate) else { continue }
+            rates[code] = rate
         }
-        guard !rates.isEmpty else { throw URLError(.cannotParseResponse) }
         rates[base] = 1
+        guard rates.count > 1 else { throw URLError(.cannotParseResponse) }
 
-        var coins = 0
-        // Last, so the coin feed's own price wins for a symbol the fiat table also quotes.
-        if let crypto, let payload = try? JSONDecoder().decode(CryptoPayload.self, from: crypto),
-            payload.success, payload.target == base
-        {
-            for (code, price) in payload.rates where usable(price) && usable(1 / price) {
-                rates[code] = 1 / price
-                coins += 1
-            }
-        }
-
-        return (CurrencyRates(base: base, rates: rates, fetchedAt: now), coins > 0)
+        let snapshot = CurrencyRates(base: base, rates: rates, fetchedAt: now)
+        return (snapshot, pricesCoins(snapshot))
     }
 
     /// Only whole snapshots are persisted, so a cached one pricing no coin predates them entirely.

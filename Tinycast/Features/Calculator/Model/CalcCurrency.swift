@@ -175,7 +175,7 @@ enum CalcCurrency {
         ("XRP", "XRP", ["ripple"])
     ]
 
-    /// `CurrencyRateStore` builds its request from this, so the two lists cannot drift apart.
+    /// What `CurrencyFeed.pricesCoins` checks a snapshot against.
     static let cryptoCodes: [String] = crypto.map(\.code)
 
     /// A fixed split of BTC, so it is priced off that rate and never fetched as a coin of its own.

@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 // Generate Tinycast/Features/Calculator/Model/CurrencyData.generated.swift.
 //
-// Usage: node Scripts/gen-currencies.js [rates.json cldr-currencies.json cldr-currency-data.json]
+// Usage: node Scripts/gen-currencies.js [currencies.json cldr-currencies.json cldr-currency-data.json]
 // Downloads the sources when paths aren't given. Run occasionally, commit the output.
 //
 // Three sources, joined on the ISO code:
-//   - The fiat rate feed decides *which* currencies exist — the same feed CurrencyRateStore pulls
-//     rates from, so the table can never list a currency the app can't price.
-//   - CLDR's supplemental currency data decides which of those are still *in use*. The feed carries
-//     no retirement dates and happily quotes codes their countries abandoned years ago.
+//   - Coinbase's fiat currency list decides *which* currencies exist — the provider CurrencyRateStore
+//     pulls rates from, so the table lists what the app can price.
+//   - CLDR's supplemental currency data decides which of those are still *in use*. The list carries
+//     no retirement dates and happily includes codes their countries abandoned years ago.
 //   - CLDR's `en` numbers data decides what humans *call* them: display name, currency sign, and the
 //     singular/plural noun. Read from the pinned cldr-json checkout rather than the host's `Intl`,
 //     whose output shifts with the local ICU version and would make this file unreproducible.
@@ -21,7 +21,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const RATES = "https://tinycast.dev/api/v1/currencies";
+const RATES = "https://api.coinbase.com/v2/currencies";
 const CLDR = "https://raw.githubusercontent.com/unicode-org/cldr-json/main/cldr-json";
 const CLDR_NAMES = `${CLDR}/cldr-numbers-full/main/en/currencies.json`;
 const CLDR_CURRENCY_DATA = `${CLDR}/cldr-core/supplemental/currencyData.json`;
@@ -97,29 +97,21 @@ async function main() {
   const feed = await load(RATES, process.argv[2]);
   const cldr = await load(CLDR_NAMES, process.argv[3]);
   const supplemental = await load(CLDR_CURRENCY_DATA, process.argv[4]);
-  const base = feed?.source;
-  const quotes = feed?.quotes;
-  // An error body arrives with HTTP 200, so the flag is the only thing that says the table is real.
-  if (feed?.success !== true) throw new Error("the rate feed reported failure");
-  if (!base || !quotes || typeof quotes !== "object")
-    throw new Error("unexpected feed shape: source/quotes missing");
+  const listed = feed?.data;
+  if (!Array.isArray(listed)) throw new Error("unexpected feed shape: data missing");
   const names = cldr?.main?.en?.numbers?.currencies;
   if (!names) throw new Error("unexpected CLDR shape: main.en.numbers.currencies missing");
   if (!supplemental?.supplemental?.currencyData?.region)
     throw new Error("unexpected CLDR shape: supplemental.currencyData.region missing");
 
-  // Quotes are keyed "<base><code>" and omit the base's own row, so it has to be added back.
-  const quoted = new Set([base]);
-  for (const pair of Object.keys(quotes)) {
-    if (pair.length === 6 && pair.startsWith(base)) quoted.add(pair.slice(3));
-  }
+  const quoted = new Set(listed.map((entry) => entry?.id).filter((id) => typeof id === "string"));
 
   const stillInUse = inUse(supplemental.supplemental.currencyData);
   const codes = [...quoted]
     .filter((code) => /^[A-Z]{3}$/.test(code) && stillInUse(code))
     .sort();
   const retired = quoted.size - codes.length;
-  const asOf = new Date((feed.timestamp || Date.now() / 1000) * 1000).toISOString().slice(0, 10);
+  const asOf = new Date().toISOString().slice(0, 10);
   if (codes.length < MIN_EXPECTED) throw new Error(`suspiciously few currencies: ${codes.length}`);
 
   const signClaims = new Map();

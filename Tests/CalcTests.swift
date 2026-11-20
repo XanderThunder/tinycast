@@ -1193,17 +1193,14 @@ struct CalcTests {
         expectNil("btc", region: "INR")
 
         expectSnapshot(
-            "fiat only", fiat: fiatJSON, crypto: nil,
-            expected: "USD=1 EUR=0.9 BTC=nil complete=false")
+            "fiat only", feed: fiatJSON, expected: "USD=1 EUR=0.9 BTC=nil complete=false")
         expectSnapshot(
-            "both feeds", fiat: fiatJSON, crypto: cryptoJSON,
-            expected: "USD=1 EUR=0.9 BTC=5e-05 complete=true")
-        // A coin payload quoted against another base is ignored rather than folded in wrongly
+            "fiat and coins", feed: feedJSON, expected: "USD=1 EUR=0.9 BTC=5e-05 complete=true")
+        // The base prices itself at exactly 1, whatever the feed rounded it to
         expectSnapshot(
-            "mismatched base", fiat: fiatJSON,
-            crypto: Data(#"{"success":true,"target":"EUR","rates":{"BTC":20000}}"#.utf8),
+            "base row", feed: Data(#"{"data":{"currency":"USD","rates":{"USD":"0.99","EUR":"0.9"}}}"#.utf8),
             expected: "USD=1 EUR=0.9 BTC=nil complete=false")
-        expectSnapshotThrows("no quotes", fiat: Data(#"{"success":true,"source":"USD","quotes":{}}"#.utf8))
+        expectSnapshotThrows("no quotes", feed: Data(#"{"data":{"currency":"USD","rates":{}}}"#.utf8))
         // A cached snapshot that prices no coin predates them, whatever its `fetchedAt` claims
         let coinless = CurrencyRates(base: "USD", rates: ["EUR": 0.9], fetchedAt: clock.now)
         check(
@@ -1212,8 +1209,7 @@ struct CalcTests {
         check("sats need BTC's rate", expected: "true", got: "\(coinless.rate(for: "SATS") == nil)")
         check("the fixture prices coins", expected: "true", got: "\(CurrencyFeed.pricesCoins(fx))")
         expectSnapshotThrows(
-            "feed reported failure",
-            fiat: Data(#"{"success":false,"source":"USD","quotes":{"USDEUR":0.9}}"#.utf8))
+            "feed reported an error", feed: Data(#"{"errors":[{"id":"not_found"}]}"#.utf8))
 
         // Slashed rate spellings — the tokenizer keeps a known `unit/unit` whole
         expectDisplay("100 km/h to mph", "62.13711922 mph")
@@ -2707,11 +2703,12 @@ struct CalcTests {
         ],
         fetchedAt: Date(timeIntervalSince1970: 1_785_000_000))
 
-    /// A pair whose base isn't the source and a nonsense rate, both of which must be dropped.
+    /// A negative rate and an unparsable one, both of which must be dropped.
     static let fiatJSON = Data(
-        #"{"success":true,"source":"USD","quotes":{"USDEUR":0.9,"EURGBP":0.8,"USDBAD":-1}}"#.utf8)
-    /// Quoted the other way round — 1 BTC costs 20,000 USD, so the table stores 0.00005.
-    static let cryptoJSON = Data(#"{"success":true,"target":"USD","rates":{"BTC":20000}}"#.utf8)
+        #"{"data":{"currency":"USD","rates":{"EUR":"0.9","BAD":"-1","NAN":"x"}}}"#.utf8)
+    /// Coins are quoted per base like fiat: 20,000 USD to the coin is 0.00005 BTC per dollar.
+    static let feedJSON = Data(
+        #"{"data":{"currency":"USD","rates":{"EUR":"0.9","BTC":"0.00005"}}}"#.utf8)
 
     // MARK: - Helpers
 
@@ -2839,8 +2836,8 @@ struct CalcTests {
         check(label(query, region), expected: expected, got: result.expression)
     }
 
-    static func expectSnapshot(_ name: String, fiat: Data, crypto: Data?, expected: String) {
-        guard let result = try? CurrencyFeed.snapshot(fiat: fiat, crypto: crypto, now: clock.now)
+    static func expectSnapshot(_ name: String, feed: Data, expected: String) {
+        guard let result = try? CurrencyFeed.snapshot(feed, now: clock.now)
         else {
             fail(name, expected: expected, got: "threw")
             return
@@ -2852,8 +2849,8 @@ struct CalcTests {
                 + "complete=\(result.complete)")
     }
 
-    static func expectSnapshotThrows(_ name: String, fiat: Data) {
-        if let result = try? CurrencyFeed.snapshot(fiat: fiat, crypto: nil, now: clock.now) {
+    static func expectSnapshotThrows(_ name: String, feed: Data) {
+        if let result = try? CurrencyFeed.snapshot(feed, now: clock.now) {
             fail(name, expected: "throws", got: "\(result.rates.rates.count) rates")
         } else {
             passes += 1
