@@ -373,8 +373,8 @@ struct SettingsFileTests {
 
     private static func testPaths() {
         let expected = [
-            ("com.abueammar.tinycast", "tinycast"), ("com.abueammar.tinycast.dev", "tinycast-dev"),
-            ("com.abueammar.tinycast.beta", "tinycast-beta"), ("org.example.cast", "org.example.cast")
+            ("com.xanderthunder.tinycast", "tinycast"), ("com.xanderthunder.tinycast.dev", "tinycast-dev"),
+            ("com.xanderthunder.tinycast.beta", "tinycast-beta"), ("org.example.cast", "org.example.cast")
         ]
         for (bundleID, folder) in expected {
             check(

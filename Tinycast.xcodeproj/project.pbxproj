@@ -5280,7 +5280,7 @@
 				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_VERSION = 6.0;
 				TINYCAST_APS_ENVIRONMENT = development;
-				TINYCAST_BUNDLE_IDENTIFIER = com.abueammar.tinycast.dev;
+				TINYCAST_BUNDLE_IDENTIFIER = com.xanderthunder.tinycast.dev;
 				TINYCAST_CLOUDKIT_ENVIRONMENT = Development;
 				TINYCAST_ENTITLEMENTS = Tinycast/Tinycast.entitlements;
 				TINYCAST_PROVISIONING_PROFILE = "";
@@ -5297,7 +5297,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.abueammar.tinycast.ClipboardTextHelper;
+				PRODUCT_BUNDLE_IDENTIFIER = com.xanderthunder.tinycast.ClipboardTextHelper;
 				PRODUCT_MODULE_NAME = ClipboardTextHelper;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
@@ -5314,7 +5314,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.abueammar.tinycast.FileIndexHelper;
+				PRODUCT_BUNDLE_IDENTIFIER = com.xanderthunder.tinycast.FileIndexHelper;
 				PRODUCT_MODULE_NAME = FileIndexHelper;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
@@ -5331,7 +5331,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.abueammar.tinycast.FileIndexHelper;
+				PRODUCT_BUNDLE_IDENTIFIER = com.xanderthunder.tinycast.FileIndexHelper;
 				PRODUCT_MODULE_NAME = FileIndexHelper;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
@@ -5405,7 +5405,7 @@
 				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_VERSION = 6.0;
 				TINYCAST_APS_ENVIRONMENT = production;
-				TINYCAST_BUNDLE_IDENTIFIER = com.abueammar.tinycast;
+				TINYCAST_BUNDLE_IDENTIFIER = com.xanderthunder.tinycast;
 				TINYCAST_CLOUDKIT_ENVIRONMENT = Production;
 				TINYCAST_ENTITLEMENTS = Tinycast/Tinycast.entitlements;
 				TINYCAST_PROVISIONING_PROFILE = "";
@@ -5423,7 +5423,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.abueammar.tinycast.ClipboardTextHelper;
+				PRODUCT_BUNDLE_IDENTIFIER = com.xanderthunder.tinycast.ClipboardTextHelper;
 				PRODUCT_MODULE_NAME = ClipboardTextHelper;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;

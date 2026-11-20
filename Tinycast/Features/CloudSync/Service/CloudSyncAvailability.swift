@@ -9,7 +9,7 @@ enum CloudSyncAvailability {
     }
 
     static var container: CKContainer {
-        CKContainer(identifier: "iCloud." + (Bundle.main.bundleIdentifier ?? "com.abueammar.tinycast"))
+        CKContainer(identifier: "iCloud." + (Bundle.main.bundleIdentifier ?? "com.xanderthunder.tinycast"))
     }
 
     static func unavailability(of container: CKContainer) async -> CloudSyncUnavailability? {
