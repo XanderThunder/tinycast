@@ -50,8 +50,6 @@ final class AppCore {
     let regionNumberFormat = RegionNumberFormatMonitor()
     let calendarStore = CalendarStore()
     let meetingClock = MeetingClock()
-    let updateChecker = UpdateCheckStore()
-    let supportReminders: SupportReminderStore
     let emojiIndex = EmojiIndex()
     let frequentEmoji = FrequentEmojiStore()
     let pinnedEmoji = PinnedEmojiStore()
@@ -216,10 +214,6 @@ final class AppCore {
     @ObservationIgnored private(set) lazy var cameraCoordinator = CameraCoordinator(core: self)
     @ObservationIgnored private(set) lazy var dictionaryCoordinator = DictionaryCoordinator(
         paletteCoordinator: paletteCoordinator)
-    @ObservationIgnored private(set) lazy var updateCoordinator = UpdateCoordinator(
-        store: updateChecker, core: self)
-    @ObservationIgnored private(set) lazy var supportCoordinator = SupportCoordinator(
-        store: supportReminders, core: self)
     @ObservationIgnored private(set) lazy var quickActionCoordinator = QuickActionCoordinator(
         settings: settings, store: quickActionSettings, customActions: customQuickActions,
         injector: textInjector, appIndex: appIndex, hotKeys: hotKeys, favorites: favorites,
@@ -265,7 +259,6 @@ final class AppCore {
         self.launcherRanking = launcherRanking
         self.settings = settings
         self.chatHistory = chatHistory
-        supportReminders = SupportReminderStore(settings: settings)
         aiChats = AIChatSurfacesState(history: chatHistory)
         appIndex = AppIndex(ranking: launcherRanking, aliases: aliases)
         let clipboardManager = ClipboardManager(store: clipboardStore, settings: settings)
@@ -351,15 +344,10 @@ final class AppCore {
                 default: break
                 }
             }
-            updateCoordinator.applyEnabled()
             calendarCoordinator.applyEnabled()
             Task { await appIndex.refresh() }
             Task { await emojiIndex.load(languages: SystemLanguages.preferred) }
             currencyRates.start()
-            updateChecker.onUpdateAvailable = { [weak self] in self?.updateCoordinator.offer($0) }
-            updateCoordinator.applyAutomaticChecking()
-            supportReminders.onDue = { [weak self] in self?.supportCoordinator.presentIfDue() }
-            supportReminders.start()
 
             hyperKey.healthTicker = healthTicker
             hotKeys.modifierTapMonitor.healthTicker = healthTicker
@@ -462,26 +450,8 @@ final class AppCore {
             } else if launchedByUser {
                 paletteCoordinator.showPalette(mode: .launcher)
             }
-            reportInstall(updateChecker.takeInstallReport())
         }
         openPendingURLs()
-    }
-
-    private func reportInstall(_ report: UpdateCheckStore.InstallReport?) {
-        switch report {
-        case .installed(let version):
-            showMessage(String(localized: "Updated to Tinycast \(version.description)"))
-        case .notInstalled(let version):
-            showMessage(
-                String(
-                    localized: """
-                        Tinycast \(version.description) could not be installed. \
-                        Check for updates to try again.
-                        """),
-                tone: .danger)
-        case nil:
-            break
-        }
     }
 
     private func openPendingURLs() {
@@ -494,7 +464,6 @@ final class AppCore {
         if settingsCoordinator.focusExisting() { return }
         if aiChatCoordinator.focusExisting() { return }
         if onboardingCoordinator.focusExisting() { return }
-        if supportCoordinator.focusExisting() { return }
         if customCommandCoordinator.focusOutputWindow() { return }
         paletteCoordinator.showPalette(mode: .launcher, restoreAnyMode: true)
     }
@@ -640,7 +609,6 @@ final class AppCore {
         mcpOAuth.stop()
         mcp.stop()
         installedAI.stop()
-        updateCoordinator.installStagedUpdate()
         if relaunchRequested { RelaunchRunner.relaunchAfterExit(Bundle.main.bundleURL) }
     }
 
@@ -698,9 +666,6 @@ final class AppCore {
     // MARK: - Feature switches
 
     private func observeFeatureSwitches() {
-        track(
-            { _ = $0.automaticallyCheckForUpdates },
-            reproject: { $0.updateCoordinator.applyAutomaticChecking() })
         track({ _ = $0.iCloudSyncEnabled }, reproject: { $0.cloudSyncCoordinator.applyEnabled() })
         track(
             {
@@ -975,20 +940,6 @@ final class AppCore {
         guard let summary = SettingsFileIssue.summary(issues) else { return }
         showMessage(summary, tone: .danger)
     }
-
-    // MARK: - Interruption
-
-    var currentActivity: UpdateActivity {
-        UpdateActivity(
-            isExpandingSnippet: textInjector.isDelivering,
-            isRunningExtension: extensions.running != nil,
-            isUninstalling: uninstall.isTrashing,
-            isRecordingHotKey: hotKeys.recordingAction != nil,
-            isShowingDialog: isShowingDialog,
-            isPaletteVisible: paletteCoordinator.isVisible)
-    }
-
-    var canInterruptUser: Bool { UpdateReadiness.evaluate(currentActivity) == nil }
 
     // MARK: - Dialogs, routed here so `dialogs` stays the single owner
 

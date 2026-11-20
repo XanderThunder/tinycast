@@ -5,11 +5,9 @@ enum SettingsFileKey: String, CaseIterable, Sendable {
     // Spelled out, so renaming a case can never rename a key in someone's file.
     case launcherShortcut = "general.launcherShortcut"
     case showInMenuBar = "general.showInMenuBar"
-    case automaticallyCheckForUpdates = "general.automaticallyCheckForUpdates"
     case popToRootTimeout = "general.popToRootSeconds"
     case escapeKeyBehavior = "general.escapeKeyBehavior"
     case autoSwitchInputSource = "general.autoSwitchInputSource"
-    case supportReminders = "general.supportReminders"
     case language = "general.language"
     case appearance = "appearance.theme"
     case animationsEnabled = "appearance.animations"

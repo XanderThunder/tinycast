@@ -43,10 +43,8 @@ enum CommandID: String, CaseIterable, Sendable {
     case exportSettings = "command:export-settings"
     case importSettings = "command:import-settings"
     case importFromRaycast = "command:import-from-raycast"
-    case checkForUpdates = "command:check-for-updates"
     case settings = "command:settings"
     case about = "command:about"
-    case support = "command:support"
     case quit = "command:quit"
 
     static let defaultCompactBarCommands: [CommandID] = [
@@ -118,10 +116,8 @@ enum CommandID: String, CaseIterable, Sendable {
         case .exportSettings: return "Export Backup"
         case .importSettings: return "Import Backup"
         case .importFromRaycast: return "Import from Raycast"
-        case .checkForUpdates: return "Check for Updates"
         case .settings: return "Tinycast Settings"
         case .about: return "About Tinycast"
-        case .support: return "Support Tinycast"
         case .quit: return "Quit Tinycast"
         }
     }
@@ -166,10 +162,8 @@ enum CommandID: String, CaseIterable, Sendable {
         case .exportSettings: return "square.and.arrow.up.fill"
         case .importSettings: return "square.and.arrow.down.fill"
         case .importFromRaycast: return "arrow.down.doc.fill"
-        case .checkForUpdates: return "arrow.down.circle.fill"
         case .settings: return "gearshape.fill"
         case .about: return "info.circle.fill"
-        case .support: return "heart.fill"
         case .quit: return "power"
         }
     }
@@ -179,7 +173,7 @@ enum CommandID: String, CaseIterable, Sendable {
         case .quickAI, .aiChat: return .purple
         case .fixGrammar, .rewrite, .translate, .summarize, .clipboardHistory, .pasteSequentially:
             return .indigo
-        case .calculatorHistory, .checkForUpdates: return .green
+        case .calculatorHistory: return .green
         case .searchEmoji: return .orange
         case .searchFiles, .openInBrowser, .createQuicklink, .searchQuicklinks, .importQuicklinks,
             .exportQuicklinks:
@@ -194,7 +188,6 @@ enum CommandID: String, CaseIterable, Sendable {
         case .showNotes, .createNote, .searchNotes: return .yellow
         case .createWindowLayout, .captureWindowLayout, .switchRoom, .createRoom: return .mint
         case .exportSettings, .importSettings, .importFromRaycast: return .cyan
-        case .support: return .pink
         }
     }
 

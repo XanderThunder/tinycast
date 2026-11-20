@@ -32,7 +32,6 @@ struct SettingsBackup: Codable {
         var emojiSkinTone: String?
         var emojiGridColumns: Int?
         var showInMenuBar: Bool?
-        var automaticallyCheckForUpdates: Bool?
         var popToRootSeconds: Int?
         var escapeKeyBehavior: String?
         var appearance: String?
@@ -98,8 +97,6 @@ struct SettingsBackup: Codable {
         var menuBarLinkedEventsOnly: Bool?
         var calendarMenuBarHidesWhenEmpty: Bool?
         var hideCurrentEvent: Int?
-        // Safe to carry: it silences a prompt rather than granting anything.
-        var supportReminders: Bool?
     }
 
     struct HotkeyBackup: Codable {
@@ -152,7 +149,6 @@ extension SettingsBackup {
             emojiSkinTone: s.emojiSkinTone.rawValue,
             emojiGridColumns: s.emojiGridColumns.rawValue,
             showInMenuBar: s.showInMenuBar,
-            automaticallyCheckForUpdates: s.automaticallyCheckForUpdates,
             popToRootSeconds: s.popToRootTimeout.rawValue,
             escapeKeyBehavior: s.escapeKeyBehavior.rawValue,
             appearance: s.appearance.rawValue,
@@ -209,8 +205,7 @@ extension SettingsBackup {
             calendarMenuBarDisplay: s.calendarMenuBarDisplay.rawValue,
             menuBarLinkedEventsOnly: s.menuBarLinkedEventsOnly,
             calendarMenuBarHidesWhenEmpty: s.calendarMenuBarHidesWhenEmpty,
-            hideCurrentEvent: s.hideCurrentEvent.rawValue,
-            supportReminders: s.supportRemindersEnabled)
+            hideCurrentEvent: s.hideCurrentEvent.rawValue)
 
         let hk = core.hotKeys
         var hotkeys = HotkeyBackup()
@@ -365,10 +360,6 @@ extension SettingsBackup {
         }
         if let show = s.showInMenuBar {
             settings.showInMenuBar = show
-            count += 1
-        }
-        if let automaticallyCheck = s.automaticallyCheckForUpdates {
-            settings.automaticallyCheckForUpdates = automaticallyCheck
             count += 1
         }
         if let secs = s.popToRootSeconds, let timeout = PopToRootTimeout(rawValue: secs) {
@@ -602,10 +593,6 @@ extension SettingsBackup {
         }
         if let raw = s.hideCurrentEvent, let hide = HideCurrentEvent(rawValue: raw) {
             settings.hideCurrentEvent = hide
-            count += 1
-        }
-        if let flag = s.supportReminders {
-            settings.supportRemindersEnabled = flag
             count += 1
         }
         return count

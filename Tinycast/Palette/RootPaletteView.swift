@@ -25,7 +25,6 @@ struct RootPaletteView: View {
     @Environment(ExtensionManager.self) private var extensions
     @Environment(AppSettings.self) private var settings
     @Environment(\.metrics) private var metrics
-    @Environment(\.openURL) private var openURL
     @FocusState private var searchFocused: Bool
     /// Kept apart from the search field's own focus. See docs/features/palette.md.
     @FocusState private var argumentFocused: String?
@@ -221,27 +220,8 @@ struct RootPaletteView: View {
         return PopoverMenuContent(
             header: title,
             items: [
-                PopoverMenuItem(
-                    title: String(localized: "Check for Updates"), systemImage: "arrow.down.circle"
-                ) {
-                    core.updateCoordinator.checkForUpdates()
-                },
-                PopoverMenuItem(
-                    title: String(localized: "Changelog"),
-                    systemImage: "clock.arrow.trianglehead.2.counterclockwise.rotate.90"
-                ) {
-                    if let url = URL(string: "https://tinycast.dev/changelog/") {
-                        openURL(url)
-                    }
-                },
-                PopoverMenuItem(
-                    title: String(localized: "About Tinycast"), systemImage: "info.circle",
-                    startsSection: true
-                ) {
+                PopoverMenuItem(title: String(localized: "About Tinycast"), systemImage: "info.circle") {
                     core.settingsCoordinator.showAbout()
-                },
-                PopoverMenuItem(title: String(localized: "Support Tinycast"), systemImage: "heart") {
-                    core.supportCoordinator.showSupport()
                 },
                 PopoverMenuItem(
                     title: String(localized: "Settings"), systemImage: "gearshape",
@@ -873,7 +853,6 @@ struct RootPaletteView: View {
                     accessory, isOpen: openMenu == .extensionAccessory,
                     action: toggleExtensionSearchAccessory)
             }
-            if isCollapsed { UpdatePill() }
             // The slack above and below, so the pill stays concentric with the capsule.
             headerGutter(width: isCollapsed ? metrics.size.headerPadding : metrics.spacing.md * 2)
         }
@@ -1023,7 +1002,6 @@ struct RootPaletteView: View {
         HStack(spacing: 0) {
             HStack(spacing: 0) {
                 appMenuButton
-                UpdatePill()
             }
             .modifier(ExtensionToastSlot(extensions: extensions, showing: vm.mode == .extensionCommand))
             if showActionGroup {

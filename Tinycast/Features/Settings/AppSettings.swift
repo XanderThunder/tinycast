@@ -166,13 +166,6 @@ final class AppSettings {
         didSet { defaults.set(showInMenuBar, forKey: Key.showInMenuBar.rawValue) }
     }
 
-    var automaticallyCheckForUpdates: Bool {
-        didSet {
-            defaults.set(
-                automaticallyCheckForUpdates, forKey: Key.automaticallyCheckForUpdates.rawValue)
-        }
-    }
-
     /// The physical key remapped to the Hyper chord; `HyperKeyManager` reacts via its observer.
     var hyperKey: HyperKeyPhysicalKey {
         didSet { defaults.set(hyperKey.rawValue, forKey: Key.hyperKey.rawValue) }
@@ -674,11 +667,6 @@ final class AppSettings {
         }
     }
 
-    /// Whether the support window may reopen itself; off means never ask again.
-    var supportRemindersEnabled: Bool {
-        didSet { defaults.set(supportRemindersEnabled, forKey: Key.supportReminders.rawValue) }
-    }
-
     /// Whether settings.json mirrors these settings; `AppCore` starts and stops the mirror.
     var settingsFileEnabled: Bool {
         didSet { defaults.set(settingsFileEnabled, forKey: Key.settingsFileEnabled.rawValue) }
@@ -737,9 +725,6 @@ final class AppSettings {
         showInMenuBar =
             defaults.object(forKey: Key.showInMenuBar.rawValue) == nil
             || defaults.bool(forKey: Key.showInMenuBar.rawValue)
-        automaticallyCheckForUpdates =
-            defaults.object(forKey: Key.automaticallyCheckForUpdates.rawValue) == nil
-            || defaults.bool(forKey: Key.automaticallyCheckForUpdates.rawValue)
         hyperKey =
             defaults.string(forKey: Key.hyperKey.rawValue).flatMap(HyperKeyPhysicalKey.init)
             ?? .none
@@ -946,9 +931,6 @@ final class AppSettings {
         quicklinkConfirmsBeforeDelete =
             defaults.object(forKey: Key.quicklinkConfirmsBeforeDelete.rawValue) == nil
             || defaults.bool(forKey: Key.quicklinkConfirmsBeforeDelete.rawValue)
-        supportRemindersEnabled =
-            defaults.object(forKey: Key.supportReminders.rawValue) == nil
-            || defaults.bool(forKey: Key.supportReminders.rawValue)
         settingsFileEnabled = defaults.bool(forKey: Key.settingsFileEnabled.rawValue)
         iCloudSyncEnabled = defaults.bool(forKey: Key.iCloudSyncEnabled.rawValue)
         iCloudSyncDisabledCategories = Set(

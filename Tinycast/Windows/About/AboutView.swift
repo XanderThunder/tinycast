@@ -22,7 +22,6 @@ struct AboutView: View {
     }()
 
     private static let iconSize: CGFloat = 88
-    private static let tileSize: CGFloat = 30
 
     var body: some View {
         VStack(spacing: 0) {
@@ -33,9 +32,7 @@ struct AboutView: View {
                         .padding(.vertical, Theme.Spacing.lg)
                 }
                 .settingsAnchor(.aboutAbout)
-                updates
                 links
-                support
             }
             .formStyle(.grouped)
             .settingsScrollTarget(.about)
@@ -78,48 +75,6 @@ struct AboutView: View {
         }
     }
 
-    private var updates: some View {
-        let updates = core.updateCoordinator
-        return Section {
-            HStack(spacing: Theme.Spacing.xl) {
-                tile("arrow.down.circle.fill", tint: Theme.Colors.progress)
-                VStack(alignment: .leading, spacing: Theme.Spacing.xxs) {
-                    SettingsRowTitle(.aboutAbout, "Check for Updates")
-                        .font(.body.weight(.medium))
-                    updateStatus(updates)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                Spacer(minLength: Theme.Spacing.lg)
-                Button("Check Now") { updates.checkForUpdates() }
-                    .disabled(updates.isChecking)
-            }
-            .padding(.vertical, Theme.Spacing.xs)
-        }
-    }
-
-    private func updateStatus(_ updates: UpdateCoordinator) -> Text {
-        guard updates.updatesItself else {
-            return Text("This is a local build — rebuild it to move it forward.")
-        }
-        if updates.isChecking {
-            return Text("Checking for updates…")
-        }
-        if let version = updates.availableVersion {
-            return Text("Version \(version.description) is available")
-        }
-        guard let lastCheckedAt = updates.lastCheckedAt else {
-            return Text("Not checked yet")
-        }
-        return Text("Last checked \(.currentDate, format: Self.elapsed(since: lastCheckedAt))")
-    }
-
-    /// Minutes at the finest, so the line re-renders once a minute rather than every second.
-    private static func elapsed(since date: Date) -> SystemFormatStyle.DateReference {
-        .reference(to: date, allowedFields: [.day, .hour, .minute], maxFieldCount: 1)
-    }
-
     private var links: some View {
         Section {
             ForEach(AboutLink.all) { link in
@@ -128,39 +83,6 @@ struct AboutView: View {
         } header: {
             SettingsSectionHeader(.aboutLinks)
         }
-    }
-
-    private var support: some View {
-        Section {
-            HStack(spacing: Theme.Spacing.xl) {
-                tile("heart.fill", tint: Theme.Colors.brand)
-                VStack(alignment: .leading, spacing: Theme.Spacing.xxs) {
-                    SettingsRowTitle(.aboutLinks, "Support")
-                        .font(.body.weight(.medium))
-                    Text("Free and open source. Your support sustains its development.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                Spacer(minLength: Theme.Spacing.lg)
-                Button("Support…") { core.supportCoordinator.showSupport() }
-                    .buttonStyle(.borderedProminent)
-                    .tint(Theme.Colors.brand)
-            }
-            .padding(.vertical, Theme.Spacing.xs)
-        }
-    }
-
-    /// Both tints are fixed hues, so an alpha on them holds up in both appearances.
-    private func tile(_ symbol: String, tint: Color) -> some View {
-        RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous)
-            .fill(tint.opacity(0.16))
-            .frame(width: Self.tileSize, height: Self.tileSize)
-            .overlay(
-                Image(systemName: symbol)
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(tint)
-            )
     }
 
     private var footer: some View {
@@ -185,23 +107,9 @@ private struct AboutLink: Identifiable {
 
     static let all: [AboutLink] = [
         AboutLink(
-            id: "website", glyph: .symbol("globe"), title: String(localized: "Website"),
-            detail: "tinycast.dev",
-            url: URL(string: "https://tinycast.dev/")!),
-        AboutLink(
             id: "github", glyph: .brand("BrandGitHub"), title: "GitHub",
-            detail: "github.com/abue-ammar/tinycast",
-            url: URL(string: "https://github.com/abue-ammar/tinycast")!),
-        AboutLink(
-            id: "discord", glyph: .brand("BrandDiscord"), title: "Discord",
-            detail: String(localized: "Join the Tinycast community"),
-            url: URL(string: "https://discord.gg/v2Eeb4QQy3")!),
-        AboutLink(
-            id: "x", glyph: .brand("BrandX"), title: "X", detail: "@abue_ammar",
-            url: URL(string: "https://x.com/abue_ammar")!),
-        AboutLink(
-            id: "email", glyph: .symbol("envelope"), title: String(localized: "Email"),
-            detail: "hello@tinycast.dev", url: URL(string: "mailto:hello@tinycast.dev")!)
+            detail: "github.com/XanderThunder/tinycast",
+            url: URL(string: "https://github.com/XanderThunder/tinycast")!)
     ]
 }
 

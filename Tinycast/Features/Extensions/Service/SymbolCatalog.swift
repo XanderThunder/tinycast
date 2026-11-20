@@ -19,16 +19,14 @@ struct SymbolCatalog: Sendable {
     private let searchTerms: [String: [String]]
 
     /// Marks we ship ourselves: the system has no bluetooth symbol at all, restricted or otherwise.
-    static let bundledGlyphs = ["bluetooth", "BrandGitHub", "BrandDiscord", "BrandX"]
+    static let bundledGlyphs = ["bluetooth", "BrandGitHub"]
 
     static func isBundled(_ symbol: String) -> Bool { bundledGlyphs.contains(symbol) }
 
     /// Search terms for the app's own marks, since they carry none of CoreGlyphs' metadata.
     private nonisolated static let bundledTerms: [String: [String]] = [
         "bluetooth": ["bluetooth", "wireless", "pair", "device"],
-        "BrandGitHub": ["github", "git", "repository", "code", "brand"],
-        "BrandDiscord": ["discord", "chat", "community", "brand"],
-        "BrandX": ["x", "twitter", "social", "brand"]
+        "BrandGitHub": ["github", "git", "repository", "code", "brand"]
     ]
 
     /// What the picker opens on: scrolling eight thousand icons is not a way to choose one.

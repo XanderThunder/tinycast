@@ -42,8 +42,8 @@ enum SyncSettingScope {
             .navigationCommands, .windowShortcuts, .windowAliases, .windowManagementCommands,
             .clipboardCommands, .emojiCommands, .calendarCommands:
             .hotkeysAndAliases
-        case .automaticallyCheckForUpdates, .popToRootTimeout, .escapeKeyBehavior,
-            .autoSwitchInputSource, .supportReminders, .openOnCursorScreen, .paletteDraggable,
+        case .popToRootTimeout, .escapeKeyBehavior,
+            .autoSwitchInputSource, .openOnCursorScreen, .paletteDraggable,
             .calcNumberStyle, .launcherShowsSuggestions, .rootSearchSensitivity,
             .customCommandsShowInLauncher, .quicklinksShowInLauncher, .quicklinkOpensNewWindow,
             .quicklinkPassesSelectedText, .quicklinkConfirmsBeforeDelete, .aiWebSearch,

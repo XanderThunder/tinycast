@@ -803,13 +803,6 @@ run SettingsHistoryTests   Tinycast/Features/Settings/SettingsTab.swift \
                            $L/SearchRelevance.swift \
                            Tinycast/Platform/LocalizedResource.swift \
                            Tinycast/DesignSystem/IconTint.swift
-run UpdatesTests           Tinycast/Features/Updates/Model/*.swift \
-                           Tinycast/Features/Updates/Service/BundleSignature.swift \
-                           Tinycast/Features/Updates/Service/UpdateSignature.swift
-run UpdateCheckTests       Tinycast/Features/Updates/Model/*.swift \
-                           Tinycast/Features/Updates/Service/UpdateCheckStore.swift \
-                           Tinycast/Platform/AppPaths.swift
-run SupportTests           Tinycast/Features/Support/Model/*.swift
 run AIProviderTests        Tinycast/Features/Settings/AppSettingsKey.swift \
                            Tinycast/Features/AI/Model/*.swift \
                            Tinycast/Features/AI/Settings/AISettingsStore.swift \
