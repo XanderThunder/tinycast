@@ -530,7 +530,7 @@ struct AppInstallationTests {
 
 // Empty feature catalogs keep this harness focused on the shipped launcher.
 enum SettingsTab: Sendable {
-    case ai, windowManagement, quicklinks, snippets, commands, calendar
+    case windowManagement, quicklinks, snippets, commands
     var tint: IconTint { .gray }
 }
 enum EntryIcon: Hashable, Sendable {

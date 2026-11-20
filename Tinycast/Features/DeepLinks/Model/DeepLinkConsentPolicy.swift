@@ -44,12 +44,12 @@ enum DeepLinkConsentPolicy {
     private static func requiresConsent(_ id: CommandID) -> Bool {
         switch id {
         case .pasteSequentially, .openCamera,
-            .joinNextMeeting, .copyMeetingLink, .openInCalendar, .captureWindowLayout, .openInBrowser,
+            .captureWindowLayout, .openInBrowser,
             .runShellCommand, .quit:
             true
         case .calculatorHistory, .clipboardHistory, .searchEmoji, .searchFiles,
             .searchMenuItems, .switchWindows, .switchWindowsBackwards, .createCustomCommand,
-            .searchCustomCommands, .define, .mySchedule, .createEvent, .showNotes, .createNote,
+            .searchCustomCommands, .define, .showNotes, .createNote,
             .searchNotes, .createWindowLayout, .switchRoom, .createRoom, .createQuicklink,
             .searchQuicklinks, .importQuicklinks, .exportQuicklinks, .searchSnippets, .createSnippet,
             .exportSettings, .importSettings, .importFromRaycast, .settings, .about:
