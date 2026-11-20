@@ -184,7 +184,7 @@ struct CloudSyncTests {
         let syncedSwitches = enabledKeys.filter { SyncSettingScope.category(of: $0) != nil }
         check("every feature switch stays on its Mac — \(syncedSwitches)", syncedSwitches.isEmpty)
         let local: [SettingsFileKey] = [
-            .language, .notesFolder, .snippetsFolder, .dictationModel, .dictationMicrophone,
+            .language, .notesFolder, .snippetsFolder,
             .fileSearchScopes, .searchScopes
         ]
         check(

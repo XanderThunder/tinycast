@@ -540,7 +540,7 @@ struct HotKeyTests {
                     for time in [0.0, 1.0] {
                         expect(
                             sided.handle(keys, at: time) == .cancelled,
-                            "\(context): Hyper cannot start dictation's lone-key hold")
+                            "\(context): Hyper cannot start a lone-key hold")
                         expect(
                             sided.handle(keys, at: time + 0.01) == nil,
                             "\(context): repeated Hyper flags cannot start a hold")

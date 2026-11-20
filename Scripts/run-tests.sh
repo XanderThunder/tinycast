@@ -362,25 +362,6 @@ run FallbackTests          Tinycast/Features/Launcher/Model/Fallback.swift \
                            Tinycast/DesignSystem/IconTint.swift
 run DictionaryTests        Tinycast/Features/Dictionary/Model/DictionaryEntry.swift \
                            Tinycast/Features/Dictionary/Model/DictionaryMarkup.swift
-run DictationTests         Tinycast/Features/Dictation/Model/DictationModel.swift Tinycast/Features/Dictation/Model/DictationIdleRelease.swift Tinycast/Features/Dictation/Model/DictationLanguage.swift Tinycast/Features/Dictation/Model/DictationTextFormatter.swift
-run DictationCueTests      Tinycast/Features/Dictation/Service/DictationCueRunner.swift
-run DictationVolumeTests   Tinycast/Features/Dictation/Model/DictationVolumeSnapshot.swift \
-                           Tinycast/Features/Dictation/Service/DictationAudioDucker.swift \
-                           Tinycast/Platform/AppPaths.swift
-run index -O DictationPerformanceTests Tinycast/Platform/ProcessExit.swift \
-                           Tinycast/Features/Dictation/Model/DictationModel.swift \
-                           Tinycast/Features/Dictation/Service/DictationWire.swift
-run DictationInferenceTests Tinycast/Features/Dictation/Model/DictationAudioChunks.swift \
-    Tinycast/Features/Dictation/Service/DictationSpectrum.swift \
-    Tinycast/Features/Dictation/Helper/DictationTensor.swift Tinycast/Features/Dictation/Helper/DictationTokenizer.swift \
-    Tinycast/Features/Dictation/Helper/DictationMel.swift
-run DictationWorkerTests   Tinycast/Features/Dictation/Model/DictationModel.swift \
-                           Tinycast/Features/Dictation/Model/DictationIdleRelease.swift \
-                           Tinycast/Features/Dictation/Service/DictationWire.swift \
-                           Tinycast/Features/Dictation/Service/DictationWorker.swift \
-                           Tinycast/Features/Dictation/Service/DictationModelStore.swift \
-                           Tinycast/Features/Dictation/Service/DictationModelDownloader.swift \
-                           Tinycast/Platform/ProcessExit.swift Tinycast/Platform/AppPaths.swift
 run HotKeyTests            Tinycast/Features/HotKeys/Model/DoubleTapModifier.swift \
                            Tinycast/Features/HotKeys/Model/ModifierKey.swift \
                            Tinycast/Features/HotKeys/Model/ModifierKeyDetector.swift \

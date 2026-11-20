@@ -46,11 +46,6 @@ extension SettingsAnchor {
 
     static let fallbacksFallbacks = Self(tab: .fallbacks, title: "Fallbacks")
 
-    static let dictationDictation = Self(tab: .dictation, title: "Dictation")
-    static let dictationCommands = Self(tab: .dictation, title: "Commands")
-    static let dictationModel = Self(tab: .dictation, title: "Model")
-    static let dictationMemory = Self(tab: .dictation, title: "Memory")
-    static let dictationOutput = Self(tab: .dictation, title: "Output")
 
     static let fileSearchFileSearch = Self(tab: .fileSearch, title: "File Search")
     static let fileSearchFullDiskAccess = Self(tab: .fileSearch, title: "Full Disk Access")
@@ -98,7 +93,6 @@ extension SettingsAnchor {
     static let permissionsAccessibility = Self(tab: .permissions, title: "Accessibility")
     static let permissionsFullDiskAccess = Self(tab: .permissions, title: "Full Disk Access")
     static let permissionsCalendars = Self(tab: .permissions, title: "Calendars")
-    static let permissionsMicrophone = Self(tab: .permissions, title: "Microphone")
 
     static let iCloudSyncSwitch = Self(tab: .iCloudSync, title: "iCloud Sync")
     static let iCloudSyncContent = Self(tab: .iCloudSync, title: "Content")

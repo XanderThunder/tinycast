@@ -19,8 +19,7 @@ enum SyncSettingScope {
         // A feature's switch is enabled per Mac, and a folder, scope or device names this Mac.
         case .language, .applicationsEnabled, .searchScopes, .systemSettingsEnabled,
             .systemActionsEnabled, .builtInCommandsEnabled, .customCommandsEnabled,
-            .quicklinksEnabled, .appleShortcutsEnabled, .dictationModel,
-            .dictationMicrophone, .fileSearchEnabled, .fileSearchScopes, .notesEnabled,
+            .quicklinksEnabled, .appleShortcutsEnabled, .fileSearchEnabled, .fileSearchScopes, .notesEnabled,
             .notesFolder, .snippetsFolder, .navigationEnabled, .windowManagementEnabled,
             .clipboardEnabled:
             nil
@@ -28,14 +27,10 @@ enum SyncSettingScope {
         case .appearance, .animationsEnabled: .appearance
         case .interfaceSize: .interfaceSize
         case .compactMode, .compactBarCommands: .windowMode
-        case .dictationMode, .dictationPlaysSounds, .dictationDestination,
-            .dictationAdaptsCapitalization, .dictationLiveInsertion, .dictationIdleRelease,
-            .dictationLanguage:
-            .dictation
         case .customWindowSizes, .windowLayouts, .windowRooms: .windowLayouts
         case .launcherShortcut, .hyperKey, .hyperKeyIncludesShift, .hyperKeyQuickPress,
             .hyperKeySecureInputCompatibility, .applications, .systemSettings, .systemActions,
-            .builtInCommands, .quicklinkCommands, .dictationShortcut, .fileSearchCommands, .notesCommands, .snippetsCommands,
+            .builtInCommands, .quicklinkCommands, .fileSearchCommands, .notesCommands, .snippetsCommands,
             .navigationCommands, .windowShortcuts, .windowAliases, .windowManagementCommands,
             .clipboardCommands, .emojiCommands, .calendarCommands:
             .hotkeysAndAliases
