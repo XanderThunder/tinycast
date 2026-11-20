@@ -131,7 +131,7 @@ struct DeepLinkTests {
         let unnamed: [HotKeyAction] = [
             .togglePalette, .dictation, .app(bundleID: "com.apple.Safari"),
             .settingsPane(bundleID: "com.apple.Wallpaper-Settings.extension"),
-            .extensionCommand(entryID: "extension:demo/search"), .command(.quit)
+            .command(.quit)
         ]
         for action in unnamed {
             expect(action.entryID == nil, "\(action.defaultsKey) has no entry ID, so no link")

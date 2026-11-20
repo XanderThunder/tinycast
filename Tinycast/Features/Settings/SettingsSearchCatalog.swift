@@ -108,7 +108,7 @@ enum SettingsSearchCatalog {
     static let entries: [SettingsSearchEntry] =
         general + iCloudSync + applications + systemSettings + systemActions + commands + quicklinks
         + appleShortcuts + fallbacks + clipboard + snippets + fileSearch + windowManagement
-        + navigation + notes + calendar + emoji + ai + quickActions + dictation + extensions + permissions
+        + navigation + notes + calendar + emoji + ai + quickActions + dictation + permissions
         + backup + about
 
     private static let general: [SettingsSearchEntry] = [
@@ -607,38 +607,6 @@ enum SettingsSearchCatalog {
         .init(
             group: .calendarCalendars, "Calendars",
             keywords: ["accounts", "sources", "choose", "icloud", "google"])
-    ]
-
-    private static let extensions: [SettingsSearchEntry] = [
-        .init(
-            pane: .extensions,
-            keywords: ["raycast", "plugins", "store", "javascript"]),
-        .init(
-            .extensionsExtensions, "Enable extensions",
-            keywords: ["raycast", "third party", "javascript"]),
-        .init(
-            .extensionsInstall, "Search extensions",
-            keywords: ["store", "browse", "install"]),
-        .init(
-            .extensionsInstall, "Install from GitHub",
-            keywords: ["source", "build", "repository", "package manager", "pnpm", "npm", "yarn", "bun"]),
-        .init(
-            .extensionsInstall, "Import from Raycast",
-            keywords: ["migrate", "existing"]),
-        .init(
-            .extensionsInstall, "Add from folder",
-            keywords: ["local", "develop", "sideload"]),
-        .init(
-            group: .extensionsInstalled, "Installed extensions",
-            keywords: [
-                "library", "uninstall", "update", "preferences", "appearance", "alias", "shortcut"
-            ]),
-        .init(
-            group: .extensionsCompatibility, "Compatibility",
-            keywords: ["supported", "unsupported", "raycast api"]),
-        .init(
-            .extensionsStorage, "Leftover files",
-            keywords: ["clean up", "disk", "reclaim", "cache"])
     ]
 
     private static let permissions: [SettingsSearchEntry] = [

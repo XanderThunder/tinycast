@@ -136,7 +136,7 @@ struct LauncherList: View {
         }
         // Publication order, so rows match the flat index.
         let kinds: [AppEntry.Kind] = [
-            .meeting, .application, .systemSettings, .extensionCommand, .quicklink, .appleShortcut,
+            .meeting, .application, .systemSettings, .quicklink, .appleShortcut,
             .snippet, .systemAction, .windowLayout, .windowRoom, .windowCommand, .customCommand,
             .quickAction, .command
         ]
@@ -355,10 +355,6 @@ private struct AppRow: View {
                 }
             }
             Spacer()
-            if let refresh = app.backgroundRefresh {
-                ExtensionRefreshIndicator(state: refresh)
-                    .font(metrics.typography.rowTrailing)
-            }
             if let slot, palette.commandHeld {
                 HStack(spacing: metrics.spacing.xxs) {
                     KeyCapChip(text: "⌘", style: .outline)

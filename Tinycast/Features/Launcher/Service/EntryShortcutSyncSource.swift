@@ -10,10 +10,9 @@ final class EntryShortcutSyncSource: SyncSource {
     }
 
     private static let logger = Logger(subsystem: "com.tinycast", category: "CloudSync")
-    private static let extensionPrefix = "extension:"
     private static let prefixes = [
         Quicklink.entryIDPrefix, CustomQuickAction.entryIDPrefix, StoredSnippet.entryIDPrefix,
-        AppleShortcut.entryIDPrefix, extensionPrefix
+        AppleShortcut.entryIDPrefix
     ]
 
     let id = SyncSourceID.launcherShortcuts
@@ -93,7 +92,6 @@ final class EntryShortcutSyncSource: SyncSource {
         ids.formUnion(hotKeys.boundQuickActionIDs.compactMap { HotKeyAction.quickAction(id: $0).entryID })
         ids.formUnion(hotKeys.boundAppleShortcutIDs.compactMap { HotKeyAction.appleShortcut(id: $0).entryID })
         ids.formUnion(hotKeys.boundSnippetIDs.compactMap { HotKeyAction.snippet(id: $0).entryID })
-        ids.formUnion(hotKeys.boundExtensionCommandEntryIDs)
         return ids
     }
 
@@ -105,7 +103,6 @@ final class EntryShortcutSyncSource: SyncSource {
     }
 
     private static func action(for entryID: String) -> HotKeyAction? {
-        entryID.hasPrefix(extensionPrefix)
-            ? .extensionCommand(entryID: entryID) : HotKeyAction(entryID: entryID)
+        HotKeyAction(entryID: entryID)
     }
 }

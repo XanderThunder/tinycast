@@ -298,7 +298,6 @@ final class CloudSyncCoordinator {
             Set(core.appIndex.apps.map(\.id))
                 .union(core.quicklinks.quicklinks.map(\.entryID))
                 .union(core.snippetsStore.snippets.map(\.entryID))
-                .union(core.extensions.installed.flatMap(\.commandEntryIDs))
         }
         return [
             devices,
@@ -318,8 +317,7 @@ final class CloudSyncCoordinator {
             RecordSyncSource.customQuickActions(core.customQuickActions),
             RecordSyncSource.mcpServers(
                 { core.mcpSettings.servers }, apply: { core.mcpCoordinator.applySynced($0) },
-                remove: { (try? core.mcpCoordinator.remove($0)) != nil }),
-            ExtensionSyncSource(manager: core.extensions)
+                remove: { (try? core.mcpCoordinator.remove($0)) != nil })
         ]
     }
 }

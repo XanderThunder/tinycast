@@ -192,16 +192,7 @@ struct LauncherScreen: PaletteScreen {
                 metrics: core.settings.interfaceSize.metrics, focus: focus,
                 onSubmit: { activate(at: selection) })
         }
-        return ExtensionArgumentsAccessory.make(
-            entry: entry, coordinator: core.extensionCoordinator,
-            values: { name in headerFieldBinding(entry: entry, name: name) },
-            focus: focus, metrics: core.settings.interfaceSize.metrics,
-            onSubmit: { activate(at: selection) })
-    }
-
-    private func headerFieldBinding(entry: AppEntry, name: String) -> Binding<String> {
-        let key = PaletteState.argumentKey(entry.id, name)
-        return Binding(get: { vm.commandArguments[key] ?? "" }, set: { vm.commandArguments[key] = $0 })
+        return nil
     }
 
     private func quicklink(for entry: AppEntry) -> Quicklink? {
