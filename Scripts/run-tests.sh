@@ -113,8 +113,6 @@ run() {
 }
 
 L=Tinycast/Features/Launcher/Model
-# What a sync source needs from iCloud Sync, for harnesses compiling a whole Service folder.
-SYNC="Tinycast/Features/CloudSync/Model/*.swift Tinycast/Features/CloudSync/Service/SyncSource.swift Tinycast/Features/CloudSync/Service/RecordSyncSource.swift Tinycast/Features/Settings/Model/SettingsFileKey.swift"
 run slow -O FuzzTests      $L/SearchRelevance.swift $L/ScriptRomanization.swift \
                            $L/LauncherMatch.swift $L/EntryNaming.swift $L/LauncherOrder.swift \
                            $L/LauncherRankingStore.swift $L/LauncherSuggestions.swift
@@ -532,14 +530,14 @@ run slow SnippetsTests     Tinycast/Platform/NotificationToken.swift \
                            Tinycast/Platform/HealthTicker.swift \
                            Tinycast/Platform/AccessibilityText.swift \
                            Tinycast/Features/Snippets/Model/*.swift \
-                           Tinycast/Features/Snippets/Service/*.swift $SYNC \
+                           Tinycast/Features/Snippets/Service/*.swift \
                            Tinycast/Features/Snippets/UI/SnippetEditorSession.swift \
                            Tinycast/Features/Snippets/UI/SnippetArgumentsState.swift \
                            Tinycast/Features/TextInjection/Service/*.swift
 run NotesTests             Tinycast/Platform/Signposts.swift \
                            $L/SearchRelevance.swift \
                            Tinycast/Features/Notes/Model/*.swift \
-                           Tinycast/Features/Notes/Service/*.swift $SYNC
+                           Tinycast/Features/Notes/Service/*.swift
 run NotesEditorTests       Tinycast/Platform/Signposts.swift \
                            Tinycast/Platform/Appearance.swift \
                            Tinycast/DesignSystem/Theme.swift \
@@ -607,8 +605,6 @@ run slow -O RaycastTests   Tinycast/Features/Backup/Model/RaycastImportError.swi
                            Tinycast/Features/Clipboard/Model/ColorValue.swift \
                            Tinycast/Features/Clipboard/Model/ColorFormat.swift \
                            Tinycast/Features/Clipboard/Model/ColorSpaces.swift
-run CloudSyncTests         Tinycast/Features/CloudSync/Model/*.swift \
-                           Tinycast/Features/Settings/Model/SettingsFileKey.swift
 run SettingsBackupTests    Tinycast/Features/Settings/AppSettingsKey.swift \
                            Tinycast/Features/Backup/Model/SettingsBackupCoverage.swift
 run HyperKeyEngineTests    Tinycast/Features/HotKeys/Model/HyperKeyEngine.swift \

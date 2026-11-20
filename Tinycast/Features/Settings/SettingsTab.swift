@@ -1,5 +1,5 @@
 enum SettingsTab: CaseIterable, Identifiable {
-    case general, iCloudSync, applications, systemSettings, systemActions, commands, quicklinks,
+    case general, applications, systemSettings, systemActions, commands, quicklinks,
         appleShortcuts,
         fallbacks, clipboard, snippets, fileSearch, windowManagement, navigation, notes, calendar, emoji,
         permissions, backup, about
@@ -15,7 +15,6 @@ enum SettingsTab: CaseIterable, Identifiable {
     var slug: String {
         switch self {
         case .general: "general"
-        case .iCloudSync: "icloud-sync"
         case .applications: "applications"
         case .systemSettings: "system-settings"
         case .systemActions: "system-actions"
@@ -40,7 +39,6 @@ enum SettingsTab: CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .general: return String(localized: "General")
-        case .iCloudSync: return String(localized: "iCloud Sync")
         case .applications: return String(localized: "Applications")
         case .systemSettings: return String(localized: "System Settings")
         case .systemActions: return String(localized: "System Actions")
@@ -65,7 +63,6 @@ enum SettingsTab: CaseIterable, Identifiable {
     var systemImage: String {
         switch self {
         case .general: return "switch.2"
-        case .iCloudSync: return "icloud.fill"
         case .applications: return "square.grid.2x2.fill"
         case .systemSettings: return "gearshape.fill"
         case .systemActions: return "bolt.fill"
@@ -92,7 +89,7 @@ enum SettingsTab: CaseIterable, Identifiable {
         case .general, .systemSettings, .fallbacks, .about: return .gray
         case .commands, .navigation: return .graphite
         case .permissions, .quicklinks, .fileSearch: return .blue
-        case .applications, .iCloudSync, .backup: return .cyan
+        case .applications, .backup: return .cyan
         case .windowManagement: return .mint
         case .notes: return .yellow
         case .systemActions, .emoji: return .orange
@@ -121,7 +118,7 @@ enum SettingsSection: CaseIterable, Identifiable {
 
     var tabs: [SettingsTab] {
         switch self {
-        case .general: return [.general, .iCloudSync, .permissions]
+        case .general: return [.general, .permissions]
         case .launcher:
             return [
                 .applications, .systemSettings, .systemActions, .commands, .quicklinks,

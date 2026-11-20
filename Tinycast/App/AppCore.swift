@@ -175,7 +175,6 @@ final class AppCore {
     @ObservationIgnored private(set) lazy var cameraCoordinator = CameraCoordinator(core: self)
     @ObservationIgnored private(set) lazy var dictionaryCoordinator = DictionaryCoordinator(
         paletteCoordinator: paletteCoordinator)
-    @ObservationIgnored private(set) lazy var cloudSyncCoordinator = CloudSyncCoordinator(core: self)
     @ObservationIgnored private(set) lazy var deepLinkCoordinator = DeepLinkCoordinator(
         scheme: AppURLScheme.current, settings: settings, hotKeys: hotKeys,
         paletteCoordinator: paletteCoordinator, settingsCoordinator: settingsCoordinator,
@@ -319,7 +318,6 @@ final class AppCore {
                     let issues = settingsBindings.launcher.applyInstalled()
                     if settingsFile != nil { reportSettingsFileIssues(issues) }
                 }
-                cloudSyncCoordinator.appIndexDidScan()
             }
             hotKeys.displayName = { [weak self] action in self?.hotKeyDisplayName(for: action) }
             hotKeys.allowsAction = { [weak self] in self?.allowsHotKeyAction($0) ?? false }
@@ -479,7 +477,6 @@ final class AppCore {
 
     func prepareForTermination() {
         settingsFile?.flush()
-        cloudSyncCoordinator.flush()
         clipboardTextIndexer?.stop()
         // Caps Lock first: its remap is the one teardown that outlives the process.
         hyperKey.prepareForTermination()
@@ -495,7 +492,6 @@ final class AppCore {
     // MARK: - Feature switches
 
     private func observeFeatureSwitches() {
-        track({ _ = $0.iCloudSyncEnabled }, reproject: { $0.cloudSyncCoordinator.applyEnabled() })
         track(
             {
                 _ = $0.windowManagementEnabled

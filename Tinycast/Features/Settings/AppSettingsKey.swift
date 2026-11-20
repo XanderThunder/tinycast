@@ -82,7 +82,5 @@ enum AppSettingsKey: String, CaseIterable {
     case calendarMenuBarHidesWhenEmpty = "calendarMenuBarHidesWhenEmpty"
     case hideCurrentEvent = "hideCurrentEvent"
     case settingsFileEnabled = "settingsFileEnabled"
-    case iCloudSyncEnabled = "iCloudSyncEnabled"
-    case iCloudSyncDisabledCategories = "iCloudSyncDisabledCategories"
     case allowedDeepLinks = "allowedDeepLinks"
 }
