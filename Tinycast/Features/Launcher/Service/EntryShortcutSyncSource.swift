@@ -11,7 +11,7 @@ final class EntryShortcutSyncSource: SyncSource {
 
     private static let logger = Logger(subsystem: "com.tinycast", category: "CloudSync")
     private static let prefixes = [
-        Quicklink.entryIDPrefix, CustomQuickAction.entryIDPrefix, StoredSnippet.entryIDPrefix,
+        Quicklink.entryIDPrefix, StoredSnippet.entryIDPrefix,
         AppleShortcut.entryIDPrefix
     ]
 
@@ -89,7 +89,6 @@ final class EntryShortcutSyncSource: SyncSource {
     private func localEntryIDs() -> Set<String> {
         var ids = Set(aliases.aliases.keys.filter { key in Self.prefixes.contains { key.hasPrefix($0) } })
         ids.formUnion(hotKeys.boundQuicklinkIDs.compactMap { HotKeyAction.quicklink(id: $0).entryID })
-        ids.formUnion(hotKeys.boundQuickActionIDs.compactMap { HotKeyAction.quickAction(id: $0).entryID })
         ids.formUnion(hotKeys.boundAppleShortcutIDs.compactMap { HotKeyAction.appleShortcut(id: $0).entryID })
         ids.formUnion(hotKeys.boundSnippetIDs.compactMap { HotKeyAction.snippet(id: $0).entryID })
         return ids

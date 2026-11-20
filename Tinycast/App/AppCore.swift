@@ -71,8 +71,6 @@ final class AppCore {
     let mcpSettings = MCPSettingsStore()
     let mcpOAuth = MCPOAuthManager()
     @ObservationIgnored private(set) lazy var mcp = MCPServerManager(oauth: mcpOAuth)
-    let quickActionSettings = QuickActionSettingsStore()
-    let customQuickActions = CustomQuickActionStore()
     let chatPresets = ChatPresetStore()
     let chatGPTSubscription = ChatGPTSubscriptionManager()
     let installedAI = InstalledAIManager()
@@ -209,11 +207,6 @@ final class AppCore {
     @ObservationIgnored private(set) lazy var cameraCoordinator = CameraCoordinator(core: self)
     @ObservationIgnored private(set) lazy var dictionaryCoordinator = DictionaryCoordinator(
         paletteCoordinator: paletteCoordinator)
-    @ObservationIgnored private(set) lazy var quickActionCoordinator = QuickActionCoordinator(
-        settings: settings, store: quickActionSettings, customActions: customQuickActions,
-        injector: textInjector, appIndex: appIndex, hotKeys: hotKeys, favorites: favorites,
-        visibility: visibility, ranking: launcherRanking, aliases: aliases,
-        paletteCoordinator: paletteCoordinator, core: self)
     @ObservationIgnored private(set) lazy var cloudSyncCoordinator = CloudSyncCoordinator(core: self)
     @ObservationIgnored private(set) lazy var mcpCoordinator = MCPCoordinator(
         settings: settings, store: mcpSettings, manager: mcp, core: self)
@@ -295,12 +288,6 @@ final class AppCore {
             chatGPTSubscription.launchSettings = { [aiSettings] in aiSettings.launch(for: .codex) }
             aiChatCoordinator.applyEnabled()
             mcpCoordinator.applyEnabled()
-            customQuickActions.onChange = { [weak self] _ in
-                self?.quickActionCoordinator.applyCustomQuickActionsPresence()
-            }
-            // Before `hotKeys.start` even when off: the prune reads it.
-            customQuickActions.load()
-            quickActionCoordinator.applyEnabled()
             customCommands.onChange = { [weak self] _ in
                 self?.customCommandCoordinator.applyCustomCommandsPresence()
             }
@@ -371,9 +358,6 @@ final class AppCore {
             hotKeys.onOpenQuicklink = { [weak self] id in
                 self?.quicklinkCoordinator.openQuicklinkFromHotKey(id: id)
             }
-            hotKeys.onRunQuickAction = { [weak self] id in
-                self?.quickActionCoordinator.run(id: id)
-            }
             hotKeys.onRunAppleShortcut = { [weak self] id in
                 self?.appleShortcutCoordinator.run(id: id)
             }
@@ -406,8 +390,7 @@ final class AppCore {
                 quicklinkIDs: Set(quicklinks.quicklinks.map(\.id)),
                 windowLayoutIDs: Set(windowLayouts.layouts.map(\.id)),
                 windowRoomIDs: Set(rooms.rooms.map(\.id)),
-                customWindowSizeIDs: Set(customWindowSizes.sizes.map(\.id)),
-                quickActionIDs: Set(customQuickActions.actions.map(\.id)))
+                customWindowSizeIDs: Set(customWindowSizes.sizes.map(\.id)))
             trackHotKeyAllowance()
             // After `hotKeys.start`: Secure Input equivalents are built from the loaded bindings.
             hyperKey.onProblem = { [weak self] in self?.showMessage($0, tone: .danger) }
@@ -476,7 +459,6 @@ final class AppCore {
         // Snippets load after `start()`; observing `snippets` re-registers them once they arrive.
         case .snippet(let id):
             return settings.snippetsEnabled && snippetsStore.record(id: id)?.snippet.isEnabled == true
-        case .quickAction: return settings.quickActionsEnabled
         case .quicklink(let id):
             return settings.quicklinksEnabled && quicklinks.quicklink(id: id)?.isEnabled == true
         case .appleShortcut: return settings.appleShortcutsEnabled
@@ -496,8 +478,6 @@ final class AppCore {
             return customCommands.command(id: id)?.name
         case .quicklink(let id):
             return quicklinks.quicklink(id: id)?.name
-        case .quickAction(let id):
-            return customQuickActions.action(id: id)?.name
         case .windowLayout(let id):
             return windowLayouts.layout(id: id)?.name
         case .windowRoom(let id):
@@ -585,9 +565,7 @@ final class AppCore {
     /// Only the tool whose own path or variables changed is checked again; the rest keep running.
     private func applyInstalledLaunches() {
         let revisions = aiSettings.launchRevisions
-        let enabled =
-            settings.aiEnabled || settings.quickActionsEnabled
-            ? aiSettings.enabledInstalledProviders : []
+        let enabled = settings.aiEnabled ? aiSettings.enabledInstalledProviders : []
         for kind in InstalledAIKind.allCases where appliedLaunchRevisions[kind] != revisions[kind] {
             guard enabled.contains(kind) else { continue }
             if kind == .codex {
@@ -602,9 +580,7 @@ final class AppCore {
 
     @discardableResult
     func applyInstalledAILifecycle() -> Task<Void, Never> {
-        let enabledKinds =
-            settings.aiEnabled || settings.quickActionsEnabled
-            ? aiSettings.enabledInstalledProviders : []
+        let enabledKinds = settings.aiEnabled ? aiSettings.enabledInstalledProviders : []
         var tasks: [Task<Void, Never>] = []
         if enabledKinds.contains(.codex) {
             tasks.append(
@@ -616,21 +592,6 @@ final class AppCore {
         }
         tasks.append(installedAI.ensure(enabledKinds: enabledKinds))
         return Task { for task in tasks { await task.value } }
-    }
-
-    /// Permissive guardrails: the text transformed is the reader's own, which `.default` refuses.
-    func quickActionProvider(for action: QuickAction) throws -> any AIProvider {
-        quickActionSettings.repairModel(
-            against: aiSettings.connections, fallback: aiSettings.defaultModel)
-        guard let selection = quickActionSettings.model(for: action) ?? aiSettings.defaultModel
-        else {
-            throw AIProviderError.unavailable(
-                String(localized: "Choose a model in Settings \u{2192} Quick Actions."))
-        }
-        return try AIProviderFactory.make(
-            selection: selection, settings: aiSettings, subscription: chatGPTSubscription,
-            installedAI: installedAI,
-            guardrails: .permissiveContentTransformations)
     }
 
     // MARK: - Feature switches
@@ -707,9 +668,6 @@ final class AppCore {
                 _ = $0.aiEnabled
                 _ = $0.mcpEnabled
             }, reproject: { $0.mcpCoordinator.applyEnabled() })
-        track(
-            { _ = $0.quickActionsEnabled },
-            reproject: { $0.quickActionCoordinator.applyEnabled() })
         track({ _ = $0.calendarEnabled }, reproject: { $0.calendarCoordinator.applyEnabled() })
         track(
             {
@@ -895,7 +853,7 @@ final class AppCore {
         let launcher = LauncherSettingsFile(
             appIndex: appIndex, aliases: aliases, visibility: visibility, shortcuts: shortcuts)
         let bindings = SettingsFileSchema.bindings(
-            settings: settings, ai: aiSettings, quickActions: quickActionSettings,
+            settings: settings, ai: aiSettings,
             shortcuts: shortcuts, launcher: launcher,
             windowManagement: WindowManagementSettingsFile(
                 sizes: customWindowSizes, layouts: windowLayouts, rooms: rooms, aliases: aliases,

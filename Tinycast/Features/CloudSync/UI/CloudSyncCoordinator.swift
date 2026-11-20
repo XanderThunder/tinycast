@@ -314,7 +314,6 @@ final class CloudSyncCoordinator {
             ChatSyncSource(
                 store: core.chatHistory, isActive: aiIsOn, answering: { core.aiChats.answeringIDs }),
             RecordSyncSource.chatPresets(core.chatPresets, isActive: aiIsOn),
-            RecordSyncSource.customQuickActions(core.customQuickActions),
             RecordSyncSource.mcpServers(
                 { core.mcpSettings.servers }, apply: { core.mcpCoordinator.applySynced($0) },
                 remove: { (try? core.mcpCoordinator.remove($0)) != nil })

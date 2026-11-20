@@ -530,7 +530,7 @@ struct AppInstallationTests {
 
 // Empty feature catalogs keep this harness focused on the shipped launcher.
 enum SettingsTab: Sendable {
-    case ai, quickActions, windowManagement, quicklinks, snippets, commands, calendar
+    case ai, windowManagement, quicklinks, snippets, commands, calendar
     var tint: IconTint { .gray }
 }
 enum EntryIcon: Hashable, Sendable {
@@ -556,7 +556,7 @@ enum CommandCatalog {
 }
 enum HotKeyAction: Hashable, Sendable {
     case togglePalette, dictation, command(CommandID)
-    case app(bundleID: String), settingsPane(bundleID: String), quickAction(id: UUID)
+    case app(bundleID: String), settingsPane(bundleID: String)
     case customCommand(id: UUID), systemAction(id: SystemAction.ID), windowCommand(id: WindowCommand.ID)
     case customWindowSize(id: UUID), windowLayout(id: UUID), windowRoom(id: UUID), quicklink(id: UUID)
     case appleShortcut(id: UUID), snippet(id: UUID)
@@ -577,14 +577,12 @@ struct OtherEntry<Tag: Sendable>: Sendable {
 enum LayoutTag: Sendable {}
 enum RoomTag: Sendable {}
 enum SizeTag: Sendable {}
-enum QuickActionTag: Sendable {}
 enum CommandTag: Sendable {}
 enum QuicklinkTag: Sendable {}
 enum ShortcutTag: Sendable {}
 typealias WindowLayout = OtherEntry<LayoutTag>
 typealias Room = OtherEntry<RoomTag>
 typealias CustomWindowSize = OtherEntry<SizeTag>
-typealias CustomQuickAction = OtherEntry<QuickActionTag>
 typealias CustomCommand = OtherEntry<CommandTag>
 typealias Quicklink = OtherEntry<QuicklinkTag>
 typealias AppleShortcut = OtherEntry<ShortcutTag>

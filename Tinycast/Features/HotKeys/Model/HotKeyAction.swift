@@ -15,7 +15,6 @@ enum HotKeyAction: Hashable, Sendable {
     case windowRoom(id: UUID)
     case customWindowSize(id: UUID)
     case quicklink(id: UUID)
-    case quickAction(id: UUID)
     case appleShortcut(id: UUID)
     case snippet(id: StoredSnippet.ID)
 
@@ -35,7 +34,6 @@ enum HotKeyAction: Hashable, Sendable {
         case .customWindowSize(let id):
             "hotkey.customWindowSize." + id.uuidString.lowercased()
         case .quicklink(let id): "hotkey.quicklink." + id.uuidString.lowercased()
-        case .quickAction(let id): "hotkey.quickAction." + id.uuidString.lowercased()
         case .appleShortcut(let id): "hotkey.appleShortcut." + id.uuidString.lowercased()
         case .snippet(let id): "hotkey.snippet." + id
         }

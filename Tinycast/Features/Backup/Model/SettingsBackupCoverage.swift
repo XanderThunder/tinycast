@@ -165,22 +165,6 @@ enum SettingsBackupCoverage {
         AppSettingsKey.mcpServers.rawValue:
             "An MCP server is a source of executable code and a destination for chat context, and "
             + "it is meaningless without the machine-local Keychain secrets it describes.",
-        AppSettingsKey.quickActionsEnabled.rawValue:
-            "Grants keystroke delivery into other apps through the Accessibility permission, and a "
-            + "flag that grants a capability is never carried by a backup.",
-        AppSettingsKey.quickActionModel.rawValue:
-            "Names an external AI destination for text taken from whatever app is frontmost; an "
-            + "import must not choose one.",
-        AppSettingsKey.quickActionModelOverrides.rawValue:
-            "Sends one action's text to its own AI destination, some keyed by actions that exist only "
-            + "on the Mac that made them.",
-        AppSettingsKey.quickActionPreviews.rawValue:
-            "Says which actions may rewrite a document without showing the result first, which is a "
-            + "decision each Mac makes about its own text.",
-        AppSettingsKey.quickActionInstructions.rawValue:
-            "Custom model instructions change transformed results and must not move unseen.",
-        AppSettingsKey.quickActionLanguage.rawValue:
-            "Follows the language the person at this Mac reads, not the one who wrote the backup.",
         AppSettingsKey.snippetsFolder.rawValue:
             "Names a folder on this Mac; the one a backup lands on may not have it.",
         AppSettingsKey.notesFolder.rawValue:

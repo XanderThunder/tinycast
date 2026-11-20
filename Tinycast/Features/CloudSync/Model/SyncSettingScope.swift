@@ -37,8 +37,7 @@ enum SyncSettingScope {
         case .customWindowSizes, .windowLayouts, .windowRooms: .windowLayouts
         case .launcherShortcut, .hyperKey, .hyperKeyIncludesShift, .hyperKeyQuickPress,
             .hyperKeySecureInputCompatibility, .applications, .systemSettings, .systemActions,
-            .builtInCommands, .quicklinkCommands, .aiCommands, .quickActionCommands,
-            .dictationShortcut, .fileSearchCommands, .notesCommands, .snippetsCommands,
+            .builtInCommands, .quicklinkCommands, .aiCommands, .dictationShortcut, .fileSearchCommands, .notesCommands, .snippetsCommands,
             .navigationCommands, .windowShortcuts, .windowAliases, .windowManagementCommands,
             .clipboardCommands, .emojiCommands, .calendarCommands:
             .hotkeysAndAliases
@@ -48,7 +47,7 @@ enum SyncSettingScope {
             .customCommandsShowInLauncher, .quicklinksShowInLauncher, .quicklinkOpensNewWindow,
             .quicklinkPassesSelectedText, .quicklinkConfirmsBeforeDelete, .aiWebSearch,
             .aiChoices, .aiExpandsReasoning, .aiOpensTo, .aiNewChatAfter, .aiToolRounds,
-            .quickActionLanguage, .fileSearchIncludesHiddenFiles, .fileSearchIgnorePatterns,
+            .fileSearchIncludesHiddenFiles, .fileSearchIgnorePatterns,
             .fileSearchRemovedDefaultPatterns, .fileSearchShowInLauncher, .notesRendersMarkdown,
             .notesShowsFormattingBar, .notesShowsInMenuBar, .snippetsShowInLauncher,
             .snippetDefaultAction, .menuSearchShowsAppleMenu, .menuSearchDisabledApps,

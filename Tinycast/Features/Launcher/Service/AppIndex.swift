@@ -5,7 +5,6 @@ struct AppEntry: Identifiable, Hashable, Sendable {
         case application
         case systemSettings
         case command
-        case quickAction
         case customCommand
         case snippet
         case systemAction
@@ -32,11 +31,6 @@ struct AppEntry: Identifiable, Hashable, Sendable {
                 return KindDescriptor(
                     label: "Command", sectionTitle: "Commands",
                     openVerb: "Run Command", canHideFromSearch: true,
-                    canRevealInFinder: false, canDragOut: false, isSymbolIcon: true, rankPriority: 3)
-            case .quickAction:
-                return KindDescriptor(
-                    label: "Quick Action", sectionTitle: "Quick Actions",
-                    openVerb: "Run Quick Action", canHideFromSearch: true,
                     canRevealInFinder: false, canDragOut: false, isSymbolIcon: true, rankPriority: 3)
             case .customCommand:
                 return KindDescriptor(
@@ -164,7 +158,7 @@ struct AppEntry: Identifiable, Hashable, Sendable {
             return bundleID.map { .app(bundleID: $0) }
         case .systemSettings:
             return bundleID.map { .settingsPane(bundleID: $0) }
-        case .command, .quickAction, .customCommand, .systemAction, .windowCommand, .windowLayout,
+        case .command, .customCommand, .systemAction, .windowCommand, .windowLayout,
             .windowRoom, .quicklink, .appleShortcut, .snippet:
             return HotKeyAction(entryID: id)
         case .meeting:
@@ -187,12 +181,6 @@ struct AppEntry: Identifiable, Hashable, Sendable {
         switch kind {
         case .command:
             guard let command = CommandCatalog.command(for: self) else { return .symbol("questionmark") }
-            return .tile(symbol: command.sfSymbol, tint: command.tint)
-        case .quickAction:
-            guard let command = CommandCatalog.command(for: self) else {
-                return .tile(
-                    symbol: symbolName ?? CustomQuickAction.sfSymbol, tint: SettingsTab.quickActions.tint)
-            }
             return .tile(symbol: command.sfSymbol, tint: command.tint)
         case .systemAction:
             guard let action = SystemActionCatalog.action(forEntryID: id) else {
@@ -256,13 +244,6 @@ extension AppEntry {
             id: size.entryID, name: size.name,
             url: URL(string: "tinycast://window-size/" + size.id.uuidString)!,
             bundleID: nil, kind: .windowCommand)
-    }
-
-    init(_ action: CustomQuickAction) {
-        self.init(
-            id: action.entryID, name: action.name,
-            url: URL(string: "tinycast://quick-action/" + action.id.uuidString)!,
-            bundleID: nil, kind: .quickAction, symbolName: action.iconSymbol)
     }
 
     init(_ command: CustomCommand) {
@@ -387,7 +368,6 @@ final class AppIndex {
     private var windowRoomEntries: [AppEntry] = []
     private var quicklinkEntries: [AppEntry] = []
     private var appleShortcutEntries: [AppEntry] = []
-    private var customQuickActionEntries: [AppEntry] = []
     private var meetingEntries: [AppEntry] = []
     /// The catalog's commands a disabled feature hides; the Commands slice is recomputed from it.
     private var hiddenCommands: Set<CommandID> = []
@@ -411,10 +391,6 @@ final class AppIndex {
 
     private var commandEntries: [AppEntry] {
         visibleCatalogEntries.filter { $0.kind == .command }
-    }
-
-    private var quickActionEntries: [AppEntry] {
-        visibleCatalogEntries.filter { $0.kind == .quickAction } + customQuickActionEntries
     }
 
     private var visibleCatalogEntries: [AppEntry] {
@@ -449,14 +425,6 @@ final class AppIndex {
             .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
         guard entries != customCommandEntries else { return }
         customCommandEntries = entries
-        publishEntries()
-    }
-
-    /// Replaces the custom Quick Action slice, which shares its section with the shipped four.
-    func setCustomQuickActions(_ actions: [CustomQuickAction]) {
-        let entries = actions.sorted(by: CustomQuickAction.precedes).map(AppEntry.init)
-        guard entries != customQuickActionEntries else { return }
-        customQuickActionEntries = entries
         publishEntries()
     }
 
@@ -675,7 +643,7 @@ final class AppIndex {
                 quicklinkEntries + appleShortcutEntries + snippetEntries
                     + Self.systemActionEntries + windowLayoutEntries + windowRoomEntries
                     + windowCommandEntries
-                    + customWindowSizeEntries + customCommandEntries + quickActionEntries
+                    + customWindowSizeEntries + customCommandEntries
                     + commandEntries)
         guard updated != searchEntries else { return }
         searchEntries = updated

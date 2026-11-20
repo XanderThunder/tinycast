@@ -277,16 +277,6 @@ enum Theme {
         static let cameraPreview = CGSize(width: 420, height: 236)
         /// 16:9 again, wider: the standalone camera is the surface, not a confirmation on one.
         static let cameraStage = CGSize(width: 560, height: 315)
-        /// Wider than a dialog: a Quick Action's result is prose to read, not a sentence to answer.
-        static let quickActionPanel: CGFloat = 520
-        /// Matched to the title's cap height; a row-sized glyph beside it reads as an error.
-        static let quickActionHeaderIcon: CGFloat = 14
-        /// The dissolve ramp below each bar's clear zone, measured against text behind the title.
-        static let quickActionScrollFade: CGFloat = 40
-        /// Past this the result scrolls, so a long summary cannot grow the panel off the screen.
-        static let quickActionPanelBody: CGFloat = 320
-        /// Keeps a two-word grammar fix from collapsing the panel to a slot.
-        static let quickActionPanelMinBody: CGFloat = 44
         /// Transient volume HUD shown after any volume or mute command.
         static let hudWidth: CGFloat = 200
         static let hudHeight: CGFloat = 100

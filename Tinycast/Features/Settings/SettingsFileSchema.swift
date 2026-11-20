@@ -4,20 +4,18 @@ import Foundation
 @MainActor
 enum SettingsFileSchema {
     static func bindings(
-        settings: AppSettings, ai: AISettingsStore, quickActions: QuickActionSettingsStore,
-        shortcuts: HotKeySettingsFile, launcher: LauncherSettingsFile,
+        settings: AppSettings, ai: AISettingsStore, shortcuts: HotKeySettingsFile, launcher: LauncherSettingsFile,
         windowManagement: WindowManagementSettingsFile
     ) -> [SettingsFileBinding] {
         SettingsFileKey.allCases.map { key in
             binding(
-                for: key, settings: settings, ai: ai, quickActions: quickActions,
-                shortcuts: shortcuts, launcher: launcher, windowManagement: windowManagement)
+                for: key, settings: settings, ai: ai, shortcuts: shortcuts, launcher: launcher, windowManagement: windowManagement)
         }
     }
 
     private static func binding(
         for key: SettingsFileKey, settings: AppSettings, ai: AISettingsStore,
-        quickActions: QuickActionSettingsStore, shortcuts: HotKeySettingsFile,
+        shortcuts: HotKeySettingsFile,
         launcher: LauncherSettingsFile, windowManagement: WindowManagementSettingsFile
     ) -> SettingsFileBinding {
         func bind<Root: AnyObject, Value: SettingsFileValue>(
@@ -83,8 +81,6 @@ enum SettingsFileSchema {
         case .aiNewChatAfter: return bind(ai, \.newChatAfter)
         case .aiToolRounds: return bind(ai, \.toolRounds)
         case .aiCommands: return launcher.commandsBinding(for: key, owner: .ai)
-        case .quickActionLanguage: return bind(quickActions, \.settings.targetLanguage)
-        case .quickActionCommands: return launcher.commandsBinding(for: key, owner: .quickActions)
         case .fileSearchEnabled: return bind(settings, \.fileSearchEnabled)
         case .fileSearchScopes: return bind(settings, \.fileSearchScopes)
         case .fileSearchIncludesHiddenFiles: return bind(settings, \.fileSearchIncludesHiddenFiles)

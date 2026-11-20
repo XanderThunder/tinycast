@@ -139,17 +139,6 @@ struct InterfaceSizeTests {
         expect(m.size.chatAttachmentGlyph, Theme.Size.chatAttachmentGlyph, "size.chatAttachmentGlyph")
         expect(m.size.chatAttachmentThumb, Theme.Size.chatAttachmentThumb, "size.chatAttachmentThumb")
         expect(m.size.chatAttachmentInset, Theme.Size.chatAttachmentInset, "size.chatAttachmentInset")
-        expect(m.size.quickActionPanel, Theme.Size.quickActionPanel, "size.quickActionPanel")
-        expect(
-            m.size.quickActionHeaderIcon, Theme.Size.quickActionHeaderIcon,
-            "size.quickActionHeaderIcon")
-        expect(
-            m.size.quickActionScrollFade, Theme.Size.quickActionScrollFade,
-            "size.quickActionScrollFade")
-        expect(m.size.quickActionPanelBody, Theme.Size.quickActionPanelBody, "size.quickActionPanelBody")
-        expect(
-            m.size.quickActionPanelMinBody, Theme.Size.quickActionPanelMinBody,
-            "size.quickActionPanelMinBody")
         expect(
             m.size.dialogCompactWidth, Theme.Size.dialogCompactWidth,
             "size.dialogCompactWidth")
@@ -322,11 +311,6 @@ struct InterfaceSizeTests {
             ("size.chatAttachmentGlyph", m.size.chatAttachmentGlyph),
             ("size.chatAttachmentThumb", m.size.chatAttachmentThumb),
             ("size.chatAttachmentInset", m.size.chatAttachmentInset),
-            ("size.quickActionPanel", m.size.quickActionPanel),
-            ("size.quickActionHeaderIcon", m.size.quickActionHeaderIcon),
-            ("size.quickActionScrollFade", m.size.quickActionScrollFade),
-            ("size.quickActionPanelBody", m.size.quickActionPanelBody),
-            ("size.quickActionPanelMinBody", m.size.quickActionPanelMinBody),
             ("size.dialogCompactWidth", m.size.dialogCompactWidth),
             ("size.dialogWidth", m.size.dialogWidth),
             ("size.dialogButtonHeight", m.size.dialogButtonHeight),

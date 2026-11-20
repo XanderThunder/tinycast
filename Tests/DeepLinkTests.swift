@@ -107,7 +107,6 @@ struct DeepLinkTests {
             (CustomWindowSize.entryIDPrefix + uuid, .customWindowSize(id: id)),
             (WindowLayout.entryIDPrefix + uuid, .windowLayout(id: id)),
             (Room.entryIDPrefix + uuid, .windowRoom(id: id)),
-            (CustomQuickAction.entryIDPrefix + uuid, .quickAction(id: id)),
             (CustomCommand.entryIDPrefix + uuid, .customCommand(id: id)),
             (Quicklink.entryIDPrefix + uuid, .quicklink(id: id)),
             (AppleShortcut.entryIDPrefix + uuid, .appleShortcut(id: id))

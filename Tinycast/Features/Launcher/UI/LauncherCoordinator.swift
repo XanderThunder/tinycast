@@ -81,15 +81,6 @@ final class LauncherCoordinator {
             runCommand(id)
             return
         }
-        if app.kind == .quickAction {
-            if let command = CommandCatalog.command(for: app) {
-                runCommand(command)
-                return
-            }
-            guard let id = CustomQuickAction.id(fromEntryID: app.id) else { return }
-            core.quickActionCoordinator.run(id: id)
-            return
-        }
         if app.kind == .customCommand {
             guard let id = CustomCommand.id(fromEntryID: app.id) else { return }
             customCommandCoordinator.runCustomCommand(id: id, values: arguments)
@@ -148,7 +139,7 @@ final class LauncherCoordinator {
         case .snippet:
             guard let snippetID = StoredSnippet.id(fromEntryID: app.id) else { return }
             snippetCoordinator.expandSnippet(id: snippetID, target: previous)
-        case .command, .quickAction, .customCommand, .systemAction, .windowCommand, .windowLayout,
+        case .command, .customCommand, .systemAction, .windowCommand, .windowLayout,
             .windowRoom, .quicklink, .appleShortcut, .meeting:
             break  // handled above
         }
@@ -162,14 +153,6 @@ final class LauncherCoordinator {
         case .aiChat:
             dismissPalette()
             core.aiChatCoordinator.toggleWindow()
-        case .fixGrammar:
-            core.quickActionCoordinator.run(.fixGrammar)
-        case .rewrite:
-            core.quickActionCoordinator.run(.rewrite)
-        case .translate:
-            core.quickActionCoordinator.run(.translate)
-        case .summarize:
-            core.quickActionCoordinator.run(.summarize)
         case .calculatorHistory:
             paletteCoordinator.togglePalette(mode: .calculatorHistory)
         case .clipboardHistory:

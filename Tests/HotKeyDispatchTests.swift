@@ -133,7 +133,7 @@ struct HotKeyDispatchTests {
         let actions: [HotKeyAction] = [
             .command(.sample), .customCommand(id: UUID()), .windowCommand(id: .sample),
             .windowLayout(id: UUID()), .windowRoom(id: UUID()), .customWindowSize(id: UUID()),
-            .quicklink(id: UUID()), .quickAction(id: UUID()), .appleShortcut(id: UUID()),
+            .quicklink(id: UUID()), .appleShortcut(id: UUID()),
             .snippet(id: "sample"), .dictation
         ]
         for (offset, action) in actions.enumerated() {
@@ -174,7 +174,7 @@ struct HotKeyDispatchTests {
         relaunched.allowsAction = { $0 != snippet || snippetsLoaded }
         relaunched.start(
             customCommandIDs: [], quicklinkIDs: [], windowLayoutIDs: [], windowRoomIDs: [],
-            customWindowSizeIDs: [], quickActionIDs: [])
+            customWindowSizeIDs: [])
         check("snippet waits at launch", relaunchedCenter.entries[snippet.defaultsKey] == nil)
         snippetsLoaded = true
         relaunched.applyAllowance()
