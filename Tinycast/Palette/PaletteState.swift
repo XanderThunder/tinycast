@@ -18,9 +18,6 @@ final class PaletteState {
     var selection: Int = 0
     /// True while an IME holds marked text, which leaves `query` empty. The panel publishes it.
     var isComposing = false
-    var clipboardFilter: ClipboardFilter = .all {
-        didSet { if oldValue != clipboardFilter { restoredSelection = nil } }
-    }
     var fileSearchFilter: FileSearchFilter = .all
     /// Ordering out leaves the SwiftUI tree mounted, so a media preview needs this to stop playing.
     private(set) var isVisible = false
@@ -135,7 +132,6 @@ final class PaletteState {
         commandArguments = [:]
         pendingArgumentEntryID = nil
         argumentEntryID = nil
-        clipboardFilter = .all
         fileSearchFilter = .all
         forceExpanded = false
         dropHoverHighlight()

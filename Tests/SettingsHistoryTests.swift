@@ -45,8 +45,8 @@ struct SettingsHistoryTests {
 
     static func selectingPushes() {
         var history = SettingsHistory(current: .general)
-        history.select(.clipboard)
-        expect(history.current == .clipboard, "selecting shows the new pane")
+        history.select(.fileSearch)
+        expect(history.current == .fileSearch, "selecting shows the new pane")
         expect(history.canGoBack, "and leaves the old one behind us")
         expect(!history.canGoForward, "with nothing ahead")
     }
@@ -150,7 +150,6 @@ struct SettingsHistoryTests {
             ("hyper", .general),
             ("caps lock", .general),
             ("launch at login", .general),
-            ("paste history", .clipboard),
             ("window manage", .windowManagement)
         ]
         for (query, tab) in cases {
@@ -185,7 +184,7 @@ struct SettingsHistoryTests {
         let navigation = SettingsNavigationState(tab: .general)
         expect(navigation.scrollRequest == nil, "a fresh window has nothing to reveal")
 
-        navigation.select(.clipboard)
+        navigation.select(.quicklinks)
         expect(navigation.scrollRequest == nil, "and a plain pane selection asks for no scroll")
 
         navigation.select(.general, revealing: .section(.generalHyperKey))
@@ -206,17 +205,17 @@ struct SettingsHistoryTests {
     /// The pulse outlives the pane that started it, and only its own owner may put it out.
     static func flashOutlivesThePaneThatLitIt() {
         let navigation = SettingsNavigationState(tab: .general)
-        navigation.select(.clipboard, revealing: .row(.clipboardHistory, "Keep history for"))
-        navigation.beginFlash(.row(.clipboardHistory, "Keep history for"))
-        expect(navigation.flashing == .row(.clipboardHistory, "Keep history for"), "the revealed row is lit")
+        navigation.select(.quicklinks, revealing: .row(.quicklinksBehaviour, "Open in a new window"))
+        navigation.beginFlash(.row(.quicklinksBehaviour, "Open in a new window"))
+        expect(navigation.flashing == .row(.quicklinksBehaviour, "Open in a new window"), "the revealed row is lit")
 
         navigation.endFlash(.section(.generalHyperKey))
         expect(navigation.flashing != nil, "another target can't put it out")
-        navigation.endFlash(.row(.clipboardHistory, "Keep history for"))
+        navigation.endFlash(.row(.quicklinksBehaviour, "Open in a new window"))
         expect(navigation.flashing == nil, "its own owner can")
 
         // A jump that lands elsewhere must not leave the old light burning behind it.
-        navigation.beginFlash(.row(.clipboardHistory, "Keep history for"))
+        navigation.beginFlash(.row(.quicklinksBehaviour, "Open in a new window"))
         navigation.select(.general)
         expect(navigation.flashing == nil, "navigating away clears a stale pulse")
     }

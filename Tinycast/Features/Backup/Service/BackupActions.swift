@@ -10,11 +10,9 @@ extension UTType {
 enum BackupActions {
     struct RaycastOutcome {
         var summary: SettingsBackup.ApplySummary
-        var clipboardImported: Int
         var quicklinksImported: Int
         /// Set when the library wouldn't open; the rest of the import still applied.
         var quicklinksError: String?
-        var missingImages: Int
     }
 
     // MARK: - Tinycast native (own file panels; dialogs come from `AppCore`)
@@ -46,7 +44,7 @@ enum BackupActions {
 
     // MARK: - Tinycast backups
 
-    /// Composes off-main, then seals — a clipboard history runs to gigabytes.
+    /// Composes off-main, then seals, so the file IO never blocks the main actor.
     static func exportBackup(
         core: AppCore, categories: Set<BackupCategory>
     ) async throws
@@ -153,15 +151,9 @@ enum BackupActions {
             }
         }
         let summary = result.backup.apply(to: core)
-        let imported =
-            result.clipboard.isEmpty
-            ? 0 : core.clipboardStore.importEntries(result.clipboard)
         return RaycastOutcome(
-            summary: summary,
-            clipboardImported: imported,
-            quicklinksImported: quicklinksImported,
-            quicklinksError: quicklinksError,
-            missingImages: result.missingImages)
+            summary: summary, quicklinksImported: quicklinksImported,
+            quicklinksError: quicklinksError)
     }
 
     /// Every Raycast channel (stable, beta, alpha, internal) shares this bundle-id prefix.
@@ -202,7 +194,6 @@ enum BackupActions {
             parts.append(applied)
         }
         var imported: [String] = []
-        if summary.clipboard > 0 { imported.append(String(localized: "\(summary.clipboard) clips")) }
         if summary.learning > 0 {
             imported.append(String(localized: "\(summary.learning) learning records"))
         }
@@ -215,14 +206,9 @@ enum BackupActions {
 
     static func exportText(_ result: BackupComposer.Result) -> String {
         let labels = BackupCategory.ordered(result.manifest.categories).map(\.descriptor.label)
-        var text =
-            labels.isEmpty
+        return labels.isEmpty
             ? String(localized: "Nothing was selected.")
             : String(localized: "Saved \(labels.formatted(.list(type: .and))).")
-        if result.missingImages > 0 {
-            text += " " + String(localized: "\(result.missingImages) images were unavailable and skipped.")
-        }
-        return text
     }
 
     static let nothingImportedText = String(localized: "Nothing to import from this file.")
@@ -233,9 +219,6 @@ enum BackupActions {
     static func raycastText(_ outcome: RaycastOutcome) -> String {
         var parts: [String] = []
         if let applied = appliedText(outcome.summary) { parts.append(applied) }
-        if outcome.clipboardImported > 0 {
-            parts.append(String(localized: "Imported \(outcome.clipboardImported) clipboard entries."))
-        }
         if outcome.quicklinksImported > 0 {
             parts.append(String(localized: "Imported \(outcome.quicklinksImported) quicklinks."))
         }
@@ -243,10 +226,6 @@ enum BackupActions {
             parts.append(String(localized: "Couldn’t import quicklinks: \(quicklinksError)"))
         }
         var message = parts.isEmpty ? nothingImportedText : parts.joined(separator: " ")
-        if outcome.missingImages > 0 {
-            message +=
-                " " + String(localized: "\(outcome.missingImages) images were unavailable and skipped.")
-        }
         if !parts.isEmpty { message += " \(restartAfterImportText)" }
         return message
     }

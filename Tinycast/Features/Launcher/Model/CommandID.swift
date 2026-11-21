@@ -2,8 +2,6 @@ import Foundation
 
 enum CommandID: String, CaseIterable, Sendable {
     case calculatorHistory = "command:calculator-history"
-    case clipboardHistory = "command:clipboard-history"
-    case pasteSequentially = "command:paste-sequentially"
     case searchFiles = "command:search-files"
     case searchMenuItems = "command:search-menu-items"
     case switchWindows = "command:switch-windows"
@@ -30,7 +28,7 @@ enum CommandID: String, CaseIterable, Sendable {
     case quit = "command:quit"
 
     static let defaultCompactBarCommands: [CommandID] = [
-        .clipboardHistory, .searchFiles, .searchQuicklinks
+        .searchFiles, .searchQuicklinks
     ]
 
     static let compactBarOptions: [CommandID] = defaultCompactBarCommands
@@ -55,8 +53,6 @@ enum CommandID: String, CaseIterable, Sendable {
     private var nameResource: LocalizedStringResource {
         switch self {
         case .calculatorHistory: return "Calculator History"
-        case .clipboardHistory: return "Clipboard History"
-        case .pasteSequentially: return "Paste Sequentially"
         case .searchFiles: return "Search Files"
         case .searchMenuItems: return "Search Menu Bar Items"
         case .switchWindows: return "Switch Windows"
@@ -87,8 +83,6 @@ enum CommandID: String, CaseIterable, Sendable {
     var sfSymbol: String {
         switch self {
         case .calculatorHistory: return "plus.forwardslash.minus"
-        case .clipboardHistory: return "list.clipboard.fill"
-        case .pasteSequentially: return "arrow.right.doc.on.clipboard"
         case .searchFiles: return "doc.text.magnifyingglass"
         case .searchMenuItems: return "menubar.rectangle"
         case .switchWindows, .switchWindowsBackwards: return "macwindow.on.rectangle"
@@ -115,7 +109,6 @@ enum CommandID: String, CaseIterable, Sendable {
 
     var tint: IconTint {
         switch self {
-        case .clipboardHistory, .pasteSequentially: return .indigo
         case .calculatorHistory: return .green
         case .searchFiles, .openInBrowser, .createQuicklink, .searchQuicklinks, .importQuicklinks,
             .exportQuicklinks:
@@ -137,7 +130,6 @@ enum CommandID: String, CaseIterable, Sendable {
     /// Suggested, highest first, until the user's own habits fill the section.
     var suggestionPriority: Int? {
         switch self {
-        case .clipboardHistory: 80
         case .searchFiles: 70
         case .createQuicklink: 30
         default: nil

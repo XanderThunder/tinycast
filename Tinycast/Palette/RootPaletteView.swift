@@ -4,7 +4,6 @@ struct RootPaletteView: View {
     @Environment(AppCore.self) private var core
     @Environment(PaletteState.self) private var vm
     @Environment(AppIndex.self) private var appIndex
-    @Environment(ClipboardStore.self) private var store
     @Environment(FavoritesStore.self) private var favorites
     @Environment(VisibilityStore.self) private var visibility
     @Environment(CalculatorHistoryStore.self) private var calcHistory
@@ -78,10 +77,6 @@ struct RootPaletteView: View {
             return CustomCommandListScreen(
                 store: core.customCommands, coordinator: core.customCommandCoordinator,
                 vm: vm, metrics: metrics, openActions: openActions)
-        case .clipboard:
-            return ClipboardScreen(
-                store: store, core: core, vm: vm, openActions: openActions,
-                scrollToFollow: { scroll = ScrollIntent(kind: .follow) })
         case .dictionary:
             return DictionaryScreen(session: dictionary, core: core, vm: vm)
         case .calculatorHistory:
@@ -104,19 +99,6 @@ struct RootPaletteView: View {
     private var menuOpen: Bool { openMenu != nil }
 
     // MARK: - Popover menu content
-
-    /// The clipboard type filter's rows; activating one is the only way the filter changes.
-    private var clipboardFilterContent: PopoverMenuContent {
-        PopoverMenuContent(
-            items: ClipboardFilter.allCases.enumerated().map { index, filter in
-                PopoverMenuItem(
-                    title: filter.title, systemImage: filter.systemImage,
-                    startsSection: index == 1
-                ) {
-                    vm.clipboardFilter = filter
-                }
-            })
-    }
 
     private var fileSearchFilterContent: PopoverMenuContent {
         PopoverMenuContent(
@@ -178,9 +160,6 @@ struct RootPaletteView: View {
                 search: PopoverMenu.Search(
                     placeholder: String(localized: "Search for actions…"), placement: .bottom),
                 onActivate: activateMenuItem, preferredSelection: filtered.bestMatch)
-        case .clipboardFilter:
-            return headerMenu(
-                clipboardFilterContent, width: metrics.size.clipboardFilterMenuWidth)
         case .fileSearchFilter:
             return headerMenu(fileSearchFilterContent, width: metrics.size.fileSearchFilterMenuWidth)
         case .dictionaryScope:
@@ -299,15 +278,12 @@ struct RootPaletteView: View {
                 if vm.mode == .menuSearch { menuSearch.filter(vm.query) }
                 if vm.mode == .switchWindows { windowSwitch.filter(vm.query) }
             }
-            // A narrower list means the old index points at a different row, or at none.
-            .onChange(of: vm.clipboardFilter) { land(restoringSelection: true) }
             // The filter is part of the query, so narrowing re-runs it rather than thinning rows.
             .onChange(of: vm.fileSearchFilter) {
                 land()
                 fileSearch.search(vm.query, filter: vm.fileSearchFilter)
             }
             .onChange(of: vm.mode) {
-                vm.clipboardFilter = .all
                 vm.fileSearchFilter = .all
                 if menuOpen { closeMenus() }
                 land(restoringSelection: true)
@@ -455,8 +431,7 @@ struct RootPaletteView: View {
                 {
                     return .handled
                 }
-                if command { return screen.secondary(at: selection) ? .handled : .ignored }
-                return screen.pasteKeepingWindowOpen(at: selection) ? .handled : .ignored
+                return command && screen.secondary(at: selection) ? .handled : .ignored
             }
             .onKeyPress(.escape) {
                 // An open control list owns Escape before the palette beneath it.
@@ -644,12 +619,6 @@ struct RootPaletteView: View {
                 accessory.view
                 // Given room last: at the default priority it would split it with the field.
                 Spacer(minLength: 0).layoutPriority(-1)
-            }
-            if !isCollapsed, vm.mode == .clipboard {
-                headerGutter(width: metrics.spacing.md)
-                ClipboardFilterButton(
-                    filter: vm.clipboardFilter, isOpen: openMenu == .clipboardFilter,
-                    action: toggleClipboardFilter)
             }
             if !isCollapsed, vm.mode == .fileSearch {
                 headerGutter(width: metrics.spacing.md)
@@ -852,16 +821,6 @@ struct RootPaletteView: View {
         }
     }
 
-    /// Opens on the active filter, so the current value is the highlighted row like a pop-up's.
-    private func toggleClipboardFilter() {
-        if openMenu == .clipboardFilter {
-            closeMenus()
-            return
-        }
-        let active = ClipboardFilter.allCases.firstIndex(of: vm.clipboardFilter) ?? 0
-        open(.clipboardFilter, highlighting: active)
-    }
-
     private func toggleFileSearchFilter() {
         if openMenu == .fileSearchFilter {
             closeMenus()
@@ -873,7 +832,6 @@ struct RootPaletteView: View {
 
     private func performFilterAction() -> Bool {
         switch PaletteFilterAction.resolve(collapsed: isCollapsed, mode: vm.mode) {
-        case .clipboardFilter: toggleClipboardFilter()
         case .fileSearchFilter: toggleFileSearchFilter()
         case .dictionaryScope: toggleDictionaryScope()
         case .ignored: return false
@@ -983,9 +941,7 @@ struct RootPaletteView: View {
                 return true
             }
             if modifiers.contains(.command) { return screen.secondary(at: selection) }
-            if modifiers.contains(.option) {
-                return screen.pasteKeepingWindowOpen(at: selection)
-            }
+            if modifiers.contains(.option) { return false }
             activateMenuItem(menuSelection)
             return true
         case .some(.tab), .some(.backTab):
@@ -1055,7 +1011,7 @@ struct RootPaletteView: View {
         case .actions: .bottomTrailing
         case .argumentOptions: .belowHeaderTrailing
         case .inputOptions(let corner): corner
-        case .clipboardFilter, .fileSearchFilter, .dictionaryScope:
+        case .fileSearchFilter, .dictionaryScope:
             .belowHeaderTrailing
         case nil: nil
         }
@@ -1144,14 +1100,10 @@ struct RootPaletteView: View {
         _ = screen.perform(shortcut, at: selection(in: screen))
     }
 
-    /// A ring hop leaves a step back — except the hop closing the ring on the launcher, its root.
+    /// Tab leaves a sub-screen for the launcher, its root, carrying the typed text along.
     private func cycleMode() {
-        switch PaletteTabAction.resolve(mode: vm.mode, clipboardEnabled: settings.clipboardEnabled) {
-        case .carryQuery(.launcher):
-            vm.mode = .launcher
-            vm.resetNavigation()
-        case .carryQuery(let mode): vm.pushCarryingQuery(mode: mode)
-        }
+        vm.mode = .launcher
+        vm.resetNavigation()
     }
 
     private func advanceTabFocus(backwards: Bool) {
@@ -1258,7 +1210,6 @@ private enum OpenMenu: Equatable {
     case argumentOptions
     case inputOptions(MenuPanelCorner)
     case app
-    case clipboardFilter
     case fileSearchFilter
     case dictionaryScope
 }

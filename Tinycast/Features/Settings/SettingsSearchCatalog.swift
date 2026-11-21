@@ -98,7 +98,7 @@ enum SettingsSearchCatalog {
         } else {
             band = 0
         }
-        // A pane outranks its own rows, so a bare "clipboard" lands on the pane rather than a row.
+        // A pane outranks its own rows, so a bare pane name lands on the pane rather than a row.
         return band + titleScore + (entry.anchor == nil ? 500_000 : 0)
     }
 
@@ -107,7 +107,7 @@ enum SettingsSearchCatalog {
 
     static let entries: [SettingsSearchEntry] =
         general + applications + systemSettings + systemActions + commands + quicklinks
-        + appleShortcuts + fallbacks + clipboard + fileSearch + windowManagement
+        + appleShortcuts + fallbacks + fileSearch + windowManagement
         + navigation + permissions
         + backup + about
 
@@ -148,7 +148,7 @@ enum SettingsSearchCatalog {
             keywords: ["compact", "expanded", "slim", "search bar", "small"]),
         .init(
             group: .generalCompactShortcuts, "Compact Shortcuts",
-            keywords: ["slots", "buttons", "reorder", "clipboard"]),
+            keywords: ["slots", "buttons", "reorder"]),
         .init(
             .generalAppearance, "Follow the cursor across displays",
             keywords: ["monitor", "screen", "pointer", "multi display"]),
@@ -385,33 +385,6 @@ enum SettingsSearchCatalog {
         .init(
             .windowManagementCustomSizes, "New Custom Size",
             keywords: ["add", "create", "resize", "window size"])
-    ]
-
-    private static let clipboard: [SettingsSearchEntry] = [
-        .init(
-            pane: .clipboard,
-            keywords: ["paste", "history", "copy", "pasteboard"]),
-        .init(
-            .clipboardClipboard, "Enable Clipboard History",
-            keywords: ["disable", "turn off", "monitor", "record", "privacy"]),
-        .init(
-            group: .clipboardCommands, "Clipboard commands",
-            keywords: ["shortcut", "hotkey", "launcher", "paste", "browser"]),
-        .init(
-            .clipboardHistory, "Keep history for",
-            keywords: ["retention", "delete", "privacy", "expire"]),
-        .init(
-            .clipboardHistory, "Search text in images and PDFs",
-            keywords: ["OCR", "recognize", "scan", "screenshot", "background", "idle"]),
-        .init(
-            .clipboardHistory, "Default action",
-            keywords: ["enter", "return", "paste", "copy", "primary"]),
-        .init(
-            group: .clipboardDisabledApplications, "Excluded Applications",
-            keywords: ["exclude", "password manager", "ignore", "privacy"]),
-        .init(
-            .clipboardDisabledApplications, "Clear history",
-            keywords: ["delete", "erase", "wipe"])
     ]
 
     private static let permissions: [SettingsSearchEntry] = [

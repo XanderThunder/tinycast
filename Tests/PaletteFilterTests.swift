@@ -24,9 +24,6 @@ struct PaletteFilterTests {
 
     static func main() {
         expect(
-            resolve(mode: .clipboard), .clipboardFilter,
-            "the clipboard's type filter is what ⌘P has always opened")
-        expect(
             resolve(mode: .fileSearch), .fileSearchFilter,
             "file search has a header filter of its own")
         expect(
@@ -43,7 +40,7 @@ struct PaletteFilterTests {
         }
 
         // Collapsed there is no header to hang a button off, so no filter may open.
-        for mode in [PaletteMode.clipboard, .fileSearch, .launcher] {
+        for mode in [PaletteMode.fileSearch, .dictionary, .launcher] {
             expect(
                 resolve(collapsed: true, mode: mode), .ignored,
                 "the compact bar draws no filter button, so ⌘P opens nothing on \(mode.rawValue)")

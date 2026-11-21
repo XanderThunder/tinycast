@@ -2,7 +2,6 @@ import Foundation
 
 /// Which header menu ⌘P opens.
 enum PaletteFilterAction: Equatable {
-    case clipboardFilter
     case fileSearchFilter
     case dictionaryScope
     /// No filter on the header, so the key stays with the search field.
@@ -12,7 +11,6 @@ enum PaletteFilterAction: Equatable {
         // The compact bar draws no header controls, so neither filter has a button to hang off.
         guard !collapsed else { return .ignored }
         switch mode {
-        case .clipboard: return .clipboardFilter
         case .fileSearch: return .fileSearchFilter
         case .dictionary: return .dictionaryScope
         default: return .ignored

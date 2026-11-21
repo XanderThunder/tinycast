@@ -132,10 +132,6 @@ final class LauncherCoordinator {
         switch id {
         case .calculatorHistory:
             paletteCoordinator.togglePalette(mode: .calculatorHistory)
-        case .clipboardHistory:
-            paletteCoordinator.togglePalette(mode: .clipboard)
-        case .pasteSequentially:
-            core.clipboardCoordinator.pasteNextInSequence()
         case .searchFiles:
             fileSearchCoordinator.show()
         case .searchMenuItems:
@@ -205,6 +201,11 @@ final class LauncherCoordinator {
 
     func resetRanking(for app: AppEntry) {
         ranking.reset(itemKey: app.preferenceKey)
+    }
+
+    func copyColor(_ color: ColorValue, as format: ColorFormat) {
+        paletteCoordinator.hidePalette(restoreFocus: false)
+        Paster.copyPlainText(format.string(for: color))
     }
 
     func showInFinder(_ app: AppEntry) {

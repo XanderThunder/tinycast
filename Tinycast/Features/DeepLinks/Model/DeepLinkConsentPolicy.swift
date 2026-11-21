@@ -43,11 +43,11 @@ enum DeepLinkConsentPolicy {
     /// No `default`, so a new command has to be classed before it builds.
     private static func requiresConsent(_ id: CommandID) -> Bool {
         switch id {
-        case .pasteSequentially, .openCamera,
+        case .openCamera,
             .captureWindowLayout, .openInBrowser,
             .runShellCommand, .quit:
             true
-        case .calculatorHistory, .clipboardHistory, .searchFiles,
+        case .calculatorHistory, .searchFiles,
             .searchMenuItems, .switchWindows, .switchWindowsBackwards, .createCustomCommand,
             .searchCustomCommands, .define, .createWindowLayout, .switchRoom, .createRoom, .createQuicklink,
             .searchQuicklinks, .importQuicklinks, .exportQuicklinks, .exportSettings, .importSettings, .importFromRaycast, .settings, .about:

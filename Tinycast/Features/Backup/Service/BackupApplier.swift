@@ -5,7 +5,6 @@ import Foundation
 enum BackupApplier {
     struct Summary: Sendable {
         var settings: SettingsBackup.ApplySummary?
-        var clipboard = 0
         var learning = 0
         /// Reported rather than thrown: a failure here must not abort the categories after it.
         var problems: [String] = []
@@ -20,10 +19,6 @@ enum BackupApplier {
         {
             summary.settings = backup.apply(to: core)
         }
-        if categories.contains(.clipboard) {
-            summary.clipboard = await importClipboard(bundle, into: core.clipboardStore)
-            if summary.clipboard > 0 { core.clipboardStore.load() }
-        }
         if categories.contains(.learning) {
             summary.learning = applyLearning(bundle, to: core)
         }
@@ -31,44 +26,6 @@ enum BackupApplier {
     }
 
     // MARK: - Parts
-
-    /// Off-main and streamed: a restored history runs to hundreds of thousands of clips.
-    private nonisolated static func importClipboard(
-        _ bundle: BackupBundle, into store: ClipboardStore
-    ) async -> Int {
-        ClipboardStore.importStoredItems(
-            inDatabaseAt: store.dbURL, adoptingImagesInto: store.imagesDir,
-            bundle.clipboardItems().lazy.compactMap { staged($0, in: bundle) })
-    }
-
-    /// The row still points into staging; the store adopts the blob once it accepts the clip.
-    private nonisolated static func staged(
-        _ item: BackupClipboardItem, in bundle: BackupBundle
-    ) -> ClipboardItem? {
-        switch item.kind {
-        case .text:
-            guard let text = item.text else { return nil }
-            return ClipboardItem(
-                id: UUID(), kind: .text, text: text, imagePath: nil, createdAt: item.createdAt,
-                sourceBundleID: item.sourceBundleID, pinnedAt: item.pinnedAt)
-        case .image:
-            guard let name = item.imageName, let url = bundle.clipboardImageURL(named: name) else {
-                return nil
-            }
-            return ClipboardItem(
-                id: UUID(), kind: .image, text: nil, imagePath: url.path,
-                createdAt: item.createdAt, sourceBundleID: item.sourceBundleID,
-                pinnedAt: item.pinnedAt)
-        case .file:
-            // A path from another Mac names nothing here, so the row is dropped rather than dead.
-            guard let path = item.text, FileManager.default.fileExists(atPath: path) else {
-                return nil
-            }
-            return ClipboardItem(
-                id: UUID(), kind: .file, text: path, imagePath: nil, createdAt: item.createdAt,
-                sourceBundleID: item.sourceBundleID, pinnedAt: item.pinnedAt)
-        }
-    }
 
     private static func applyLearning(_ bundle: BackupBundle, to core: AppCore) -> Int {
         var applied = 0
@@ -82,5 +39,4 @@ enum BackupApplier {
         }
         return applied
     }
-
 }

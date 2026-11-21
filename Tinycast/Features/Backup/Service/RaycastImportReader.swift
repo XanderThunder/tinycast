@@ -15,15 +15,10 @@ enum RaycastImportReader {
         backup.hotkeys = mapHotkeys(json)
         backup.favoriteApps = mapFavorites(json)
         backup.launcherAliases = mapAliases(json)
-        let (clipboard, missing) = RaycastClipboardImport.parse(
-            json["clipboardHistory"], now: Date.init,
-            fileExists: { FileManager.default.fileExists(atPath: $0) })
         let quicklinks = RaycastQuicklinkImport.parse(json["quicklinks"])
         return RaycastImport.Result(
             backup: backup,
-            clipboard: clipboard,
-            quicklinks: quicklinks,
-            missingImages: missing)
+            quicklinks: quicklinks)
     }
 
     /// Raycast's hyper key code → ours; nothing maps to `.none`, so none is cleared.
@@ -75,7 +70,6 @@ enum RaycastImportReader {
         let settings = json["settings"] as? [String: Any]
         var hotkeys = SettingsBackup.HotkeyBackup()
         var apps: [String: HotKeyBinding] = [:]
-        var commands: [String: HotKeyBinding] = [:]
         var mapped = false
 
         if let general = settings?["general"] as? [String: Any],
@@ -86,24 +80,15 @@ enum RaycastImportReader {
         }
 
         for command in settings?["commands"] as? [[String: Any]] ?? [] {
-            guard let binding = binding(from: command["macosHotkey"]) else { continue }
-            switch command["extensionId"] as? String {
-            case "e:r:clipboard-history":
-                commands[CommandID.clipboardHistory.rawValue] = binding
-                mapped = true
-            case "e:r:applications":
-                if let path = appPath(fromCommandID: command["id"] as? String),
-                    let bundleID = Bundle(url: URL(fileURLWithPath: path))?.bundleIdentifier
-                {
-                    apps[bundleID] = binding
-                    mapped = true
-                }
-            default:
-                break
-            }
+            guard let binding = binding(from: command["macosHotkey"]),
+                command["extensionId"] as? String == "e:r:applications",
+                let path = appPath(fromCommandID: command["id"] as? String),
+                let bundleID = Bundle(url: URL(fileURLWithPath: path))?.bundleIdentifier
+            else { continue }
+            apps[bundleID] = binding
+            mapped = true
         }
         if !apps.isEmpty { hotkeys.apps = apps }
-        if !commands.isEmpty { hotkeys.commands = commands }
         return mapped ? hotkeys : nil
     }
 

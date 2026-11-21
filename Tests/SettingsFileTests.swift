@@ -45,8 +45,7 @@ struct SettingsFileTests {
             SettingsFileKey.sections == [
                 "general", "appearance", "hyperKey", "calculator", "search", "applications",
                 "systemSettings", "systemActions", "commands", "quicklinks", "appleShortcuts",
-                "fileSearch", "navigation",
-                "windowManagement", "clipboard"
+                "fileSearch", "navigation", "windowManagement"
             ])
 
         // A file that could switch one of these on would grant what only the app may ask for.

@@ -18,7 +18,6 @@ struct SettingsDetailView: View {
             case .fileSearch: FileSearchSettingsView()
             case .navigation: NavigationSettingsView()
             case .windowManagement: WindowManagementSettingsView()
-            case .clipboard: ClipboardSettingsView()
             case .permissions: PermissionsSettingsView()
             case .backup: BackupSettingsView()
             case .about: AboutView()

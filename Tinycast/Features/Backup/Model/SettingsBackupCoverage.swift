@@ -3,10 +3,6 @@ import Foundation
 /// What `SettingsBackup.SettingsData` carries, written out so a new setting has to be considered.
 enum SettingsBackupCoverage {
     static let mirrored: [String: AppSettingsKey] = [
-        "clipboardEnabled": .clipboardEnabled,
-        "clipboardRetentionDays": .clipboardRetention,
-        "clipboardDefaultAction": .clipboardDefaultAction,
-        "clipboardDisabledApps": .clipboardDisabledApps,
         "hyperKey": .hyperKey,
         "hyperKeyIncludesShift": .hyperKeyIncludesShift,
         "hyperKeyQuickPress": .hyperKeyQuickPress,
@@ -60,8 +56,6 @@ enum SettingsBackupCoverage {
 
     /// Keys kept out of a backup on purpose, each with the reason it has to stay out.
     static let deliberatelyExcluded: [String: String] = [
-        AppSettingsKey.clipboardTextSearchEnabled.rawValue:
-            "Background OCR is an opt-in processing choice on this Mac; a backup must not enable it.",
         AppSettingsKey.allowedDeepLinks.rawValue:
             "Each entry lets a web page or app run a command unasked; an import must not grant that.",
         AppSettingsKey.palettePosition.rawValue:

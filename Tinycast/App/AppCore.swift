@@ -17,9 +17,6 @@ final class AppCore {
     let roomParking = RoomParkingLedger(
         fileURL: AppPaths.applicationSupport().appendingPathComponent("room-parking.json"))
     let roomSession = RoomSession()
-    let clipboardStore = ClipboardStore()
-    @ObservationIgnored private var clipboardTextIndexer: ClipboardTextIndexer?
-    let clipboardManager: ClipboardManager
     let textInjector: TextInjector
     let hotKeys = HotKeyManager()
     @ObservationIgnored private(set) lazy var hyperKey = HyperKeyManager(
@@ -58,7 +55,7 @@ final class AppCore {
         visibility: visibility, ranking: launcherRanking, aliases: aliases,
         windowController: windowController,
         paletteCoordinator: paletteCoordinator,
-        clipboardHistory: { [unowned self] in self.clipboardCoordinator.templateHistory() },
+        clipboardHistory: { NSPasteboard.general.string(forType: .string).map { [$0] } ?? [] },
         core: self)
 
     @ObservationIgnored private(set) lazy var paletteCoordinator = PaletteCoordinator(
@@ -117,10 +114,6 @@ final class AppCore {
     @ObservationIgnored private(set) lazy var fallbackCoordinator = FallbackCoordinator(
         store: fallbacks, quicklinks: quicklinks, settings: settings, visibility: visibility,
         core: self)
-    @ObservationIgnored private(set) lazy var clipboardCoordinator = ClipboardCoordinator(
-        clipboardStore: clipboardStore, clipboardManager: clipboardManager, settings: settings,
-        appIndex: appIndex, palette: palette, windowController: windowController,
-        paletteCoordinator: paletteCoordinator, core: self)
     @ObservationIgnored private(set) lazy var calculatorCoordinator = CalculatorCoordinator(
         calcHistory: calcHistory, paletteCoordinator: paletteCoordinator, core: self)
     @ObservationIgnored private(set) lazy var fileSearchCoordinator = FileSearchCoordinator(
@@ -164,9 +157,7 @@ final class AppCore {
         self.launcherRanking = launcherRanking
         self.settings = settings
         appIndex = AppIndex(ranking: launcherRanking, aliases: aliases)
-        let clipboardManager = ClipboardManager(store: clipboardStore, settings: settings)
-        self.clipboardManager = clipboardManager
-        textInjector = TextInjector(clipboardManager: clipboardManager)
+        textInjector = TextInjector()
     }
 
     func start(launchedByUser: Bool) {
@@ -179,7 +170,6 @@ final class AppCore {
             observeEffectiveAppearance()
 
             appIndex.start(settings: settings)
-            clipboardCoordinator.applyEnabled()
             fileSearchCoordinator.applyEnabled()
             windowSwitchCoordinator.applyEnabled()
             menuSearchCoordinator.applyEnabled()
@@ -356,34 +346,6 @@ final class AppCore {
         }
     }
 
-    /// Idempotent: both switches are tracked, and either one flipping re-runs the whole decision.
-    func applyClipboardTextSearch() {
-        guard settings.clipboardEnabled, settings.clipboardTextSearchEnabled else {
-            clipboardStore.onItemsChanged = nil
-            clipboardStore.onSearchResultsChanged = nil
-            clipboardStore.setTextSearchEnabled(false)
-            clipboardTextIndexer?.stop()
-            return
-        }
-        guard clipboardStore.setTextSearchEnabled(true) else {
-            showMessage(
-                String(localized: "Couldn't enable text recognition for clipboard history."),
-                tone: .danger)
-            return
-        }
-        clipboardStore.setTextSearchActive(palette.isVisible)
-        // Kept across a disable: the indexer reschedules itself once a cancelled run winds down.
-        let indexer =
-            clipboardTextIndexer
-            ?? ClipboardTextIndexer(store: clipboardStore, canRun: { ClipboardTextIndexer.isSystemIdle })
-        clipboardTextIndexer = indexer
-        clipboardStore.onItemsChanged = { [weak indexer] in indexer?.schedule() }
-        clipboardStore.onSearchResultsChanged = { [weak self] query, previous, current in
-            self?.clipboardCoordinator.followSearchResults(query: query, previous: previous, current: current)
-        }
-        indexer.start()
-    }
-
     func relaunch() {
         guard !relaunchRequested else { return }
         relaunchRequested = true
@@ -395,7 +357,6 @@ final class AppCore {
 
     func prepareForTermination() {
         settingsFile?.flush()
-        clipboardTextIndexer?.stop()
         // Caps Lock first: its remap is the one teardown that outlives the process.
         hyperKey.prepareForTermination()
         windowLayoutCoordinator.prepareForTermination()
@@ -439,10 +400,6 @@ final class AppCore {
         track(
             { _ = $0.appleShortcutsEnabled },
             reproject: { $0.appleShortcutCoordinator.applyPresence() })
-        track(
-            { _ = $0.clipboardEnabled }, reproject: { $0.clipboardCoordinator.applyEnabled() })
-        track(
-            { _ = $0.clipboardTextSearchEnabled }, reproject: { $0.applyClipboardTextSearch() })
         track({ _ = $0.fileSearchEnabled }, reproject: { $0.fileSearchCoordinator.applyEnabled() })
         track(
             { _ = $0.fileSearchShowInLauncher },
@@ -467,10 +424,6 @@ final class AppCore {
         track({ _ = $0.animationsEnabled }, reproject: { $0.applyMotion() })
         track({ _ = $0.language }, reproject: { $0.offerLanguageRelaunch() })
         track({ _ = $0.interfaceSize }, reproject: { $0.windowController.applyInterfaceSize() })
-        // Settings panes did these on change; settings.json can change them with no pane open.
-        track(
-            { _ = $0.clipboardRetention },
-            reproject: { $0.clipboardCoordinator.applyRetention($0.settings.clipboardRetention) })
     }
 
     /// `.system` resolves to `nil`, so AppKit follows macOS with nothing polling.
@@ -647,9 +600,5 @@ final class AppCore {
 
     func pickVolume(current: Float32) async -> Float32? {
         await dialogs.pickVolume(current: current)
-    }
-
-    func editClipboardText(_ text: String) async -> String? {
-        await dialogs.editClipboardText(text)
     }
 }

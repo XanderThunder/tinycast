@@ -58,7 +58,6 @@ extension SettingsTab {
         case .navigation: [.switchWindows, .switchWindowsBackwards, .searchMenuItems]
         case .windowManagement:
             [.createWindowLayout, .captureWindowLayout, .switchRoom, .createRoom]
-        case .clipboard: [.clipboardHistory, .pasteSequentially]
         default: []
         }
     }

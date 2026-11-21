@@ -26,7 +26,7 @@ struct DeepLinkTests {
     }
 
     static func input(_ query: String) -> DeepLinkInput? {
-        guard case .entry(_, let input)? = parse("tinycast://command/clipboard-history?" + query)
+        guard case .entry(_, let input)? = parse("tinycast://command/search-files?" + query)
         else { return nil }
         return input
     }
@@ -83,8 +83,8 @@ struct DeepLinkTests {
         }
 
         expect(
-            DeepLink.url(forEntryID: "command:clipboard-history", scheme: scheme)?.absoluteString
-                == "tinycast://command/clipboard-history",
+            DeepLink.url(forEntryID: "command:search-files", scheme: scheme)?.absoluteString
+                == "tinycast://command/search-files",
             "a command's link reads as its entry ID")
         expect(
             DeepLink.url(forEntryID: "window-command:left-half", scheme: "tinycast-dev")?
@@ -142,12 +142,12 @@ struct DeepLinkTests {
         expect(
             DeepLink.url(forEntryID: "extension:demo/search", scheme: scheme) == nil,
             "extension commands keep their own link")
-        expect(parse("raycast://command/clipboard-history") == nil, "built-in links are Tinycast's alone")
+        expect(parse("raycast://command/search-files") == nil, "built-in links are Tinycast's alone")
         expect(
-            parse("tinycast-dev://command/clipboard-history") == nil,
+            parse("tinycast-dev://command/search-files") == nil,
             "another channel's scheme is not this build's")
         expect(
-            parse("tinycast://command/clipboard-history", scheme: "tinycast-dev") == nil,
+            parse("tinycast://command/search-files", scheme: "tinycast-dev") == nil,
             "a Debug build ignores Release's links")
         expect(
             parse("tinycast://extensions/demo/search") == nil,
@@ -172,7 +172,7 @@ struct DeepLinkTests {
         expect(parse("tinycast://settings") == nil, "a settings link without a tab is refused")
         expect(parse("tinycast://settings/ai/providers") == nil, "a settings tab is one segment")
         expect(
-            parse("tinycast://command/clipboard-history") == .entry(.command(.clipboardHistory), .none),
+            parse("tinycast://command/search-files") == .entry(.command(.searchFiles), .none),
             "a link without parameters carries no input")
     }
 
@@ -342,14 +342,11 @@ struct DeepLinkTests {
 
     static func consentChecks() {
         expect(
-            !DeepLinkConsentPolicy.requiresConsent(.command(.clipboardHistory)),
+            !DeepLinkConsentPolicy.requiresConsent(.command(.searchFiles)),
             "opening a Tinycast screen runs without asking")
         expect(
             !DeepLinkConsentPolicy.requiresConsent(.command(.createQuicklink)),
             "a create editor saves nothing on its own, so it runs without asking")
-        expect(
-            DeepLinkConsentPolicy.requiresConsent(.command(.pasteSequentially)),
-            "pasting into another app asks first")
         expect(
             DeepLinkConsentPolicy.requiresConsent(.command(.openCamera)),
             "turning the camera on asks first")

@@ -15,7 +15,7 @@ final class QuicklinkCoordinator {
     private let aliases: AliasStore
     private let windowController: PaletteWindowController
     private let paletteCoordinator: PaletteCoordinator
-    /// `{clipboard offset=N}` reads the history a snippet expansion does; one owner, one depth.
+    /// What `{clipboard offset=N}` reads, newest first.
     private let clipboardHistory: @MainActor () -> [String]
     /// Dialogs and the HUD stay owned by the composition root.
     private unowned let core: AppCore

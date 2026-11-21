@@ -14,7 +14,6 @@ final class DialogPanel: NSPanel, AnimatedPanel {
     var onKey: ((Key) -> Void)?
     /// Arrows are a control's keys, not the panel's; a text field needs them for its caret.
     var handlesArrowKeys = false
-    var acceptsLineBreaks = false
 
     init(content: NSView, cornerRadius: CGFloat) {
         super.init(
@@ -66,7 +65,7 @@ final class DialogPanel: NSPanel, AnimatedPanel {
 
     /// An input method commits its marked text on ↵, so that press is never a confirm.
     private func returnBelongsToText(_ event: NSEvent) -> Bool {
-        hasMarkedText || (acceptsLineBreaks && !event.modifierFlags.contains(.command))
+        hasMarkedText
     }
 
     private var hasMarkedText: Bool {

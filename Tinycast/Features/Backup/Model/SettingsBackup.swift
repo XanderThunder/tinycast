@@ -18,11 +18,6 @@ struct SettingsBackup: Codable {
     /// Enums store by raw value, so an unknown one is ignored rather than failing.
     struct SettingsData: Codable {
         // Adding a field here means adding it to SettingsBackupCoverage too, or the harness fails.
-        // Carried, unlike the consent flags: recording your own copies grants no permission class.
-        var clipboardEnabled: Bool?
-        var clipboardRetentionDays: Int?
-        var clipboardDefaultAction: String?
-        var clipboardDisabledApps: [String]?
         var launchAtLogin: Bool?
         var hyperKey: String?
         var hyperKeyIncludesShift: Bool?
@@ -112,10 +107,6 @@ extension SettingsBackup {
         let s = core.settings
         var backup = SettingsBackup()
         backup.settings = SettingsData(
-            clipboardEnabled: s.clipboardEnabled,
-            clipboardRetentionDays: s.clipboardRetention.rawValue,
-            clipboardDefaultAction: s.clipboardDefaultAction.rawValue,
-            clipboardDisabledApps: s.clipboardDisabledApps,
             launchAtLogin: s.launchAtLogin,
             hyperKey: s.hyperKey.rawValue,
             hyperKeyIncludesShift: s.hyperKeyIncludesShift,
@@ -264,22 +255,6 @@ extension SettingsBackup {
     private func applySettings(_ s: SettingsData, to core: AppCore) -> Int {
         let settings = core.settings
         var count = 0
-        if let flag = s.clipboardEnabled {
-            settings.clipboardEnabled = flag
-            count += 1
-        }
-        if let days = s.clipboardRetentionDays, let retention = ClipboardRetention(rawValue: days) {
-            settings.clipboardRetention = retention
-            count += 1
-        }
-        if let apps = s.clipboardDisabledApps {
-            settings.clipboardDisabledApps = apps
-            count += 1
-        }
-        if let raw = s.clipboardDefaultAction, let action = ClipboardDefaultAction(rawValue: raw) {
-            settings.clipboardDefaultAction = action
-            count += 1
-        }
         if let launch = s.launchAtLogin {
             settings.launchAtLogin = launch
             count += 1

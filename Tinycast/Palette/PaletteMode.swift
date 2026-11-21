@@ -2,7 +2,6 @@ import AppKit
 
 enum PaletteMode: String, CaseIterable, Identifiable {
     case launcher
-    case clipboard
     case calculatorHistory
     case fileSearch
     case menuSearch
@@ -25,7 +24,6 @@ enum PaletteMode: String, CaseIterable, Identifiable {
     var systemImage: String {
         switch self {
         case .launcher: return "magnifyingglass"
-        case .clipboard: return "doc.on.doc"
         case .calculatorHistory: return "plus.forwardslash.minus"
         case .fileSearch: return "doc.text.magnifyingglass"
         case .menuSearch: return "menubar.rectangle"
@@ -40,7 +38,6 @@ enum PaletteMode: String, CaseIterable, Identifiable {
     var placeholder: String {
         switch self {
         case .launcher: return String(localized: "Search for apps and commands…")
-        case .clipboard: return String(localized: "Type to filter entries…")
         case .calculatorHistory:
             return String(localized: "Do math, convert units, or search your past calculations…")
         case .fileSearch: return String(localized: "Search files and folders…")

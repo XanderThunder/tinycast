@@ -43,34 +43,6 @@ final class AppSettings {
         }
     }
 
-    /// Ships on, unlike every other feature switch: a launcher is expected to keep history.
-    var clipboardEnabled: Bool {
-        didSet { defaults.set(clipboardEnabled, forKey: Key.clipboardEnabled.rawValue) }
-    }
-
-    var clipboardTextSearchEnabled: Bool {
-        didSet { defaults.set(clipboardTextSearchEnabled, forKey: Key.clipboardTextSearchEnabled.rawValue) }
-    }
-
-    var clipboardRetention: ClipboardRetention {
-        didSet {
-            defaults.set(clipboardRetention.rawValue, forKey: Key.clipboardRetention.rawValue)
-        }
-    }
-
-    /// Bundle IDs never recorded from; ordered, so the Settings list stays stable.
-    var clipboardDisabledApps: [String] {
-        didSet { defaults.set(clipboardDisabledApps, forKey: Key.clipboardDisabledApps.rawValue) }
-    }
-
-    /// What ↵ does on a clipboard entry; Paste takes the chord the chosen action leaves free.
-    var clipboardDefaultAction: ClipboardDefaultAction {
-        didSet {
-            defaults.set(
-                clipboardDefaultAction.rawValue, forKey: Key.clipboardDefaultAction.rawValue)
-        }
-    }
-
     var launchAtLogin: Bool {
         didSet { LaunchAtLogin.set(launchAtLogin) }
     }
@@ -386,21 +358,8 @@ final class AppSettings {
 
     init() {
         // The only feature switch that defaults on, so absence has to outrank a stored `false`.
-        clipboardEnabled =
-            defaults.object(forKey: Key.clipboardEnabled.rawValue) == nil
-            || defaults.bool(forKey: Key.clipboardEnabled.rawValue)
         // `integer(forKey:)` returns 0 when unset, which no case matches.
-        clipboardTextSearchEnabled = defaults.bool(forKey: Key.clipboardTextSearchEnabled.rawValue)
-        clipboardRetention =
-            ClipboardRetention(rawValue: defaults.integer(forKey: Key.clipboardRetention.rawValue))
-            ?? .threeMonths
         // Password managers ship excluded, until the user first edits the list.
-        clipboardDisabledApps =
-            defaults.stringArray(forKey: Key.clipboardDisabledApps.rawValue)
-            ?? ["com.apple.keychainaccess", "com.apple.Passwords"]
-        clipboardDefaultAction =
-            defaults.string(forKey: Key.clipboardDefaultAction.rawValue)
-            .flatMap(ClipboardDefaultAction.init) ?? .paste
         launchAtLogin = LaunchAtLogin.isEnabled
         showInMenuBar =
             defaults.object(forKey: Key.showInMenuBar.rawValue) == nil

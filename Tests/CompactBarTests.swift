@@ -17,9 +17,9 @@ struct CompactBarTests {
     static func main() throws {
         let defaults = CommandID.defaultCompactBarCommands
         check(
-            defaults == [.clipboardHistory, .searchFiles, .searchQuicklinks],
+            defaults == [.searchFiles, .searchQuicklinks],
             "the always-on commands lead the default")
-        check(CommandID.compactBarOptions.count == 3, "three supported destinations")
+        check(CommandID.compactBarOptions.count == 2, "two supported destinations")
         for count in 0...CommandID.compactBarLimit {
             let commands = Array(defaults.prefix(count))
             var selection = CompactBarSelection()
@@ -36,16 +36,16 @@ struct CompactBarTests {
         }
 
         var selection = CompactBarSelection(command: .searchFiles)
-        selection.reconcile(commands: [.searchFiles, .clipboardHistory])
+        selection.reconcile(commands: [.searchQuicklinks, .searchFiles])
         check(selection.command == .searchFiles, "reordering preserves the selected command")
-        selection.reconcile(commands: [.clipboardHistory])
+        selection.reconcile(commands: [.searchQuicklinks])
         check(selection.command == nil, "removing or disabling the selected command returns to Search")
         selection.command = .calculatorHistory
         selection.move(by: 1, commands: defaults)
         check(selection.command == defaults.first, "an obsolete selection starts from Search")
 
         check(CommandID.compactBarCommands(from: []) == [], "empty means no shortcuts")
-        let chosen: [CommandID] = [.searchQuicklinks, .searchFiles, .clipboardHistory]
+        let chosen: [CommandID] = [.searchQuicklinks, .searchFiles]
         check(
             CommandID.compactBarCommands(from: chosen.map(\.rawValue)) == chosen,
             "all additional destinations retain their order")

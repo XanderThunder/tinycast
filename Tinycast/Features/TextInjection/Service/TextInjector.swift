@@ -4,12 +4,6 @@ import Carbon.HIToolbox
 /// Reads text out of the app behind the palette, for a quicklink's `{selection}` and `{argument}`.
 @MainActor
 final class TextInjector {
-    private let clipboardManager: ClipboardManager
-
-    init(clipboardManager: ClipboardManager) {
-        self.clipboardManager = clipboardManager
-    }
-
     func captureExpansionContext(
         target: InjectionTarget?,
         clipboardHistory: [String]
@@ -40,10 +34,8 @@ final class TextInjector {
             return nil
         }
         isBorrowingCopy = true
-        clipboardManager.pauseCapture()
         defer {
             restore(original, to: pasteboard)
-            clipboardManager.resumeCapture()
             isBorrowingCopy = false
         }
 
@@ -62,9 +54,7 @@ final class TextInjector {
     private func restore(_ snapshot: PasteboardSnapshot, to pasteboard: any PasteboardAccess) {
         guard let items = snapshot.pasteboardItems() else { return }
         pasteboard.clearContents()
-        guard pasteboard.writeObjects(items) else { return }
-        clipboardManager.synchronizeAfterTinycastPasteboardMutation(
-            changeCount: pasteboard.changeCount)
+        _ = pasteboard.writeObjects(items)
     }
 
     private var isBorrowingCopy = false

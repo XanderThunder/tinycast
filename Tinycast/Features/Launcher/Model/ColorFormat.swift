@@ -1,6 +1,6 @@
 import Foundation
 
-/// The notations a parsed colour can be rewritten as. See docs/features/clipboard.md#colours.
+/// The notations a parsed colour can be rewritten as. See docs/features/launcher.md.
 enum ColorFormat: CaseIterable, Hashable, Sendable {
     case hex
     case hexWithAlpha

@@ -46,15 +46,12 @@ extension SettingsAnchor {
 
     static let fallbacksFallbacks = Self(tab: .fallbacks, title: "Fallbacks")
 
-
     static let fileSearchFileSearch = Self(tab: .fileSearch, title: "File Search")
     static let fileSearchFullDiskAccess = Self(tab: .fileSearch, title: "Full Disk Access")
     static let fileSearchIndex = Self(tab: .fileSearch, title: "Index")
     static let fileSearchCommands = Self(tab: .fileSearch, title: "Commands")
     static let fileSearchSearchScopes = Self(tab: .fileSearch, title: "Search Scopes")
     static let fileSearchIgnorePatterns = Self(tab: .fileSearch, title: "Ignore Patterns")
-
-
 
     static let navigationNavigation = Self(tab: .navigation, title: "Navigation")
     static let navigationCommands = Self(tab: .navigation, title: "Commands")
@@ -68,14 +65,6 @@ extension SettingsAnchor {
         tab: .windowManagement, title: "Layout and Room Commands")
     static let windowManagementOptions = Self(tab: .windowManagement, title: "Options")
     static let windowManagementCustomSizes = Self(tab: .windowManagement, title: "Custom Sizes")
-
-    static let clipboardClipboard = Self(tab: .clipboard, title: "Clipboard")
-    static let clipboardCommands = Self(tab: .clipboard, title: "Commands")
-    static let clipboardHistory = Self(tab: .clipboard, title: "History")
-    static let clipboardDisabledApplications = Self(
-        tab: .clipboard, title: "Excluded Applications")
-
-
 
     static let permissionsAccessibility = Self(tab: .permissions, title: "Accessibility")
     static let permissionsFullDiskAccess = Self(tab: .permissions, title: "Full Disk Access")

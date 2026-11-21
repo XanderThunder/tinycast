@@ -18,7 +18,6 @@ extension View {
             .environment(core.settings)
             .environment(core.palette)
             .environment(core.appIndex)
-            .environment(core.clipboardStore)
             .environment(core.favorites)
             .environment(core.visibility)
             .environment(core.aliases)

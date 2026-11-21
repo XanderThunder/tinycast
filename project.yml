@@ -40,10 +40,8 @@ targets:
     platform: macOS
     sources:
       - path: Tinycast
-        # Helper-only sources: compiling them in would link Vision and PDFKit into the app.
+        # Helper-only sources, built into FileIndexHelper instead.
         excludes:
-          - Features/Clipboard/Service/ClipboardTextExtractor.swift
-          - Features/Clipboard/Service/ClipboardTextHelper.swift
           - Features/FileSearch/Helper
       # The MIT mark's licence asks the notice to travel with the binary, not just the repo.
       - path: NOTICE.md
@@ -51,13 +49,6 @@ targets:
     configFiles:
       Debug: Config/Tinycast.xcconfig
     dependencies:
-      - target: ClipboardTextHelper
-        link: false
-        embed: true
-        codeSign: true
-        copy:
-          destination: wrapper
-          subpath: Contents/Helpers
       # The crawl runs out of process, so its memory is returned when the helper exits.
       - target: FileIndexHelper
         link: false
@@ -83,21 +74,6 @@ targets:
         Debug:
           PRODUCT_NAME: Tinycast Dev
 
-  ClipboardTextHelper:
-    type: tool
-    platform: macOS
-    sources:
-      - Tinycast/Features/Clipboard/Service/ClipboardTextExtractor.swift
-      - Tinycast/Features/Clipboard/Service/ClipboardTextHelper.swift
-    configFiles:
-      Debug: Config/Tinycast.xcconfig
-    settings:
-      base:
-        # Pinned, or release.yml's PRODUCT_NAME renames the binary `ClipboardTextWorker` looks for.
-        EXECUTABLE_NAME: ClipboardTextHelper
-        PRODUCT_MODULE_NAME: ClipboardTextHelper
-        SKIP_INSTALL: YES
-
   FileIndexHelper:
     type: tool
     platform: macOS
@@ -114,7 +90,7 @@ targets:
       Debug: Config/Tinycast.xcconfig
     settings:
       base:
-        # Pinned like ClipboardTextHelper's: release.yml's PRODUCT_NAME would otherwise rename it.
+        # Pinned, so a PRODUCT_NAME override can never rename the binary FileIndexer looks for.
         EXECUTABLE_NAME: FileIndexHelper
         PRODUCT_MODULE_NAME: FileIndexHelper
         SKIP_INSTALL: YES

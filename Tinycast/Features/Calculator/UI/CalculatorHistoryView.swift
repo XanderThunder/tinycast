@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Past calculations, shaped like `ClipboardList`; both sides per row, so no preview pane.
+/// Past calculations; both sides per row, so no preview pane.
 struct CalculatorHistoryList: View {
     @Environment(\.metrics) private var metrics
     let results: [CalcHistoryEntry]

@@ -182,7 +182,7 @@ enum FileSearchActionsMenu {
         case .copyName: coordinator.copyName(result)
         case .copyPath: coordinator.copyPath(result)
         case .pasteFile: coordinator.pasteFile(result)
-        // Trashing is undoable, so it asks nothing first, as the clipboard's delete does.
+        // Trashing is undoable, so it asks nothing first.
         case .delete: coordinator.trash(result)
         default: return false
         }

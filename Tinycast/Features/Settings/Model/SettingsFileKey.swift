@@ -66,11 +66,6 @@ enum SettingsFileKey: String, CaseIterable, Sendable {
     case windowLayouts = "windowManagement.layouts"
     case windowRooms = "windowManagement.rooms"
     case windowManagementCommands = "windowManagement.commands"
-    case clipboardEnabled = "clipboard.enabled"
-    case clipboardRetention = "clipboard.retentionDays"
-    case clipboardDefaultAction = "clipboard.defaultAction"
-    case clipboardDisabledApps = "clipboard.disabledApps"
-    case clipboardCommands = "clipboard.commands"
 
     var section: String { String(rawValue.prefix { $0 != "." }) }
 

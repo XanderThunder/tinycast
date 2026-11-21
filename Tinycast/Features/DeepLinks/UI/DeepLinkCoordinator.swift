@@ -270,7 +270,6 @@ final class DeepLinkCoordinator {
     /// The screens that take text open on it already typed; it is never sent or run.
     private func open(_ id: CommandID, with text: String) -> Bool {
         switch id {
-        case .clipboardHistory: paletteCoordinator.togglePalette(mode: .clipboard, seeding: text)
         case .calculatorHistory:
             paletteCoordinator.togglePalette(mode: .calculatorHistory, seeding: text)
         case .searchQuicklinks: paletteCoordinator.togglePalette(mode: .quicklinks, seeding: text)

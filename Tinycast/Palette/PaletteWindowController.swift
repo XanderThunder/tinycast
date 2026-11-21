@@ -84,7 +84,6 @@ final class PaletteWindowController: NSObject, NSWindowDelegate {
             core.inputSourceSwitcher.beginSession(
                 preferredInputSourceID: core.settings.autoSwitchInputSourceID)
             core.palette.noteVisible(true)
-            core.clipboardStore.setTextSearchActive(true)
             // Non-activating, so summoning never raises our own aux windows behind it.
             panel.makeKeyAndOrderFront(nil)
             panel.orderFrontRegardless()
@@ -111,7 +110,6 @@ final class PaletteWindowController: NSObject, NSWindowDelegate {
         core.inputSourceSwitcher.endSession()
         core.roomCoordinator.paletteDidHide()
         core.palette.noteVisible(false)
-        core.clipboardStore.setTextSearchActive(false)
         // Drop the anchor, so the next summon re-resolves for the screen in use then.
         anchor = nil
         // The guides must never outlive the panel they point at.
@@ -169,15 +167,6 @@ final class PaletteWindowController: NSObject, NSWindowDelegate {
         popToRootTimer = nil
         queryWasPreserved = true
         return true
-    }
-
-    @discardableResult
-    func pasteKeepingWindowOpen(_ item: ClipboardItem, store: ClipboardStore) -> Bool {
-        Paster.pasteInPlace(item, store: store, into: previousApp)
-    }
-
-    func pasteStringKeepingWindowOpen(_ text: String) {
-        Paster.pasteStringInPlace(text, into: previousApp)
     }
 
     // MARK: - NSWindowDelegate
@@ -371,7 +360,7 @@ final class PaletteWindowController: NSObject, NSWindowDelegate {
                 return true
             }
             guard Self.commandCharacter(from: event) != nil else { return false }
-            if self.core.palette.mode == .launcher || self.core.palette.mode == .clipboard,
+            if self.core.palette.mode == .launcher,
                 let index = FavoriteSlots.index(forKeyCode: event.keyCode)
             {
                 self.core.palette.noteFavoriteSlot(index)

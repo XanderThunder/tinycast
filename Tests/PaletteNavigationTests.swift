@@ -35,9 +35,9 @@ struct PaletteNavigationTests {
         let vm = searchingLauncher()
         expect(!vm.canGoBack, "a prepared screen is a root with nothing behind it")
 
-        vm.push(mode: .clipboard)
+        vm.push(mode: .fileSearch)
         expect(
-            vm.mode == .clipboard && vm.query.isEmpty && vm.selection == 0,
+            vm.mode == .fileSearch && vm.query.isEmpty && vm.selection == 0,
             "a pushed screen opens as fresh as a prepared one")
         expect(vm.canGoBack, "the screen it was pushed over is still there to return to")
 
@@ -100,25 +100,6 @@ struct PaletteNavigationTests {
         expect(editing.restoredSelection == nil, "a fresh summon releases the restored selection")
         expect(vm.restoredSelection == nil, "other screens keep their existing navigation behaviour")
 
-        let clipboard = PaletteState()
-        clipboard.prepare(mode: .clipboard)
-        clipboard.query = "draft"
-        clipboard.clipboardFilter = .text
-        clipboard.query = ""
-        clipboard.clipboardFilter = .all
-        clipboard.selection = 2
-        clipboard.preserveSelection()
-        clipboard.clipboardFilter = .all
-        expect(
-            clipboard.selection == 2 && clipboard.restoredSelection == 2,
-            "a programmatic query and filter change keeps its chosen row through the observers")
-        clipboard.clipboardFilter = .link
-        expect(clipboard.restoredSelection == nil, "a new type filter releases the preserved selection")
-        clipboard.selection = 1
-        clipboard.preserveSelection()
-        clipboard.query = "another"
-        expect(clipboard.restoredSelection == nil, "a new query releases the preserved selection")
-
         let quicklink = searchingLauncher()
         quicklink.push(mode: .quicklinks)
         quicklink.query = "GitHub"
@@ -168,7 +149,7 @@ struct PaletteNavigationTests {
         for mode: PaletteMode in [.quicklinkEditor, .customCommandEditor] {
             let switched = searchingLauncher()
             switched.push(mode: mode)
-            switched.push(mode: .clipboard)
+            switched.push(mode: .fileSearch)
             expect(
                 switched.pop() && switched.mode == .launcher && switched.query == "clipboard"
                     && !switched.canGoBack,
@@ -179,26 +160,26 @@ struct PaletteNavigationTests {
                 switched.pop() && switched.mode == .launcher && !switched.canGoBack,
                 "switching between editors preserves only the original browser")
             switched.prepare(mode: mode)
-            switched.push(mode: .clipboard)
+            switched.push(mode: .fileSearch)
             expect(!switched.canGoBack, "a directly summoned editor leaves no dead back frame")
         }
 
         let summoned = searchingLauncher()
-        summoned.push(mode: .clipboard)
+        summoned.push(mode: .fileSearch)
         summoned.prepare(mode: .fileSearch)
         expect(!summoned.canGoBack, "a summon is a new root, not a step onto the old stack")
 
         let ringed = searchingLauncher()
-        ringed.push(mode: .clipboard)
+        ringed.push(mode: .fileSearch)
         ringed.resetNavigation()
         expect(
-            !ringed.canGoBack && ringed.mode == .clipboard,
+            !ringed.canGoBack && ringed.mode == .fileSearch,
             "closing the Tab ring drops the stack without disturbing the screen")
 
         let hopped = searchingLauncher()
-        hopped.pushCarryingQuery(mode: .clipboard)
+        hopped.pushCarryingQuery(mode: .fileSearch)
         expect(
-            hopped.mode == .clipboard && hopped.query == "clipboard" && hopped.selection == 3,
+            hopped.mode == .fileSearch && hopped.query == "clipboard" && hopped.selection == 3,
             "a ring hop carries the query and the row it was on")
         expect(
             hopped.pop() && hopped.mode == .launcher && hopped.query == "clipboard",
@@ -238,7 +219,7 @@ struct PaletteNavigationTests {
         state.notePointerMoved(to: rest)
         expect(!state.hoverHighlightArmed, "a mouse-moved event that has not moved arms nothing")
         let state2 = armed()
-        state2.prepare(mode: .clipboard)
+        state2.prepare(mode: .fileSearch)
         expect(!state2.hoverHighlightArmed, "switching mode disarms the highlight again")
     }
 

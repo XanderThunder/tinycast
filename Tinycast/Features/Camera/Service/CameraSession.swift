@@ -84,7 +84,7 @@ final class CameraSession {
         self.device = next
     }
 
-    /// PNG rather than the camera's own encoding, so the clipboard history records it as an image.
+    /// PNG rather than the camera's own encoding, so any app reads the copy as an image.
     func capturePhoto(mirrored: Bool) async -> Data? {
         guard let photoOutput, capture?.isRunning == true else { return nil }
         if let connection = photoOutput.connection(with: .video),

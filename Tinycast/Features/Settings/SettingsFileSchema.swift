@@ -101,11 +101,6 @@ enum SettingsFileSchema {
         case .windowRooms: return windowManagement.roomsBinding(for: key)
         case .windowManagementCommands:
             return launcher.commandsBinding(for: key, owner: .windowManagement)
-        case .clipboardEnabled: return bind(settings, \.clipboardEnabled)
-        case .clipboardRetention: return bind(settings, \.clipboardRetention)
-        case .clipboardDefaultAction: return bind(settings, \.clipboardDefaultAction)
-        case .clipboardDisabledApps: return bind(settings, \.clipboardDisabledApps)
-        case .clipboardCommands: return launcher.commandsBinding(for: key, owner: .clipboard)
         }
     }
 }
@@ -121,19 +116,4 @@ extension HyperKeyQuickPress: SettingsFileRawValue {}
 extension CalcNumberStyle: SettingsFileRawValue {}
 extension SearchSensitivity: SettingsFileRawValue {}
 extension WindowCycle: SettingsFileRawValue {}
-extension ClipboardDefaultAction: SettingsFileRawValue {}
-
-extension ClipboardRetention: SettingsFileToken {
-    var settingsToken: SettingsFileJSON {
-        switch self {
-        case .day: 1
-        case .week: 7
-        case .month: 30
-        case .threeMonths: 90
-        case .sixMonths: 180
-        case .year: 365
-        case .forever: "forever"
-        }
-    }
-}
 

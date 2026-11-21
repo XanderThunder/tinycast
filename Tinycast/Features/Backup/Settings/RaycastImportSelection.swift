@@ -21,9 +21,6 @@ struct RaycastImportSelection: View {
             option: .menuBarVisibility, symbol: "menubar.rectangle",
             label: String(localized: "Menu-bar icon")),
         .init(
-            option: .clipboardHistory, symbol: "doc.on.clipboard",
-            label: String(localized: "Clipboard history")),
-        .init(
             option: .quicklinks, symbol: Quicklink.sfSymbol, label: String(localized: "Quicklinks")),
         .init(
             option: .popToRoot, symbol: "arrow.uturn.backward",

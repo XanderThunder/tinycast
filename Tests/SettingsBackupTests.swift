@@ -58,9 +58,6 @@ struct SettingsBackupTests {
         check(
             "compact shortcuts ride the settings backup",
             mirrored["compactBarCommands"] == .compactBarCommands)
-        check(
-            "clipboard enablement rides the settings backup",
-            mirrored["clipboardEnabled"] == .clipboardEnabled)
 
         // Named one by one: a backup now carries content, so it is far likelier to be sent on.
         for key: AppSettingsKey in [.allowedDeepLinks] {
