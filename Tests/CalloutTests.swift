@@ -177,15 +177,16 @@ struct CalloutTests {
             let catalog = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
             let strings = catalog["strings"] as? [String: [String: Any]]
         else {
-            expect(false, "the translation catalog loads")
+            expect(false, "the string catalog loads")
             return
         }
         for key in ["Press again for a double press", "Release or complete the shortcut", "Release to record"]
         {
-            guard let translations = strings[key]?["localizations"] as? [String: [String: Any]] else {
-                expect(false, "\(key) has translations")
+            guard strings[key] != nil else {
+                expect(false, "\(key) is in the catalog")
                 continue
             }
+            let translations = strings[key]?["localizations"] as? [String: [String: Any]] ?? [:]
             var labels = ["en": key]
             for (language, entry) in translations {
                 if let unit = entry["stringUnit"] as? [String: Any], let value = unit["value"] as? String {
@@ -211,7 +212,7 @@ struct CalloutTests {
     static func rowGrammar() {
         expect(
             Theme.Size.checkbox <= Theme.Size.rowIcon,
-            "the uninstall checkbox fits inside the shared leading slot")
+            "a checkbox fits inside the shared leading slot")
         expect(Theme.Size.checkbox > 0, "and is a real size")
     }
 

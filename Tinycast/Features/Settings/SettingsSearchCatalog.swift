@@ -117,9 +117,6 @@ enum SettingsSearchCatalog {
             .generalGlobalShortcuts, "Show Launcher",
             keywords: ["hotkey", "shortcut", "summon", "palette"]),
         .init(
-            .generalGeneral, "Language",
-            keywords: ["localization", "translation", "locale", "region"]),
-        .init(
             .generalGeneral, "Launch at login",
             keywords: ["startup", "login item", "start", "boot"]),
         .init(

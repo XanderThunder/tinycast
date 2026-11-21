@@ -2,11 +2,11 @@ import AppKit
 
 @main
 @MainActor
-struct RelaunchTests {
+struct TerminationTests {
     private static var failures = 0
 
     static func main() {
-        if Bundle.main.infoDictionary?["RelaunchFixtureRoot"] != nil {
+        if Bundle.main.infoDictionary?["TerminationFixtureRoot"] != nil {
             let app = NSApplication.shared
             let delegate = AppDelegate()
             app.delegate = delegate
@@ -16,8 +16,7 @@ struct RelaunchTests {
         }
         Task {
             do {
-                try await testTermination(relaunch: false)
-                try await testTermination(relaunch: true)
+                try await testTermination()
             } catch {
                 check("fixture completed", false)
                 print(error)
@@ -32,12 +31,12 @@ struct RelaunchTests {
         if !condition { failures += 1; print("FAIL: \(name)") }
     }
 
-    private static func testTermination(relaunch: Bool) async throws {
+    private static func testTermination() async throws {
         let files = FileManager.default
-        let root = files.temporaryDirectory.appendingPathComponent("tinycast-relaunch-\(UUID())")
+        let root = files.temporaryDirectory.appendingPathComponent("tinycast-termination-\(UUID())")
         let app = root.appendingPathComponent("Fixture's App.app", isDirectory: true)
         let macOS = app.appendingPathComponent("Contents/MacOS", isDirectory: true)
-        let bundleID = "com.tinycast.relaunch-test.\(UUID().uuidString.lowercased())"
+        let bundleID = "com.tinycast.termination-test.\(UUID().uuidString.lowercased())"
         let process = Process()
         try files.createDirectory(at: macOS, withIntermediateDirectories: true)
         defer {
@@ -50,9 +49,9 @@ struct RelaunchTests {
         }
         let info: [String: Any] = [
             "CFBundleIdentifier": bundleID, "CFBundleExecutable": "Fixture",
-            "CFBundleName": "Relaunch Fixture", "CFBundlePackageType": "APPL",
+            "CFBundleName": "Termination Fixture", "CFBundlePackageType": "APPL",
             "LSUIElement": true, "NSPrincipalClass": "NSApplication",
-            "RelaunchFixtureRoot": root.path, "RelaunchFixtureEnabled": relaunch
+            "TerminationFixtureRoot": root.path
         ]
         try PropertyListSerialization.data(fromPropertyList: info, format: .xml, options: 0)
             .write(to: app.appendingPathComponent("Contents/Info.plist"))
@@ -77,24 +76,6 @@ struct RelaunchTests {
         check(
             "termination runs teardown once",
             first == ["first.start", "first.request-returned", "first.teardown"])
-        guard relaunch else { return }
-        let responsive = await waitUntil { events().contains("second.heartbeat") }
-        check("the relaunched process responds on the main actor", responsive)
-        guard responsive else { return }
-        check("the old process exited before the new process started", !events().contains("second.overlap"))
-        check(
-            "reopening the same bundle succeeds",
-            try await runProgram("/usr/bin/open", [app.path]) == 0)
-        let completed = await waitUntil { events().contains("second.teardown") }
-        check("the new process handles reopen and terminates normally", completed)
-        let second = events().filter { $0.hasPrefix("second.") }
-        check("the helper launches one new process", second.filter { $0 == "second.start" }.count == 1)
-        check("the relaunch counts as a user launch", second.contains("second.user-launch"))
-        check("the new process handles an AppKit reopen event", second.contains("second.reopen"))
-        let stopped = await waitUntil {
-            NSRunningApplication.runningApplications(withBundleIdentifier: bundleID).isEmpty
-        }
-        check("the relaunched fixture leaves no running application", stopped)
     }
 
     private static func waitUntil(_ condition: () -> Bool) async -> Bool {
@@ -124,7 +105,7 @@ final class AppCore {
     private var stage = "first"
 
     private init() {
-        guard let path = Bundle.main.infoDictionary?["RelaunchFixtureRoot"] as? String
+        guard let path = Bundle.main.infoDictionary?["TerminationFixtureRoot"] as? String
         else { preconditionFailure("Missing fixture root") }
         root = URL(fileURLWithPath: path)
     }
@@ -155,9 +136,6 @@ final class AppCore {
 
     func prepareForTermination() {
         record("teardown")
-        if stage == "first", Bundle.main.infoDictionary?["RelaunchFixtureEnabled"] as? Bool == true {
-            RelaunchRunner.relaunchAfterExit(Bundle.main.bundleURL)
-        }
     }
 
     func handleReopen() {

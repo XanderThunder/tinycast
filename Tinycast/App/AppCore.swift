@@ -141,9 +141,6 @@ final class AppCore {
             isShowingDialog = isPresenting
         })
     private let healthTicker = HealthTicker()
-    /// Resolved once by AppKit, so it is what this process shows until it relaunches.
-    private let launchLocalization = Bundle.main.preferredLocalizations.first
-    private var relaunchRequested = false
 
     private init() {
         let launcherRanking = LauncherRankingStore()
@@ -324,15 +321,6 @@ final class AppCore {
         }
     }
 
-    func relaunch() {
-        guard !relaunchRequested else { return }
-        relaunchRequested = true
-        // AppKit's termination loop must start outside a Swift task or dispatch callback.
-        RunLoop.main.perform(inModes: [.common]) {
-            MainActor.assumeIsolated { NSApp.terminate(nil) }
-        }
-    }
-
     func prepareForTermination() {
         settingsFile?.flush()
         // Caps Lock first: its remap is the one teardown that outlives the process.
@@ -340,7 +328,6 @@ final class AppCore {
         windowLayoutCoordinator.prepareForTermination()
         roomCoordinator.prepareForTermination()
         inputSourceSwitcher.endSession()
-        if relaunchRequested { RelaunchRunner.relaunchAfterExit(Bundle.main.bundleURL) }
     }
 
     // MARK: - Feature switches
@@ -400,7 +387,6 @@ final class AppCore {
         track({ _ = $0.hyperKeyIncludesShift }, reproject: { $0.applyHyperChord() })
         track({ _ = $0.appearance }, reproject: { $0.applyAppearance() })
         track({ _ = $0.animationsEnabled }, reproject: { $0.applyMotion() })
-        track({ _ = $0.language }, reproject: { $0.offerLanguageRelaunch() })
         track({ _ = $0.interfaceSize }, reproject: { $0.windowController.applyInterfaceSize() })
     }
 
@@ -414,23 +400,6 @@ final class AppCore {
         Motion.isEnabled = settings.animationsEnabled
         for case let panel as any AnimatedPanel in NSApp.windows {
             panel.followMotion()
-        }
-    }
-
-    private var isLanguagePending: Bool { settings.language.rawValue != launchLocalization }
-
-    private func offerLanguageRelaunch() {
-        guard isLanguagePending else { return }
-        Task {
-            guard
-                await confirm(
-                    title: String(localized: "Relaunch Tinycast?"),
-                    message: String(localized: "The new language applies after Tinycast relaunches."),
-                    symbol: "globe", confirmTitle: String(localized: "Relaunch"), tone: .neutral,
-                    confirmRole: .standard, dismissTitle: String(localized: "Later")),
-                isLanguagePending
-            else { return }
-            relaunch()
         }
     }
 

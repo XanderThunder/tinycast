@@ -19,13 +19,6 @@ struct GeneralSettingsView: View {
             }
 
             Section {
-                Picker(selection: $settings.language) {
-                    ForEach(AppLanguage.allCases) { language in
-                        Text(verbatim: language.title).tag(language)
-                    }
-                } label: {
-                    SettingsRowTitle(.generalGeneral, "Language")
-                }
                 Toggle(isOn: $settings.launchAtLogin) {
                     SettingsRowTitle(.generalGeneral, "Launch at login")
                 }

@@ -89,11 +89,6 @@ final class AppSettings {
         didSet { defaults.set(appearance.rawValue, forKey: Key.appearance.rawValue) }
     }
 
-    /// The per-app key System Settings writes too, so the two never disagree.
-    var language: AppLanguage {
-        didSet { defaults.set([language.rawValue], forKey: Key.language.rawValue) }
-    }
-
     /// Which separators the calculator reads and writes; `.system` follows Language & Region.
     var calcNumberStyle: CalcNumberStyle {
         didSet { defaults.set(calcNumberStyle.rawValue, forKey: Key.calcNumberStyle.rawValue) }
@@ -338,19 +333,6 @@ final class AppSettings {
         didSet { defaults.set(settingsFileEnabled, forKey: Key.settingsFileEnabled.rawValue) }
     }
 
-    /// With no per-app list the bundle follows macOS's languages, so this runs before any lookup.
-    static func pinLanguage() {
-        UserDefaults.standard.set([storedLanguage.rawValue], forKey: Key.language.rawValue)
-    }
-
-    /// The app's own domain only: a plain read falls through to the global list.
-    private static var storedLanguage: AppLanguage {
-        AppLanguage(
-            storedPreferences: Bundle.main.bundleIdentifier
-                .flatMap(UserDefaults.standard.persistentDomain(forName:))?[Key.language.rawValue]
-                as? [String], systemPreferences: SystemLanguages.preferred)
-    }
-
     init() {
         // The only feature switch that defaults on, so absence has to outrank a stored `false`.
         // `integer(forKey:)` returns 0 when unset, which no case matches.
@@ -380,7 +362,6 @@ final class AppSettings {
             ?? .navigateBackOrClose
         appearance =
             defaults.string(forKey: Key.appearance.rawValue).flatMap(AppAppearance.init) ?? .system
-        language = Self.storedLanguage
         calcNumberStyle =
             defaults.string(forKey: Key.calcNumberStyle.rawValue).flatMap(CalcNumberStyle.init)
             ?? .system
