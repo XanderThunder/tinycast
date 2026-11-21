@@ -6,10 +6,10 @@
 - `HotKeyBinding`: what an action is bound to: `.combo(KeyShortcut)`,
   `.doubleTap(DoubleTapModifier)`, sided `.modifier` / `.doubleModifier`, `.globe`, or `.doubleGlobe`.
 - `HotKeyCenter`: the Carbon `RegisterEventHotKey` layer, pausable.
-- Dictation alone also observes Carbon's key-release event for hold-to-talk.
+- Only the Secure Input equivalents observe Carbon's key-release event.
 - `DoubleTapModifier` / `DoubleTapDetector`: the double-tap recognizer.
 - `ModifierKey` / `ModifierKeyDetector`: reported sides, lone presses, taps and holds.
-- `ModifierTapMonitor`: the shared modifier-only tap, including Dictation's hold/release callbacks.
+- `ModifierTapMonitor`: the shared modifier-only tap.
 
 `HotKeyManager` owns them all: persistence, conflict lookup, and dispatch. Every action reads and
 writes one `HotKeyBinding`, so all cases share persistence, conflict detection, the recorder and
@@ -63,7 +63,7 @@ keeps a dropped search scope from deleting a working shortcut, and running on un
 covers LaunchServices still resolving an app for a few seconds after it is trashed.
 
 Shortcuts are also spelled as typeable chords (`ctrl+option+left`) in the opt-in
-[settings file](settings-file.md), all but those of content, extensions and Apple Shortcuts.
+[settings file](settings-file.md), all but those of content and Apple Shortcuts.
 `HotKeySpelling` is that grammar; `HotKeySettingsFile` applies through `setBinding`, so `UserDefaults`
 stays the one store either way.
 
@@ -78,13 +78,6 @@ Apple Shortcuts keep the same kind of index in `boundAppleShortcutIDs`, pruned n
 the first successful read of the library, since a failed read looks exactly like deletion
 (see [apple-shortcuts.md](apple-shortcuts.md#sweeping-deleted-shortcuts)).
 
-Snippets index `StoredSnippet.ID`, the file's path, in `boundSnippetIDs`. The store runs only while
-the feature is on, so they are swept not at launch but on every snapshot, by
-`removeSnippetBindings`; a file that fails to parse still counts, since it is mid-edit rather than
-gone. A rename outside Tinycast or a new Snippets Folder therefore drops the shortcut, and none
-travels in a backup, where an imported snippet lands at a new path
-(see [snippets.md](snippets.md#shortcuts)).
-
 `HotKeyBinding` takes the synthesised `Codable`, so a `.combo` writes
 `{"combo":{"_0":{"carbonKeyCode":N,"carbonModifiers":N}}}` and a `.doubleTap` writes
 `{"doubleTap":{"_0":"command"}}`. `KeyShortcut` keeps a hand-written `init(from:)`: not a format seam,
@@ -97,19 +90,17 @@ names the three exceptions. Open in Browser and Run Shell Command are query-driv
 typed text a chord has none of), and Quit is withheld so no chord can terminate the app outright. The
 list is a deny-list rather than an allow-list, so a new command still arrives bindable without an edit
 there. A binding therefore persists under `hotkey.<command raw value>`, as in
-`hotkey.command:clipboard-history`, which is also what puts a recorder on the command's row and a
+`hotkey.command:search-files`, which is also what puts a recorder on the command's row and a
 keycap on every launcher row. That row is in exactly one pane: Settings ▸ Commands, or the feature's
 own pane when `SettingsTab.ownedCommands` names it. `hotkey.togglePalette` is the one fixed action with
 no command row. `HotKeyManager` names them all through `CommandID`, so a conflict callout spells an
 action exactly as its command row does.
 
-The chord registers regardless of the launcher row. Search Files and Notes both
-re-check their feature switches before opening; see [file-search.md](file-search.md#invocation) and
-[notes.md](notes.md#ownership-and-enablement). A hidden launcher row does not disable its shortcut, but
+The chord registers regardless of the launcher row. Search Files re-checks its feature switch before
+opening; see [file-search.md](file-search.md#invocation). A hidden launcher row does not disable its shortcut, but
 disabling the feature does: whatever `AppCore.allowsHotKeyAction` refuses, `HotKeyManager.applyAllowance`
 unregisters from Carbon, so the key reaches other apps rather than being swallowed and ignored.
-Disabling one snippet, quicklink or custom command does the same for its own shortcut. Snippets load
-after `start()`, so their shortcuts register once the store's `snippets` arrive.
+Disabling one quicklink or custom command does the same for its own shortcut.
 `SettingsBackup.HotkeyBackup` carries them as one `commands` map keyed by
 `CommandID` raw value.
 
@@ -142,12 +133,6 @@ track Globe from the physical `kVK_Function` keycode, not just the fn flag, beca
 It shares the double-tap's listen-only monitor, permission warning, lifecycle and pause while
 recording. macOS may perform its own Globe action too; set “Press fn/Globe key to” to “Do Nothing” in
 Keyboard settings if it conflicts. Globe+key chords use Carbon registration, like other combos.
-
-Dictation's hold-to-talk mode reserves its single physical modifier across both tap gestures. It
-starts after 250 ms held alone, so ordinary modifier+key chords do not briefly start recording. Another
-key, modifier or mouse click cancels a pending or active hold; Return and Escape belong to the dictation
-panel while listening. Release finishes the recording. Pausing, rebinding, disabling Dictation,
-session changes and tap teardown cancel any hold. Double-tap bindings require toggle mode.
 
 ## Double-tap modifiers
 
@@ -363,7 +348,7 @@ Carbon hotkeys still fire inside Secure Input, and both remedies are built on th
   (`KeyShortcut.secureInputEquivalent(of:)`), rebuilt with the bindings and dropped when Secure Input
   ends. The Carbon event's device flags select Right Control without querying mutable keyboard state.
   Left Control never triggers Hyper. An existing Tinycast Control binding shares the registration and
-  still runs from Left Control; Dictation receives the release for whichever action began the press.
+  still runs from Left Control; the release goes to whichever action began the press.
   Rebuilding or pausing registrations cancels an outstanding hold. Carbon reserves these Control
   combinations during Secure Input even when Left Control has no Tinycast binding.
 

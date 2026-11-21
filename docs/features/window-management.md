@@ -3,7 +3,7 @@
 Rectangle-style window actions (halves, quarters, fourths, thirds, sizing, nudging, edge moves,
 display moves, native fullscreen and Space switching), searchable in the palette and bindable to
 global shortcuts. 39 commands, plus any number of user-defined [custom sizes](#custom-sizes), no new
-dependencies and no new permission: they reuse the Accessibility grant clipboard paste already needs.
+dependencies and no new permission: they reuse the Accessibility grant the launcher already needs.
 
 Ships **off**. Settings › Window Management is the switch, and while it is off there are no launcher
 entries and its shortcuts are unregistered, so their keys reach other apps.
@@ -156,8 +156,7 @@ size suits every screen, so the size is the user's.
   bad import keeps the record.
 
 A custom size shares the window commands' `AppEntry.Kind`, their launcher section and their
-`windowManagementShowInLauncher` switch, the way custom Quick Actions share the shipped four's:
-`WindowCommandCatalog` claims an entry first, and `CustomWindowSize.id(fromEntryID:)` the rest.
+`windowManagementShowInLauncher` switch: `WindowCommandCatalog` claims an entry first, and `CustomWindowSize.id(fromEntryID:)` the rest.
 
 ## Cycling and Restore
 
@@ -227,9 +226,8 @@ is looking at. `WindowTarget` is the answer to "what does this command act on": 
 window of ours, falling back to the frontmost app only when there is none.
 
 `canBecomeMain` is the filter, and it needed no new flag: every transient panel in the app already
-declines it, which leaves exactly the Notes editor and the `AppWindowController` windows. When a key
-child is in front, such as the note switcher that `addChildWindow`s itself onto the editor,
-`WindowTarget` looks one level up through `parent` so the command still places the editor.
+declines it, which leaves exactly the `AppWindowController` windows. When a key child is in front,
+`WindowTarget` looks one level up through `parent` so the command still places its parent.
 
 `PalettePanel` is the one main-capable panel of ours and would pass the filter. It never reaches
 here, because `WindowCommandCoordinator.handOffTarget()` branches on `paletteCoordinator.isVisible`
@@ -241,8 +239,7 @@ this section exists.
 Fullscreen on a window of ours fires when it is `.resizable` and its `collectionBehavior` opts out of
 neither `.fullScreenAuxiliary` nor `.fullScreenNone`. AppKit fullscreens a resizable window without
 ever setting `.fullScreenPrimary` on it, so testing that flag would make Fullscreen a silent no-op on
-Settings. The Notes panel is `.fullScreenAuxiliary` and stays a no-op, as an unwilling external
-window already is.
+Settings. A `.fullScreenAuxiliary` panel stays a no-op, as an unwilling external window already is.
 
 This mirrors `InjectionTarget` in [Text injection](text-injection.md), which solved the same problem
 for keystrokes: same shape, same `Service/` position, one idea applied twice.
@@ -412,12 +409,12 @@ and every shortcut stays editable afterwards.
   window commands, inside the same section. Custom sizes and their bindings ride in settings backups.
 - **Settings**: `windowManagementEnabled` (off), `windowManagementShowInLauncher` (on), `windowGap`
   (0), `windowCycle` (`.off`), `windowWrapsDisplays` (on) and `windowKeepsProportions` (on). All six
-  ride in settings backups: unlike `snippetsEnabled` they grant no permission class of their own.
+  ride in settings backups: they grant no permission class of their own.
 - **Per-command visibility** reuses `VisibilityStore` as-is; clearing a recorded shortcut is how a
   hotkey is disabled, so there is no separate per-command enabled flag. Each command and custom-size
   row carries an alias field, dimmed while its entry is hidden from the launcher. Window commands
   deliberately get **no** launcher-category pane of their own; they are managed inside Settings ›
-  Window Management, the same call already made for snippets.
+  Window Management.
 
 ## Testing
 

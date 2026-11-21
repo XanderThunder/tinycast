@@ -1,9 +1,7 @@
 # Camera
 
-One camera, two surfaces. `Open Camera` is a launcher command that puts a live preview on screen,
-mirrors it, switches between the Mac's cameras and copies a photo to the clipboard. Calendar's
-pre-meeting preview is the other, and it rides the same session, panel and stage; the join-specific
-controller and footer are all that stay in [calendar.md](calendar.md).
+`Open Camera` is a launcher command that puts a live, mirror-style preview on screen, switches between
+the Mac's cameras and copies a photo to the clipboard.
 
 ## Invariants
 
@@ -30,7 +28,7 @@ controller and footer are all that stay in [calendar.md](calendar.md).
   (the preview layer's, and the photo output's at capture time), never a `scaleEffect` on the view,
   which would hand back a photo that is not what the user framed.
 - **A photo reaches the clipboard as PNG.** The camera's own encoding is decoded and re-encoded off
-  main, because `ClipboardManager` records `.png` and `.tiff` and nothing else.
+  main, so the pasteboard holds a format every app accepts.
 - **`AVCaptureSession` is not `Sendable`, and only `CaptureBox` crosses that line.** The blocking
   calls (`startRunning`, `stopRunning`, and the begin/commit around a device swap) run in
   `Task.detached` behind that one `@unchecked Sendable` box, which is private to `CameraSession.swift`.
@@ -43,13 +41,12 @@ controller and footer are all that stay in [calendar.md](calendar.md).
 | `Service/CameraSession.swift` | access, start/stop, device cycling, the photo, and the box              |
 | `UI/CameraCoordinator.swift`  | the standalone panel's lifecycle, mirror state, the clipboard write     |
 | `UI/CameraView.swift`         | the standalone surface: stage over a footer of controls                 |
-| `UI/CameraStage.swift`        | the shared stage: the hosted preview layer, or why there is no video    |
-| `UI/CameraPanel.swift`        | the shared borderless panel: ↵, Esc, click-away, cursor-screen centring |
-| `UI/CameraButton.swift`       | both footers' button: `ModalActionButtonStyle` plus a key-cap tooltip   |
+| `UI/CameraStage.swift`        | the stage: the hosted preview layer, or why there is no video           |
+| `UI/CameraPanel.swift`        | the borderless panel: ↵, Esc, click-away, cursor-screen centring        |
+| `UI/CameraButton.swift`       | the footer's button: `ModalActionButtonStyle` plus a key-cap tooltip    |
 
-`Purpose` is the session's one knob. `.preview` is the cheap one Calendar takes: a `.medium` preset
-and no output. `.capture` raises the preset to `.photo` and adds an `AVCapturePhotoOutput`, which is
-the whole cost of being able to take a photo, and it is paid only by the command that does.
+The session always runs the `.photo` preset with an `AVCapturePhotoOutput`, since its only surface
+can take a photo.
 
 `CameraCoordinator` is `@Observable` and the view reads it directly, so toggling Mirror re-renders
 through Observation rather than through a hand-reassigned `rootView`. `mirrored` lives on the

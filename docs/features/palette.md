@@ -66,14 +66,8 @@ Closing a palette menu explicitly restores search focus after its panel returns 
 `prepare` is one of four motions over the screen; see [Navigation](#navigation).
 
 Hiding schedules Pop to Root Search, and `PaletteWindowController.popToRoot` is its only path: the
-palette returns to the launcher _and_ chat starts a new conversation, at once or after
-`popToRootTimeout`, unless a re-summon inside that window consumes the pending reset first. An
-unfinished chat is a thing being done, exactly like a typed query, so the screen and the conversation
-are reset together rather than the screen alone. A reply still streaming is one exception: it was
-asked for, and resetting would throw the answer away. Nothing is lost either way: a conversation is
-written to Chat History, and the AI Chat window's sidebar, as soon as it has a message. The other is
-an extension's browser sign-in: while `ExtensionManager.isSigningIn`, hiding schedules no reset and a
-re-summon counts as preserved, because a reset would stop the command and cancel its sign-in.
+palette returns to the launcher, at once or after `popToRootTimeout`, unless a re-summon inside that
+window consumes the pending reset first.
 
 Each `PaletteMode` maps to one type conforming to `PaletteScreen`, and the protocol is what keeps the
 selection invariant honest: a screen exposes `rows` as its single source of visible order, and the
@@ -86,36 +80,27 @@ Where a reset leaves the highlight is the screen's to say too. Every reset (an o
 new filter) goes through `RootPaletteView.land()`, which reads `landingSelection`, so handlers that
 fire in one update agree whatever order they run in. `onAppear` lands as well: the first show builds
 the view after `prepare` has run, so no change handler ever sees that reset. The landing is row 0 on
-every screen but two: the clipboard lands past its pins
-([clipboard.md](clipboard.md#pinned-entries)), and Search Quicklinks lands on the row a prompt names
-([quicklinks.md](quicklinks.md)).
+every screen but one: Search Quicklinks lands on the row a prompt names ([quicklinks.md](quicklinks.md)).
 
 | Mode                   | Screen                      | Inner list                                                                                               |
 | ---------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------- |
 | `.launcher`            | `LauncherScreen`            | `LauncherList`                                                                                           |
-| `.clipboard`           | `ClipboardScreen`           | `ClipboardList` + preview                                                                                |
 | `.calculatorHistory`   | `CalculatorHistoryScreen`   | `CalculatorHistoryList`                                                                                  |
-| `.emoji`               | `EmojiScreen`               | `EmojiGridView`                                                                                          |
 | `.fileSearch`          | `FileSearchScreen`          | `FileSearchList` (see [file-search.md](file-search.md))                                                  |
-| `.schedule`            | `ScheduleScreen`            | `ScheduleList` (see [calendar.md](calendar.md))                                                          |
-| `.eventEditor`         | `EventEditorScreen`         | `EventEditorView` (see [calendar.md](calendar.md#create-event))                                          |
+| `.menuSearch`          | `MenuSearchScreen`          | the front app's menu items (see [menu-search.md](menu-search.md))                                        |
+| `.switchWindows`       | `WindowSwitchScreen`        | every running app's windows (see [navigation.md](navigation.md))                                         |
+| `.rooms`               | `RoomsScreen`               | the rooms list (see [window-rooms.md](window-rooms.md))                                                  |
+| `.roomWindows`         | `RoomPickerScreen`          | a room's windows and apps (see [window-rooms.md](window-rooms.md))                                       |
 | `.customCommandEditor` | `CustomCommandEditorScreen` | `CustomCommandEditorView` (see [custom-commands.md](custom-commands.md#launcher-editor))                 |
 | `.customCommands`      | `CustomCommandListScreen`   | `CustomCommandList` + script preview (see [custom-commands.md](custom-commands.md#launcher-integration)) |
-| `.meetingDetails`      | `MeetingDetailsScreen`      | `MeetingDetailsView` (see [calendar.md](calendar.md#the-details-page))                                   |
-| `.uninstall`           | `UninstallScreen`           | `UninstallList` (see [uninstall.md](uninstall.md))                                                       |
 | `.quicklinks`          | `QuicklinkListScreen`       | `QuicklinkList` + preview (see [quicklinks.md](quicklinks.md#search-quicklinks))                         |
 | `.quicklinkEditor`     | `QuicklinkEditorScreen`     | `QuicklinkEditorView` (see [quicklinks.md](quicklinks.md#launcher-editor))                               |
-| `.snippets`            | `SnippetsScreen`            | `SnippetsList` + preview (see [snippets.md](snippets.md#search-snippets))                                |
-| `.snippetEditor`       | `SnippetEditorScreen`       | `SnippetEditorView` (see [snippets.md](snippets.md#launcher-editor))                                     |
 | `.dictionary`          | `DictionaryScreen`          | `DictionaryEntryView` (see [dictionary.md](dictionary.md))                                               |
-| `.extensionCommand`    | `ExtensionCommandScreen`    | `ExtensionCommandView` (see [extensions.md](extensions.md))                                              |
 
-**Tab rings the three surfaces a reader opens directly: launcher → AI chat → clipboard → launcher**,
-unless the screen claims it through `tab(at:backwards:)` (native editors and extension forms walk
-their own fields), or the selected row declares arguments, in which case it walks those fields first (see
-below); every other mode stays off the ring, and is reached by a command or a global hotkey, with
-Uninstall only from a launcher app's Actions menu, scoped to that app. Chat is skipped whole when
-`aiEnabled` is off, which leaves the launcher ↔ clipboard flip the ring replaced.
+**Tab walks a screen's own fields, or the selected row's arguments, and otherwise returns to the
+launcher.** A screen claims it through `tab(at:backwards:)` (the native editors walk their fields);
+a row that declares arguments walks those first (see below). Anywhere else Tab leaves a sub-screen for
+the launcher, keeping the typed text. Every mode is reached by a command or a global hotkey.
 
 ### Navigation
 
@@ -123,28 +108,25 @@ Uninstall only from a launcher app's Actions menu, scoped to that app. Chat is s
 one rule: a palette already on screen is being _navigated_, so the current screen is pushed and
 becomes the step back; a hidden one is being _summoned_, so the new screen is a root with nothing
 behind it. Every mode command and every global hotkey funnels through `showPalette`, which calls it,
-so typing "Clipboard History" at the root and pressing ↵ leaves a step back to the search that found
-it, while the Clipboard History hotkey does not. **The launcher is the exception, because it is the
-root**: ⌘Space over an open clipboard opens the root search with nothing behind it, rather than
+so typing "Search Files" at the root and pressing ↵ leaves a step back to the search that found
+it, while the Search Files hotkey does not. **The launcher is the exception, because it is the
+root**: ⌘Space over an open Search Files opens the root search with nothing behind it, rather than
 stacking the launcher over the screen it replaced. Nothing per-feature encodes this.
 
 `PaletteState` holds the screens below `mode` as `[PaletteFrame]` (mode, query and selection, enough
-that returning looks like never having left) and offers four motions over it:
+that returning looks like never having left) and offers these motions over it:
 
 | Motion                     | Meaning                                                                    |
 | -------------------------- | -------------------------------------------------------------------------- |
 | `prepare(mode:)`           | become the root: open fresh, drop the stack                                |
-| `replace(mode:)`           | swap the screen, keep what it was opened over (a new chat, not a new root) |
+| `replace(mode:)`           | swap the screen, keep what it was opened over                              |
 | `push(mode:)`              | open over the current screen; replace a transient native editor instead    |
-| `pushCarryingQuery(mode:)` | the same step, with the query and row kept: Tab's hop into the ring        |
 | `pop()`                    | restore the screen underneath; `false` when this one is the root           |
 
 `pop()` bumps `followToken` rather than `resetToken`: the reset token exists to land a list afresh,
 which would throw away the very selection being restored. The native editors opt into
 `pop(preservingSelection: true)` so `restoredSelection` also carries that row through the mode and query
-observers. Clipboard edits call `preserveSelection()` after clearing a query or type filter that hides
-the edited row, so both observers keep that row selected. Typing a new query, changing the clipboard
-filter or opening a fresh screen clears it. Other filters keep their screen's own landing row.
+observers. Typing a new query or opening a fresh screen clears it. Other filters keep their screen's own landing row.
 
 Native editor drafts live only while their form is mounted. Switching features replaces that form,
 keeping its previous browser or search underneath; Back never restores a discarded draft's mode.
@@ -152,8 +134,7 @@ Closing a menu releases its hosted actions after the exit animation, while reusi
 Scrolling a native form dismisses its menu before the control's anchor moves.
 
 **Escape clears a non-empty query before it leaves the screen**, so one press clears and the next
-leaves: an extension screen exits itself first (it keeps a stack the palette cannot see), then a
-pushed screen pops, and a root hides the palette. A focused inline argument field is a rung above the
+leaves: a pushed screen pops, and a root hides the palette. A focused inline argument field is a rung above the
 query, so Escape hands focus back to the search field first; the query that found the command is
 still there to be cleared by the next press. A bare backspace in an empty field takes the same step
 **but never closes**: on a root screen summoned by its own hotkey it falls to the root search, which
@@ -172,31 +153,12 @@ pops, a root one closes), so `backHelp` says which, rather than promising a step
 a close. It lights to `textPrimary` under the pointer over `Theme.Duration.hover`, and
 `HeaderBackButton` keeps that hover state to itself so the header around it never re-renders.
 
-The launcher advertises the first hop in the header: `Quick AI` beside a ⇥ key cap.
-It is drawn only when Tab really would open Quick AI, a condition read
-back out of `PaletteTabAction` rather than restated, so a hint can never promise a destination the
-key does not go to: an argument field to walk takes Tab first, and the hint steps aside for it.
-
-`PaletteTabAction` decides where Tab goes _and_ what happens to the typed text. The clipboard hands
-the query over, since one search narrows either list. **From the launcher, Tab `.ask`s**: Quick AI opens
-fresh with the typed text already sent, so one key turns a search into a question. Leaving chat is
-still a `.freshScreen`: that field holds a half-written message rather than a query, and a draft
-dropped into a filter matches nothing. `.ask` is its own case rather than a `carryQuery(.ai)` because
-the text is submitted, not seeded, and the hint reads the case back out (`== .ask`) instead of
-restating the rule.
-
-**A ring hop is a step, so Escape walks back out the way Tab came in**: launcher → chat → clipboard
-takes two presses to unwind, and the back chevron's tooltip stops promising a step it cannot take.
-The launcher is the ring's root, so the hop that closes the ring resets the stack instead of stacking
-a third screen; ringing round forever therefore never grows the stack past two.
-
 ### Inline row arguments
 
 A selected row can declare arguments, and they are typed **in the header, beside the search field**,
-not on a screen of their own. Three features answer this way, each owning its own strip: an extension
-command through `ExtensionArgumentsAccessory`, a quicklink through `QuicklinkArgumentsAccessory`, a
-custom command through `CustomCommandArgumentsAccessory`. The last two draw the same fields,
-`DesignSystem/InlineArgumentFields`; an extension draws its own. The palette knows none of them: `PaletteScreen.headerAccessory(at:focus:)` hands back a `PaletteHeaderAccessory`:
+not on a screen of their own. Two features answer this way, each owning its own strip: a quicklink through
+`QuicklinkArgumentsAccessory` and a custom command through `CustomCommandArgumentsAccessory`. Both
+draw the same fields, `DesignSystem/InlineArgumentFields`. The palette knows none of them: `PaletteScreen.headerAccessory(at:focus:)` hands back a `PaletteHeaderAccessory`:
 a width, the field names in Tab order, the first field still owed a value, a menu for a field that is
 chosen rather than typed, and an opaque view. That costs the header its one simple rule, so it holds
 these invariants:
@@ -240,7 +202,7 @@ is its name. Both are set **after** `showPalette`, since `prepare` clears them.
 
 The flat `selection` index is the single source of truth for highlight / activation and **must always
 match the visible row order**, including the card at index 0 when present: the calculator's (see
-[calculator.md](calculator.md)) or the meeting join card (see [calendar.md](calendar.md)), never both.
+[calculator.md](calculator.md)).
 
 ## The compact bar
 
@@ -248,10 +210,9 @@ Compact is the default window mode; a stored choice of Expanded is kept. It is t
 empty query, drawn as glass shapes over a bare window: the header row in a capsule, then one round
 button per configured `AppSettings.compactBarCommands` entry whose feature
 `AppIndex.isCommandEnabled` reports on. General settings shows **Compact Shortcuts** only
-when Compact is selected: an ordered list of zero to four unique commands, with add, replace,
-remove and move controls. The default is Clipboard History and Emoji & Symbols, both on for a new
-install, then Search Files and Search Quicklinks; Search Snippets, Show Notes, My Schedule and Quick
-AI are also available. Disabled features retain their configured positions but disappear from the
+when Compact is selected: an ordered list of unique commands, up to `CommandID.compactBarLimit`,
+with add, replace, remove and move controls. Search Files and Search Quicklinks are the options and
+the default. Disabled features retain their configured positions but disappear from the
 bar until re-enabled; Settings still offers them, under **Off** in both menus and marked Off in the
 list, so a slot can be ready before its feature is.
 The ordered command identifiers persist in preferences, backups and `appearance.compactBarCommands`
@@ -264,15 +225,14 @@ boundary-arrow hook handles navigation without moving input focus away from Sear
 and modified arrows retain their normal editing behavior.
 
 Keyboard selection tints the existing glass circle and draws its glyph in white. Symbols use
-`SymbolImage`, including the appearance-aware outline for Emoji & Symbols. Settings keeps each icon
+`SymbolImage`. Settings keeps each icon
 beside its name in a command menu, with borderless move/remove controls at the trailing edge.
 The system glass material draws the selected face and contour together; no fill or stroke is painted
 over it. The glyph stays above `GlassEffectContainer` so a morph cannot smear it.
 
 Mouse and keyboard activation synchronously call `LauncherCoordinator.runCommand` in a transaction
 with animations disabled. No merge animation or delayed activation survives beneath the destination
-screen. Palette screens push over root search as before; Show Notes closes the palette and opens
-its existing window. The summon reveal still animates independently.
+screen. Palette screens push over root search as before. The summon reveal still animates independently.
 The compact bar lays `panelScrim` over its capsule and buttons through a mask that follows the
 reveal, as the expanded panel lays it over its glass; the selected button stays out of the mask so
 its tint reads undimmed.
@@ -281,7 +241,7 @@ At expanded launcher root, Escape clears the query while setting `forceExpanded`
 collapsing remain separate presses. The next Escape clears that flag and collapses; another closes.
 Menus and argument fields still take precedence, and sub-screen navigation keeps its own behavior.
 A summon clears `forceExpanded` whenever the field is empty, so a launcher Pop to Root Search
-restores still opens as the bar; a kept query, screen or extension restores expanded as before.
+restores still opens as the bar; a kept query or screen restores expanded as before.
 
 The glass is a background of the header, not a wrapper around it: the field keeps its one structural
 position, and a container never paints its merged glass over the row. While compact the row is
@@ -387,7 +347,7 @@ setting (`AppSettings.openOnCursorScreen`, on by default):
 **Neither case may use `NSScreen.main`**, which is documented as the screen of the window with keyboard
 focus (the frontmost app's, wherever the user last clicked). It therefore follows the user across
 displays, which is the wrong answer for both settings and made the off case do exactly what turning it
-off was meant to stop ([#270](https://github.com/abue-ammar/tinycast/issues/270)). The menu-bar display
+off was meant to stop. The menu-bar display
 is the one whose `frame.origin` is `.zero`, which is what `primary` looks for.
 
 The cursor hit test is `NSMouseInRect(mouse, screen.frame, false)`, **not** `CGRect.contains`. A mouse
@@ -425,7 +385,7 @@ would sit under the in-flight pinyin. `PalettePanel` publishes the editor's `has
 
 The same empty `query` would read as "nothing left to delete" to the bare-backspace step back, so
 `PalettePanel.sendEvent` asks the editor's `hasMarkedText()` itself and lets Backspace through to the
-IME while a composition is in flight. That covers every screen, an extension's search field included.
+IME while a composition is in flight. That covers every screen.
 
 The palette's arrow, ⇥ and esc handlers return `.ignored` while `isComposing` holds, so the IME
 pages, expands and cancels its candidate window with them. An open menu still claims them first.
@@ -469,7 +429,7 @@ The policy runs after `super.sendEvent`, so it has the last word, and it writes 
 actually differs. It must stay **symmetric**: an earlier version left the field alone and only forced
 the arrow outside it, and AppKit's own alternation over the field came straight back.
 
-All editable text controls use this same cursor policy, including extension fields. It checks visible
+All editable text controls use this same cursor policy. It checks visible
 native control bounds, since SwiftUI's hit-test can return a hosting view instead of its text field.
 Hidden or clipped controls cannot claim the cursor. The search rectangle remains the stable fallback.
 `FormTextInput` uses an `NSTextField` and its native placeholder; `FormTextArea` uses a growing
@@ -478,16 +438,15 @@ Both clip to their own bounds so AppKit's visible-rect tracking area stays insid
 Without this, the unclipped form scroll view makes each text view track the entire window, and their
 cursor claims overlap even in the gaps between fields. The page itself keeps its edge dissolve.
 Each editor session mounts fresh controls; textarea undo stays local and includes placeholder inserts.
-The textarea routes undo/redo to its own manager, as the Notes editor does in a non-activating panel.
+The textarea routes undo/redo to its own manager, as a non-activating panel requires.
 
 ## One menu at a time
 
 `RootPaletteView` holds a single `OpenMenu?` rather than a flag per menu, so "at most one is open" is
 structural instead of a pair of `onChange` handlers pushing each other closed. The ⌘K Actions menu
 hangs `.bottomTrailing`, the app menu `.bottomLeading`, and everything drawn as a header control
-(the clipboard type filter, the dictionary selector, the AI model and effort menus, an `options=`
-argument field's choices and
-a running command's `searchBarAccessory` dropdown) hangs `.belowHeaderTrailing`, under its own
+(the File Search type filter, the dictionary selector and an `options=` argument field's choices)
+hangs `.belowHeaderTrailing`, under its own
 button. Native editor inputs supply their own choices and control frame through `openInputOptions`;
 `.belowControl` aligns the menu with either edge of that field and allows it beyond the palette's bounds.
 It stays within the display's usable frame and opens above the field if there is no room below.
@@ -497,13 +456,11 @@ gain 20pt without changing other menus; each dropdown's chevron follows the open
 and a view built on demand), so ↑/↓, plain ↵, Esc and the click-away catcher serve every menu without
 knowing which is up. A screen supplies its rows as a `PopoverMenuContent` through `actions(at:)` and
 the default `menuContent` wraps them; a screen whose rows the palette's menu can't express overrides
-`menuContent` and hands over its own view instead; `ExtensionCommandScreen` is the only one, for
-both its ⌘K panel and its search-bar dropdown, and the reason the seam exists (see
-[extensions.md](extensions.md)). The view is a closure because `moveMenu` resolves the open menu on
+`menuContent` and hands over its own view instead; no screen does today, as upstream's extension
+screen did. The view is a closure because `moveMenu` resolves the open menu on
 every arrow key and needs the row count alone. Every open path goes through `open(_:highlighting:)`
 and states where the highlight starts: the first row, except the pop-up-shaped menus (the type
-filter, the dictionary selector, the AI model and effort menus, an extension's search-bar dropdown),
-which open on the choice
+filter, the dictionary selector), which open on the choice
 they already hold.
 
 **The palette window consumes a click-away press through its release.** While a menu is open,
@@ -520,12 +477,9 @@ row sits as far from it as from the search field's hairline. That height joins t
 sizing, but the separator takes no selection index, so navigation still walks only rows. A menu
 taller than its default cap ends its viewport mid-row, so the fold never lands on a separator or section
 title, and both hairlines are one device pixel.
-The app menu groups Check for Updates and Changelog, About and Support, then Settings and Quit,
-under the version header. It shares the default five-and-a-half-row cap, so it opens at the Actions
-menu's height with Settings partially visible; scrolling or keyboard navigation reveals the rest.
+The app menu holds About, then Settings and Quit, under the version header.
 Built-in action menus mark boundaries between opening or copying, managing the item, settings, and
-deletion. Menus offering one kind of action, such as calculator copies, color formats, or emoji
-transfers, keep their rows in one group.
+deletion. Menus offering one kind of action, such as calculator copies or color formats, keep their rows in one group.
 
 Every launcher Action Menu has a native, row-height search field. Footer menus place it below their
 rows; header menus place it above them. `ActionMenuSearchQuery` folds the shared fuzzy query once per
@@ -559,9 +513,7 @@ The panel is a second SwiftUI hierarchy, so it observes nothing of `RootPaletteV
 `PaletteMenuContent` may supply its own host-layer clip path. `MenuPanel` is an `AnimatedPanel` on
 `.documentWindow`, so every menu opens and closes with AppKit's native window animation (none while
 **Show animations** is off) and has no motion of its own. The close animation keeps drawing the panel after
-`orderOut`, so the controller releases the hosted tree from `orderOutAnimated`, once it is off screen. AppKit refreshes the shadow after layout and display. Each extension menu supplies its
-own clip path; the controller applies it as an opaque value and never reconstructs extension
-geometry.
+`orderOut`, so the controller releases the hosted tree from `orderOutAnimated`, once it is off screen. AppKit refreshes the shadow after layout and display.
 
 ## Menu-open input freeze
 
@@ -589,7 +541,7 @@ Plain ↵ is claimed by `RootPaletteView`'s own `onKeyPress` whenever the search
 `activateSelection` runs from there; the field carries no `onSubmit`. Letting the field submit ends
 editing, and AppKit tears the field editor down and selects the whole string when focus returns, so a
 screen opened with a carried query (the Search Files fallback) came up with that query selected. An
-IME's composition and any other focused field (the inline argument fields, an extension form) are
+IME's composition and any other focused field (the inline argument fields, a native editor form) are
 left alone: the handler returns `.ignored` for them, and their own `onSubmit` still commits.
 
 ## The query is one line
@@ -609,17 +561,14 @@ handled in `PalettePanel.sendEvent` before `super` hands the event to the respon
 - **A bare backspace**: the field editor consumes it as an edit (`onBareBackspace`).
 - **Chords with no main menu item**: ⌘, and ⌘w, which an app with a menu bar would never see here.
 - **The physical number-row slots.** `FavoriteSlots` matches ⌘1…⌘0 by key code before fixed command
-  chords, then publishes the resolved position to the active screen. Only the launcher and clipboard
-  screens intercept these slots; other screens keep their own ⌘-number shortcuts. The compact bar
+  chords, then publishes the resolved position to the active screen. Only the launcher screen
+  intercepts these slots; other screens keep their own ⌘-number shortcuts. The compact bar
   shows no favorites, but its slots still launch them.
 - **Chords AppKit has already bound to a selector.** `⌘.` is the one that bites: AppKit binds it to
   `cancelOperation:` alongside Escape, so `interpretKeyEvents` hands it to the field editor and
   `onKeyPress(keys: ["."])` never fires. Pin (⌘.) therefore arrives through `onCommandShortcut`,
   which bumps `PaletteState.pinChordToken`; `RootPaletteView` observes that and resolves the row
   through the current screen, so **which** row gets pinned still comes from `screen.rows` alone.
-- **Emoji zoom chords.** `⌘0`, `⌘+` and `⌘-` take the same `onCommandShortcut` path on the emoji
-  screen, Shift allowed since `+` is a shifted `=`. They bump `PaletteState.emojiGridZoomToken`, and
-  `EmojiScreen.zoom` applies the same bounded change as its Actions rows.
 - **Chords the window server keeps for itself.** ⌘esc is the one that bites: macOS binds it before
   any app sees it, so unlike ⌘. there is no keystroke left for `sendEvent` to intercept; a handler
   in the responder chain compiles, runs never, and looks like a palette bug. `CommandEscapeTap`
@@ -639,7 +588,7 @@ whether macOS has claimed the chord, before assuming the handler is wrong.
 ## Emacs navigation chords
 
 ⌃N/⌃P and ⌃F/⌃B navigate exactly as ↓/↑ and →/← do. The collapsed bar uses the horizontal pair
-to select Search or a shortcut; on the emoji grid all four step the selection. Other screens leave
+to select Search or a shortcut. Other screens leave
 the horizontal pair to the caret.
 
 None of them reach `onKeyPress` on their own: AppKit's key-binding table hands the field editor
@@ -682,21 +631,11 @@ claims focus is private and several levels down; there is nothing to override on
 ## Focus restoration (load-bearing)
 
 `PaletteWindowController` records `previousApp` (the frontmost app) on show. Paste then targets that
-app:
-
-- `Paster.paste` activates it and posts a synthetic ⌘V via `CGEvent`.
-- `Paster.pasteInPlace` posts ⌘V straight to the app's PID _without_ activating it, so the palette can
-  stay open and frontmost (used by "paste keeping window open").
-
-Both require the Accessibility permission (`Permissions.ensureAccessibility()`).
-
-Ordering the palette out makes AppKit pass key to the next of our panels that accepts it, and a
-non-activating panel holds the keyboard even while another app is active. So `hide` sets
-`NotesPanel.refusesInheritedKey` around the order-out unless `previousOwnWindow` is still visible:
-over another app the keyboard returns to that app, and a paste or the next keystroke cannot land in an
-open note. Summoned from a note, the note takes key back, so a paste lands there.
+app: `Paster.pasteFile` (File Search's paste) writes the file to the pasteboard, activates the app and
+posts a synthetic ⌘V via `CGEvent`, which requires the Accessibility permission
+(`Permissions.ensureAccessibility()`). `TextInjector` reads a selection from the same app.
 
 The same show also mirrors that app into `PaletteState.pasteTarget` (a `PasteTarget`: localized
-name + bundle path), so Clipboard and Emoji can name it: the footer pill reads "Paste to Notes" and
-the ⌘K paste rows carry the app's icon. Resolved once per summon, never per render, and deliberately
+name + bundle path), so the launcher and File Search can name it: a paste row reads "Paste to Notes"
+and carries the app's icon. Resolved once per summon, never per render, and deliberately
 not cleared by `prepare` (pop-to-root resets the screen, not the target).

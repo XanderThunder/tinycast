@@ -1,15 +1,11 @@
 # Signing
 
-Tinycast has two signing identities:
+Every build, Debug and Release, signs with a **stable self-signed identity** called
+`Tinycast Self-Signed`. Keeping the _same_ identity on every build is what makes macOS remember the
+Accessibility permission across rebuilds; ad-hoc signing changes every build and macOS forgets the
+grant. There is no Developer ID and no notarization: the app is built and installed on the same Mac.
 
-- **Local builds** sign with a **stable self-signed identity** called `Tinycast Self-Signed`.
-  Keeping the _same_ identity on every build is what makes macOS remember the Accessibility
-  permission across rebuilds; ad-hoc signing changes every build and macOS forgets the grant. Each
-  contributor creates their own, once (§1).
-- **Releases** sign with the team's **Developer ID** and are notarized. That identity exists only in
-  the release workflow's secrets (§2), so a contributor never needs it.
-
-## 1. Create the `Tinycast Self-Signed` identity (once)
+## Create the identity (once)
 
 Run these in a terminal. They generate a self-signed code-signing certificate and import it into your
 login keychain:
@@ -40,149 +36,12 @@ Verify it's there:
 security find-identity -p codesigning | grep "Tinycast Self-Signed"
 ```
 
-Now local builds (Xcode, VS Code F5, `xcodebuild`) sign with it, and you grant Accessibility once.
-
-## 2. The release secrets
-
-Releases read seven secrets from the repo's `release` environment (**Settings → Environments**). The
-environment deploys from `main` only, so a workflow pushed to any other branch can never read them.
-
-| Secret                              | Holds                                                                                           |
-| ----------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `DEVELOPER_ID_P12_BASE64`           | the Developer ID Application certificate and its private key, base64 `.p12`                     |
-| `DEVELOPER_ID_P12_PASSWORD`         | the password the `.p12` was exported with                                                       |
-| `NOTARY_KEY_P8_BASE64`              | an App Store Connect API team key (`.p8`) with Developer access, base64                         |
-| `NOTARY_KEY_ID`, `NOTARY_ISSUER_ID` | that key's ID and its issuer ID                                                                 |
-| `UPDATE_SIGNING_KEY`                | the release key: an Ed25519 private key, base64, whose public half is `TinycastUpdatePublicKey` |
-| `CLOUDKIT_MANAGEMENT_TOKEN`         | a CloudKit Console management token, which checks the iCloud Sync schema                        |
-
-Export the Developer ID identity alone: `security export -t identities` bundles every identity in
-the keychain. In Keychain Access, open **My Certificates**, select
-`Developer ID Application: … (J656U8XZ93)`, choose **File → Export Items…** and save a `.p12` with a
-password. Then:
-
-```sh
-base64 -i DeveloperID.p12 | gh secret set DEVELOPER_ID_P12_BASE64 --env release --repo abue-ammar/tinycast
-gh secret set DEVELOPER_ID_P12_PASSWORD --env release --repo abue-ammar/tinycast
-base64 -i AuthKey_<key-id>.p8 | gh secret set NOTARY_KEY_P8_BASE64 --env release --repo abue-ammar/tinycast
-gh secret set NOTARY_KEY_ID --env release --repo abue-ammar/tinycast --body "<key-id>"
-gh secret set NOTARY_ISSUER_ID --env release --repo abue-ammar/tinycast --body "<issuer-id>"
-gh secret set UPDATE_SIGNING_KEY --env release --repo abue-ammar/tinycast
-```
-
-The password and the private key go in at `gh`'s prompt, never through `--body`, which would leave
-them in your shell history.
-
-The release key is made once and never renewed. This prints its private half, then the public half
-that goes into `Info.plist` as `TinycastUpdatePublicKey`:
-
-```sh
-echo 'import CryptoKit; let k = Curve25519.Signing.PrivateKey()
-print(k.rawRepresentation.base64EncodedString(), k.publicKey.rawRepresentation.base64EncodedString())' |
-    xcrun swift -
-```
-
-**Renew the certificate yearly.** Apple issues a Developer ID certificate for about 13 months.
-Before it expires, the account holder creates a new one on developer.apple.com (**Developer ID
-Application**, **G2 Sub-CA**) and replaces the two `DEVELOPER_ID_P12_*` secrets. Nothing else
-changes: a shipped build stays valid because its signature carries Apple's timestamp, and macOS and
-the updater both match the team rather than the certificate. The API key does not expire.
-
-## iCloud Sync
-
-CloudKit and push are restricted entitlements: macOS refuses to launch a build claiming them unless an
-embedded provisioning profile authorizes them. So a build claims them only when it names a profile:
-
-- **By default**, `TINYCAST_ENTITLEMENTS` is `Tinycast/Tinycast.entitlements` and no profile is named.
-  A contributor's self-signed build is unchanged, and its iCloud Sync pane says it needs a signed
-  build.
-- **Releases** pass `Tinycast/TinycastCloud.entitlements` and the channel's Developer ID profile,
-  committed in `Config/Profiles/` (a profile holds no secret). `verify-signature.sh` asserts the
-  profile, the `iCloud.<bundle id>` container, Production and production push.
-- **The Dev build** signs with Apple Development and the Dev profile through a gitignored
-  `Config/Local.xcconfig`, which every target's Debug configuration includes:
-
-  ```
-  CODE_SIGN_IDENTITY = Apple Development
-  DEVELOPMENT_TEAM = J656U8XZ93
-  TINYCAST_ENTITLEMENTS = Tinycast/TinycastCloud.entitlements
-  TINYCAST_PROVISIONING_PROFILE = Tinycast Dev Development
-  ```
-
-  Install the profile once with `./Scripts/install-provisioning-profile.sh <file>`. It names this
-  Mac's UDID, so another Mac needs registering and the profile remaking. The new identity asks for
-  Accessibility again once.
-
-`TinycastCloud.entitlements` repeats the base keys: keep the two files in step. A capability change on
-an App ID invalidates its profiles; remake them and replace the files.
+Now every build (Xcode, VS Code F5, `xcodebuild`, `Scripts/install-local.sh`) signs with it, and you
+grant Accessibility once.
 
 ## Hardened runtime
 
-**Release only**, on both targets: `ENABLE_HARDENED_RUNTIME: YES`, which notarization requires. Debug
-must stay without it: hardened runtime turns on library validation, and Xcode's
-`Tinycast Dev.debug.dylib` is refused at launch because a self-signed identity carries no Team ID for
-the loader to match. The flag is not part of the designated requirement, so turning it on costs no
-Accessibility grant. Each entitlement in `Tinycast/Tinycast.entitlements` earns its place:
-
-| Entitlement                                         | Without it                                                                                                                                                               |
-| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `com.apple.security.cs.allow-jit`                   | JavaScriptCore cannot JIT, and every extension command runs on the interpreter                                                                                           |
-| `com.apple.security.automation.apple-events`        | Every Apple event is refused with `-1743` and no prompt; Get Info, the Finder selection an extension reads, and the System Events–driven system actions all die silently |
-| `com.apple.security.device.camera`                  | The camera prompt never appears and access resolves as denied                                                                                                            |
-| `com.apple.security.personal-information.calendars` | `requestFullAccessToEvents()` returns `false` in milliseconds with no dialog, and Tinycast never appears under System Settings › Calendars                               |
-
-**A usage string is not enough under the hardened runtime.** `tccd` checks the matching entitlement
-_before_ it prompts, and without it logs "requires entitlement … but it is missing" and denies on the
-spot: no dialog, no error, status still `.notDetermined`. A grant saved before the hardened runtime
-arrived keeps working, since `tccd` does not re-check it, which is why this surfaces only on fresh
-installs. Adding a protected resource therefore means adding its usage string _and_ its entitlement.
-
-`RESOURCE_ENTITLEMENTS` in `Scripts/verify-signature.sh` maps every protected resource's usage string
-to its entitlement, including resources Tinycast does not use. That grants nothing; only
-`Tinycast.entitlements` does, and a row whose usage string `Info.plist` doesn't declare is skipped. It
-is there so a future feature that adds the usage string but forgets the entitlement fails the release
-instead of shipping a prompt that can never appear.
-
-Nothing else is needed: the only `dlopen` is Apple's own IOBluetooth, so library validation is left
-on, and `node`, `ray` and shell commands are separate processes it never reaches. Bluetooth has no
-hardened-runtime entitlement.
-
-`./Scripts/verify-signature.sh <path-to-.app>` asserts all of this: the runtime flag and a
-timestamped Developer ID signature on the app _and_ every helper, an intact nested seal, no
-`get-task-allow`, and an entitlement for every usage string `Info.plist` declares. Both release jobs
-run it before submitting: a nested binary missing the runtime flag is the most common notarization
-rejection, and a usage string missing its entitlement ships a permission that can never be granted.
-
-## Update trust
-
-The updater trusts a downloaded bundle through either of two roots
-([features/updates.md](features/updates.md)):
-
-- **The release key.** `Scripts/sign-update.swift` signs every updater zip with
-  `UPDATE_SIGNING_KEY`, and refuses unless the built app's `TinycastUpdatePublicKey` is its public
-  half, so a release can never ship trusting a key the next one is not signed with. The bundle must
-  still carry a Developer ID signature, from any team, so a leaked key alone cannot ship an ad-hoc
-  build.
-- **The running copy's designated requirement**, read at runtime rather than pinned. For a Developer
-  ID build that is the team, so a certificate renewal still matches.
-
-**Never change both in one release.** A new Apple team ships signed by the old key, a new key under
-the old team, and the release after that may change the other. `Scripts/check-update-path.sh`
-enforces it: before notarizing, it downloads the last release on the channel and fails the run
-unless that release trusts the new build's key or the new build satisfies its designated
-requirement.
-
-## Developer ID stays in CI
-
-**The Developer ID identity stays a CI-only fact.** It is named in the release workflow's
-`SIGNING_IDENTITY` and nowhere else: `project.yml` keeps signing with `Tinycast Self-Signed`, so a
-contributor builds with the one they created in §1: same name, their own key, never shared.
-
-macOS keys a TCC grant to the app's designated requirement, so a certificate renewal keeps
-Accessibility and every other grant, while a new team asks for each one again.
-
-## Quarantine
-
-A release is notarized and its DMG stapled, so Gatekeeper opens a downloaded copy without a warning.
-A local `build-dmg.sh` DMG is self-signed and never notarized, so it is for testing on the Mac that
-built it, not for sharing.
+Release builds turn on `ENABLE_HARDENED_RUNTIME`; Debug must not, because library validation refuses
+Xcode's `Tinycast Dev.debug.dylib` from an identity with no Team ID. Under the hardened runtime a usage
+string alone is not enough: `tccd` denies silently unless `Tinycast/Tinycast.entitlements` also holds
+the matching entitlement, so a new protected resource needs both.
