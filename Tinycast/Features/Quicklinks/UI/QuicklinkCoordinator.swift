@@ -224,10 +224,6 @@ final class QuicklinkCoordinator {
         _ quicklink: Quicklink, link: String, forcingDefaultApp: Bool
     ) {
         if windowController.isVisible { paletteCoordinator.hidePalette(restoreFocus: false) }
-        // Tinycast's own link stays in-process: chosen here, so it never asks or steals focus.
-        if let url = URL(string: link), core.deepLinkCoordinator.handles(url) {
-            return core.deepLinkCoordinator.open(url, source: .tinycast)
-        }
         let openWith = forcingDefaultApp ? nil : quicklink.openWithBundleID
         Task {
             do throws(QuicklinkLauncher.Failure) {

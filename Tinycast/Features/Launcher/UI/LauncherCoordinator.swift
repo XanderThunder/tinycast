@@ -228,19 +228,6 @@ final class LauncherCoordinator {
         }
     }
 
-    func deepLink(for app: AppEntry) -> URL? {
-        core.deepLinkCoordinator.url(forEntryID: app.id, values: argumentValues(for: app))
-    }
-
-    func deepLink(for action: HotKeyAction) -> URL? {
-        action.entryID.flatMap { core.deepLinkCoordinator.url(forEntryID: $0) }
-    }
-
-    func copyDeepLink(_ url: URL) {
-        paletteCoordinator.hidePalette(restoreFocus: false)
-        core.deepLinkCoordinator.copy(url)
-    }
-
     /// Focus is never handed back: the relaunch takes it, or the app that refused has it.
     func restart(_ app: AppEntry) {
         guard app.kind == .application, let bundleID = app.bundleID else { return }

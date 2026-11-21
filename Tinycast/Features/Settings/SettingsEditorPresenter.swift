@@ -380,12 +380,6 @@ extension View {
         editorPresenter: SettingsEditorPresenter
     ) -> some View {
         environment(\.settingsEditorPresenter, editorPresenter)
-            .environment(
-                \.shortcutDeepLink,
-                ShortcutDeepLink(
-                    url: { [launcher = core.launcherCoordinator] in launcher.deepLink(for: $0) },
-                    copy: { [links = core.deepLinkCoordinator] in links.copy($0) })
-            )
             .environment(navigation)
             .environment(core)
             .environment(core.settings)

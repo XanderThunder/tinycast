@@ -59,13 +59,6 @@ struct SettingsBackupTests {
             "compact shortcuts ride the settings backup",
             mirrored["compactBarCommands"] == .compactBarCommands)
 
-        // Named one by one: a backup now carries content, so it is far likelier to be sent on.
-        for key: AppSettingsKey in [.allowedDeepLinks] {
-            check(
-                "\(key.rawValue) stays out of a backup",
-                excluded[key.rawValue] != nil && mirrored.values.allSatisfy { $0 != key })
-        }
-
         // A reason that only echoes the key name explains nothing, so it fails like a missing one.
         let emptyReasons = excluded.filter { key, reason in
             let trimmed = reason.trimmingCharacters(in: .whitespaces)

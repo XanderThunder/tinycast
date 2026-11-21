@@ -129,16 +129,10 @@ final class AppCore {
     @ObservationIgnored private(set) lazy var cameraCoordinator = CameraCoordinator(core: self)
     @ObservationIgnored private(set) lazy var dictionaryCoordinator = DictionaryCoordinator(
         paletteCoordinator: paletteCoordinator)
-    @ObservationIgnored private(set) lazy var deepLinkCoordinator = DeepLinkCoordinator(
-        scheme: AppURLScheme.current, settings: settings, hotKeys: hotKeys,
-        paletteCoordinator: paletteCoordinator, settingsCoordinator: settingsCoordinator,
-        core: self)
 
     @ObservationIgnored private lazy var windowController = PaletteWindowController(core: self)
     @ObservationIgnored private lazy var messageHUD = MessageHUDController(settings: settings)
     private(set) var isShowingDialog = false
-    /// A link that launched the app can arrive before `start` wires anything; it waits, then runs.
-    @ObservationIgnored private var pendingURLs: [URL]? = []
     var isDimmingPaletteForDialog: Bool { isShowingDialog && windowController.isVisible }
     @ObservationIgnored private lazy var dialogs = DialogController(
         settings: settings,
@@ -280,13 +274,6 @@ final class AppCore {
                 paletteCoordinator.showPalette(mode: .launcher)
             }
         }
-        openPendingURLs()
-    }
-
-    private func openPendingURLs() {
-        let waiting = pendingURLs ?? []
-        pendingURLs = nil
-        waiting.forEach(handleOpenURL)
     }
 
     func handleReopen() {
@@ -294,15 +281,6 @@ final class AppCore {
         if onboardingCoordinator.focusExisting() { return }
         if customCommandCoordinator.focusOutputWindow() { return }
         paletteCoordinator.showPalette(mode: .launcher, restoreAnyMode: true)
-    }
-
-    func handleOpenURL(_ url: URL) {
-        if pendingURLs != nil {
-            pendingURLs?.append(url)
-            return
-        }
-        guard deepLinkCoordinator.handles(url) else { return }
-        deepLinkCoordinator.open(url)
     }
 
     func allowsHotKeyAction(_ action: HotKeyAction) -> Bool {

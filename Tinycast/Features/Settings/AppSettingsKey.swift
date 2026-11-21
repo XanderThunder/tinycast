@@ -51,5 +51,4 @@ enum AppSettingsKey: String, CaseIterable {
     case quicklinkConfirmsBeforeDelete = "quicklinkConfirmsBeforeDelete"
     case appleShortcutsEnabled = "appleShortcutsEnabled"
     case settingsFileEnabled = "settingsFileEnabled"
-    case allowedDeepLinks = "allowedDeepLinks"
 }
