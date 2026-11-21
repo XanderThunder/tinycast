@@ -943,7 +943,7 @@ struct CalcTests {
         expectDisplay("100XRP to usd", "50.00 USD")
         expectDisplay("2 x 100xrp to usd", "100.00 USD")
         expectDisplay("-100 xrp to usd", "-50.00 USD")
-        for code in ["XAF", "XPF", "XCD", "XCG", "XDR", "XAU", "XAG", "XLM", "XMR"] {
+        for code in ["XAF", "XPF", "XCD", "XLM"] {
             expectError("100 \(code.lowercased()) to usd", "No exchange rate for \(code).")
             expectError("100\(code) in usd", "No exchange rate for \(code).")
         }
@@ -975,7 +975,7 @@ struct CalcTests {
         check(
             "CurrencyData sizes", expected: "true",
             got:
-                "\(CurrencyData.all.count >= 150 && CurrencyData.signs.count >= 20 && CurrencyData.aliases.count >= 100)"
+                "\(CurrencyData.all.count >= 140 && CurrencyData.signs.count >= 20 && CurrencyData.aliases.count >= 100)"
         )
         // Retired codes are filtered out, so a currency nobody spends can't shadow a live one
         expectNil("1 hrk to usd")
@@ -1149,7 +1149,6 @@ struct CalcTests {
         expectError("1 shib to usd", "No exchange rate for SHIB.")
         // Tickers are recognized rather than swallowed by the unit table
         expectError("1 dash to usd", "No exchange rate for DASH.")
-        expectError("1 neo to usd", "No exchange rate for NEO.")
         // A ticker outranks a generated noun, and only that noun: `soles` still reaches PEN
         expectBadges("1 sol to usd", source: "Solana", target: "US Dollar")
         expectError("1 soles to usd", "No exchange rate for PEN.")

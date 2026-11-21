@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 // Generate Tinycast/Features/Calculator/Model/CurrencyData.generated.swift.
 //
-// Usage: node Scripts/gen-currencies.js [currencies.json cldr-currencies.json cldr-currency-data.json]
+// Usage: node Scripts/gen-currencies.js [currencies.json rates.json cldr-currencies.json cldr-currency-data.json]
 // Downloads the sources when paths aren't given. Run occasionally, commit the output.
 //
 // Three sources, joined on the ISO code:
-//   - Coinbase's fiat currency list decides *which* currencies exist — the provider CurrencyRateStore
-//     pulls rates from, so the table lists what the app can price.
+//   - Coinbase decides *which* currencies exist: a code its fiat list names *and* its exchange-rates
+//     feed prices, the feed CurrencyRateStore reads, so the table never lists what the app can't price.
 //   - CLDR's supplemental currency data decides which of those are still *in use*. The list carries
 //     no retirement dates and happily includes codes their countries abandoned years ago.
 //   - CLDR's `en` numbers data decides what humans *call* them: display name, currency sign, and the
@@ -21,13 +21,14 @@
 const fs = require("fs");
 const path = require("path");
 
-const RATES = "https://api.coinbase.com/v2/currencies";
+const FIAT = "https://api.coinbase.com/v2/currencies";
+const RATES = "https://api.coinbase.com/v2/exchange-rates?currency=USD";
 const CLDR = "https://raw.githubusercontent.com/unicode-org/cldr-json/main/cldr-json";
 const CLDR_NAMES = `${CLDR}/cldr-numbers-full/main/en/currencies.json`;
 const CLDR_CURRENCY_DATA = `${CLDR}/cldr-core/supplemental/currencyData.json`;
 
-// The feed serves ~170 codes and ~159 survive the filter; well below that is a bad response.
-const MIN_EXPECTED = 150;
+// The fiat list holds ~165 codes and ~147 survive the filters; well below that is a bad response.
+const MIN_EXPECTED = 140;
 // CLDR carries no name for the Crown Dependencies' pounds, and the feed supplies no names at all.
 const UNNAMED = { GGP: "Guernsey Pound", IMP: "Isle of Man Pound", JEP: "Jersey Pound" };
 
@@ -77,8 +78,7 @@ function swiftString(value) {
 }
 
 /// Codes CLDR knows at all, and codes it still shows some region using. A code CLDR has never heard
-/// of stays in: absence of evidence isn't retirement, and it is what keeps CNH, XAU, XDR and the
-/// Crown Dependencies' pounds, none of which are any region's tender.
+/// of stays in: absence of evidence isn't retirement.
 function inUse(currencyData) {
   const known = new Set();
   const live = new Set();
@@ -94,17 +94,22 @@ function inUse(currencyData) {
 }
 
 async function main() {
-  const feed = await load(RATES, process.argv[2]);
-  const cldr = await load(CLDR_NAMES, process.argv[3]);
-  const supplemental = await load(CLDR_CURRENCY_DATA, process.argv[4]);
+  const feed = await load(FIAT, process.argv[2]);
+  const ratesFeed = await load(RATES, process.argv[3]);
+  const cldr = await load(CLDR_NAMES, process.argv[4]);
+  const supplemental = await load(CLDR_CURRENCY_DATA, process.argv[5]);
   const listed = feed?.data;
   if (!Array.isArray(listed)) throw new Error("unexpected feed shape: data missing");
+  const priced = ratesFeed?.data?.rates;
+  if (!priced || typeof priced !== "object") throw new Error("unexpected rates shape: data.rates missing");
   const names = cldr?.main?.en?.numbers?.currencies;
   if (!names) throw new Error("unexpected CLDR shape: main.en.numbers.currencies missing");
   if (!supplemental?.supplemental?.currencyData?.region)
     throw new Error("unexpected CLDR shape: supplemental.currencyData.region missing");
 
-  const quoted = new Set(listed.map((entry) => entry?.id).filter((id) => typeof id === "string"));
+  const quoted = new Set(
+    listed.map((entry) => entry?.id).filter((id) => typeof id === "string" && id in priced),
+  );
 
   const stillInUse = inUse(supplemental.supplemental.currencyData);
   const codes = [...quoted]

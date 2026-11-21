@@ -163,15 +163,11 @@ enum CalcCurrency {
         ("ETC", "Ethereum Classic", []),
         ("ETH", "Ethereum", ["ethereum", "ether"]),
         ("LTC", "Litecoin", ["litecoin"]),
-        ("LUNA", "Terra", ["terra"]),
-        ("NEO", "Neo", []),
         ("POL", "Polygon", ["polygon"]),
         ("SHIB", "Shiba Inu", ["shiba"]),
         ("SOL", "Solana", ["solana"]),
-        ("TRX", "TRON", ["tron"]),
         ("USDT", "Tether", ["tether"]),
         ("XLM", "Stellar", ["stellar"]),
-        ("XMR", "Monero", ["monero"]),
         ("XRP", "XRP", ["ripple"])
     ]
 

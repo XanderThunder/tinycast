@@ -761,20 +761,18 @@ A currency pair also outranks a typed-arithmetic error. Typed arithmetic reads `
 The table is **generated except for the judgement calls**. `node Scripts/gen-currencies.js` joins three
 sources on the ISO code and emits `CurrencyData.generated.swift`:
 
-- **Coinbase's fiat currency list** (`api.coinbase.com/v2/currencies`) decides which currencies
-  exist: the provider the rates come from. The committed table predates the switch, so a few of its
-  codes (`CNH`, the metals, `XDR`, the Crown Dependencies' pounds) are ones Coinbase doesn't price.
+- **Coinbase** decides which currencies exist: a code must be on its fiat list
+  (`api.coinbase.com/v2/currencies`) _and_ priced by the exchange-rates feed the app reads, so the
+  table never offers a currency the calculator can't convert.
 - **CLDR's supplemental currency data** decides which of those are still spent. The list carries no
   retirement metadata and happily quotes codes their countries abandoned years ago, so a code CLDR
   marks live in some region is kept, a code CLDR retired everywhere is dropped, and a code CLDR never
-  mentions is also kept; absence of evidence is not retirement, and that distinction is what
-  preserves `CNH`, the metals, `XDR` and the Crown Dependencies' pounds, none of which are any
-  region's tender. 159 codes survive.
+  mentions is also kept; absence of evidence is not retirement. 147 codes survive.
 - **CLDR** (`en`) decides what humans call them: display name, currency sign, singular/plural noun.
   Read from the pinned `cldr-json` checkout, not the host's `Intl`, whose output shifts with the
   local ICU version.
 
-Only _unambiguous_ CLDR data is emitted: 26 signs and 130 nouns. CLDR itself supplies the sign
+Only _unambiguous_ CLDR data is emitted: 26 signs and 121 nouns. CLDR itself supplies the sign
 tie-break: it writes every dollar but USD as `CA$`/`A$`/`NT$`, so plain `$` is claimed by exactly one
 currency. Bare Latin letters CLDR lists as symbols (`P` for BWP, `L` for HNL) are dropped, since a
 letter is indistinguishable from a word to the tokenizer. Accented nouns are emitted both as written
@@ -801,8 +799,8 @@ it implies is carried here instead, with CLDR as its source. The standard code a
 ### Crypto
 
 `CalcCurrency.crypto` is the third hand-written table, and the only one with no external source at
-all: no standards body names a coin. The list is therefore a product choice; Coinbase prices most of
-it, and `LUNA`, `NEO`, `TRX` and `XMR` currently go unquoted. A symbol the feed omits reports
+all: no standards body names a coin. The list is therefore a product choice, kept to coins Coinbase
+prices. A symbol the feed omits reports
 `No exchange rate for <CODE>.`, exactly like an unquoted fiat code, and starts working again on its
 own if the feed picks it back up.
 
