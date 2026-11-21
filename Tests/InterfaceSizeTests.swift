@@ -60,7 +60,6 @@ struct InterfaceSizeTests {
         expect(m.radius.panel, Theme.Radius.panel, "radius.panel")
         expect(m.radius.row, Theme.Radius.row, "radius.row")
         expect(m.radius.formField, Theme.Radius.formField, "radius.formField")
-        expect(m.radius.emojiCell, Theme.Radius.emojiCell, "radius.emojiCell")
         expect(m.radius.menu, Theme.Radius.menu, "radius.menu")
         expect(m.radius.menuRow, Theme.Radius.menuRow, "radius.menuRow")
         expect(m.radius.barControl, Theme.Radius.barControl, "radius.barControl")
@@ -109,7 +108,6 @@ struct InterfaceSizeTests {
         expect(m.size.menuRowHeight, Theme.Size.menuRowHeight, "size.menuRowHeight")
         expect(m.size.menuRowsMaxHeight, Theme.Size.menuRowsMaxHeight, "size.menuRowsMaxHeight")
         expect(m.size.clipboardListWidth, Theme.Size.clipboardListWidth, "size.clipboardListWidth")
-        expect(m.size.emojiCell, Theme.Size.emojiCell, "size.emojiCell")
         expect(
             m.size.dialogCompactWidth, Theme.Size.dialogCompactWidth,
             "size.dialogCompactWidth")
@@ -229,7 +227,7 @@ struct InterfaceSizeTests {
             ("spacing.chatFollowTailSlack", m.spacing.chatFollowTailSlack),
             ("radius.panel", m.radius.panel), ("radius.row", m.radius.row),
             ("radius.formField", m.radius.formField),
-            ("radius.emojiCell", m.radius.emojiCell), ("radius.menu", m.radius.menu),
+            ("radius.menu", m.radius.menu),
             ("radius.menuRow", m.radius.menuRow),
             ("radius.barControl", m.radius.barControl), ("radius.menuPanel", m.radius.menuPanel),
             ("radius.dialogSymbol", m.radius.dialogSymbol),
@@ -260,7 +258,6 @@ struct InterfaceSizeTests {
             ("size.menuRowHeight", m.size.menuRowHeight),
             ("size.menuRowsMaxHeight", m.size.menuRowsMaxHeight),
             ("size.clipboardListWidth", m.size.clipboardListWidth),
-            ("size.emojiCell", m.size.emojiCell),
             ("size.dialogCompactWidth", m.size.dialogCompactWidth),
             ("size.dialogButtonHeight", m.size.dialogButtonHeight),
             ("size.dialogSymbol", m.size.dialogSymbol),

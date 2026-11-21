@@ -284,7 +284,7 @@ final class HotKeyManager {
     func conflictOwner(of binding: HotKeyBinding, excluding action: HotKeyAction) -> String? {
         for candidate in candidateActions where candidate != action {
             guard let other = self.binding(for: candidate) else { continue }
-            if binding.conflicts(with: other, holdsModifier: false) {
+            if binding.conflicts(with: other) {
                 return displayName(of: candidate)
             }
         }
@@ -356,7 +356,7 @@ final class HotKeyManager {
             guard let binding = binding(for: action), binding.usesModifierTapMonitor else { continue }
             modifierTaps[binding] = action
         }
-        modifierTapMonitor.update(bound: Set(modifierTaps.keys), holdKey: nil)
+        modifierTapMonitor.update(bound: Set(modifierTaps.keys))
     }
 
     func perform(_ action: HotKeyAction) {

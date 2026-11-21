@@ -112,8 +112,6 @@ struct PaletteNavigationTests {
             quicklink.pop(preservingSelection: true) && quicklink.mode == .quicklinks
                 && quicklink.query == "GitHub" && quicklink.restoredSelection == 1,
             "leaving a quicklink editor restores its browser query and row")
-        quicklink.pushCarryingQuery(mode: .launcher)
-        expect(quicklink.restoredSelection == nil, "a ring hop does not carry the restored row along")
         expect(
             !PaletteMode.quicklinks.isNativeEditor,
             "native editor keyboard routing excludes browsers")
@@ -174,16 +172,7 @@ struct PaletteNavigationTests {
         ringed.resetNavigation()
         expect(
             !ringed.canGoBack && ringed.mode == .fileSearch,
-            "closing the Tab ring drops the stack without disturbing the screen")
-
-        let hopped = searchingLauncher()
-        hopped.pushCarryingQuery(mode: .fileSearch)
-        expect(
-            hopped.mode == .fileSearch && hopped.query == "clipboard" && hopped.selection == 3,
-            "a ring hop carries the query and the row it was on")
-        expect(
-            hopped.pop() && hopped.mode == .launcher && hopped.query == "clipboard",
-            "and the screen it crossed from is the step back")
+            "resetting navigation drops the stack without disturbing the screen")
 
         let pasted = searchingLauncher()
         pasted.query = "\nfirst pasted row,\r\nsecond pasted row\u{2028}third\n"

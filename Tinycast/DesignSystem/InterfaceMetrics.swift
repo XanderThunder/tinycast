@@ -37,7 +37,6 @@ struct InterfaceMetrics: Equatable, Sendable {
         var panel: CGFloat { scaledPoints(Theme.Radius.panel, scale) }
         var row: CGFloat { scaledPoints(Theme.Radius.row, scale) }
         var formField: CGFloat { scaledPoints(Theme.Radius.formField, scale) }
-        var emojiCell: CGFloat { scaledPoints(Theme.Radius.emojiCell, scale) }
         var menu: CGFloat { scaledPoints(Theme.Radius.menu, scale) }
         var menuRow: CGFloat { scaledPoints(Theme.Radius.menuRow, scale) }
         var barControl: CGFloat { scaledPoints(Theme.Radius.barControl, scale) }
@@ -91,7 +90,6 @@ struct InterfaceMetrics: Equatable, Sendable {
             (Theme.Size.menuVisibleRows * (menuRowHeight + menuRowSpacing)).rounded()
         }
         var clipboardListWidth: CGFloat { scaledPoints(Theme.Size.clipboardListWidth, scale) }
-        var emojiCell: CGFloat { scaledPoints(Theme.Size.emojiCell, scale) }
 
         var dialogCompactWidth: CGFloat { scaledPoints(Theme.Size.dialogCompactWidth, scale) }
         var dialogButtonHeight: CGFloat {

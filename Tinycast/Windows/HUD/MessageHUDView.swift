@@ -1,52 +1,20 @@
 import SwiftUI
 
 struct MessageHUDView: View {
-    enum Accessory {
-        case tone(DialogTone)
-        case progress
-    }
-
     private static let glowOpacity = 0.14
     private static let glowRadius: CGFloat = 150
     private static let rimOpacity = 0.25
 
     let message: String
-    let accessory: Accessory
-    var onCancel: (() -> Void)? = nil
-    @State private var hovered = false
+    let tone: DialogTone
     @Environment(\.metrics) private var metrics
 
     var body: some View {
-        Group {
-            if let onCancel {
-                Button(action: onCancel) {
-                    content
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Cancel \(message)")
-            } else {
-                content
-            }
-        }
-        .onHover { isHovered in
-            if onCancel != nil {
-                withAnimation(.easeOut(duration: Theme.Duration.hover)) {
-                    hovered = isHovered
-                }
-            }
-        }
-    }
-
-    private var tint: Color {
-        switch accessory {
-        case .tone(let tone): tone.tint
-        case .progress: Theme.Colors.progress
-        }
-    }
-
-    private var content: some View {
         HStack(spacing: metrics.spacing.md) {
-            mark
+            Image(systemName: tone.hudSymbol)
+                .foregroundStyle(tone.tint)
+                .font(metrics.typography.menuIcon)
+                .frame(width: metrics.size.menuIcon, height: metrics.size.menuIcon)
             Text(message)
                 .font(metrics.typography.bar)
                 .foregroundStyle(Color.primary)
@@ -57,7 +25,7 @@ struct MessageHUDView: View {
         .frame(maxWidth: metrics.size.hudMaxWidth, alignment: .leading)
         .fixedSize()
         .background { glow }
-        .background(hovered ? Theme.Colors.controlHover : Theme.Colors.panelScrim)
+        .background(Theme.Colors.panelScrim)
         .background(GlassEffectView())
         .clipShape(Capsule())
         .overlay { rim }
@@ -67,7 +35,7 @@ struct MessageHUDView: View {
         GeometryReader { proxy in
             Capsule().fill(
                 RadialGradient(
-                    colors: [tint.opacity(Self.glowOpacity), tint.opacity(0.03), .clear],
+                    colors: [tone.tint.opacity(Self.glowOpacity), tone.tint.opacity(0.03), .clear],
                     center: UnitPoint(
                         x: (metrics.spacing.xl + metrics.size.menuIcon / 2) / proxy.size.width,
                         y: 0.5),
@@ -77,45 +45,10 @@ struct MessageHUDView: View {
 
     private var rim: some View {
         Capsule().strokeBorder(
-            hovered
-                ? AnyShapeStyle(Theme.Colors.border)
-                : AnyShapeStyle(
-                    LinearGradient(
-                        colors: [tint.opacity(Self.rimOpacity), tint.opacity(0.06), .clear],
-                        startPoint: .leading, endPoint: .trailing)),
+            LinearGradient(
+                colors: [tone.tint.opacity(Self.rimOpacity), tone.tint.opacity(0.06), .clear],
+                startPoint: .leading, endPoint: .trailing),
             lineWidth: Theme.Size.hairline)
-    }
-
-    /// One box for both marks, so swapping a spinner for its outcome cannot resize the pill.
-    private var mark: some View {
-        Group {
-            if hovered, onCancel != nil {
-                Image(systemName: "xmark")
-                    .font(metrics.typography.menuIcon.weight(.semibold))
-                    .foregroundStyle(Theme.Colors.textSecondary)
-                    .frame(width: metrics.size.menuIcon, height: metrics.size.menuIcon)
-                    .transition(.opacity)
-            } else {
-                symbol
-                    .font(metrics.typography.menuIcon)
-                    .frame(width: metrics.size.menuIcon, height: metrics.size.menuIcon)
-                    .transition(.opacity)
-            }
-        }
-    }
-
-    @ViewBuilder
-    private var symbol: some View {
-        switch accessory {
-        case .tone(let tone):
-            Image(systemName: tone.hudSymbol)
-                .foregroundStyle(tone.tint)
-        case .progress:
-            // A `ProgressView` spinner is drawn by AppKit and ignores every tint it is given.
-            Image(systemName: "progress.indicator")
-                .foregroundStyle(Theme.Colors.progress)
-                .symbolEffect(.variableColor.iterative.dimInactiveLayers.nonReversing)
-        }
     }
 }
 

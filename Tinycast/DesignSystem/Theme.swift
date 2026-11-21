@@ -30,8 +30,6 @@ enum Theme {
         static let panel: CGFloat = 26
         static let row: CGFloat = 10
         static let formField: CGFloat = 10
-        /// Emoji tiles are roomier than list rows, so their corners take one larger step.
-        static let emojiCell: CGFloat = 12
         static let menu: CGFloat = 6
         static let menuRow: CGFloat = 10
         /// A header pop-up button; the footer's action pills stay capsules.
@@ -107,7 +105,6 @@ enum Theme {
         /// The uninstall list's leading checkbox / lock glyph.
         static let checkbox: CGFloat = 16
         static let clipboardListWidth: CGFloat = 290
-        static let emojiCell: CGFloat = 56
         static let menuWidth: CGFloat = 276
         static let formMenuMinimumWidth: CGFloat = 200
         static let formMenuExtraRowsHeight: CGFloat = 20
@@ -281,7 +278,6 @@ enum Theme {
         static let menuIcon = Font.body
         static let menuSymbolSize: CGFloat = 14
         static let menuSymbolWeight = Font.Weight.medium
-        static let composerSend = Font.system(size: 13, weight: .bold)
     }
 
     enum Colors {
@@ -304,7 +300,6 @@ enum Theme {
         /// Selection fill, shared by every list so they look identical.
         static let selection = ramp(dark: 0.10, light: 0.09)
         static let rowHover = ramp(dark: 0.05, light: 0.045)
-        static let emojiCell = ramp(dark: 0.045, light: 0.04)
         static let menuHover = ramp(dark: 0.10, light: 0.09)
         static let separator = ramp(dark: 0.10, light: 0.12)
         /// Small control surfaces: kbd chips, glyph tiles.
@@ -360,29 +355,11 @@ enum Theme {
         static let destructive = Color.red
         static let success = Color.green
         static let warning = Color.orange
-        static let composerSend = ramp(dark: 0.92, light: 0.92)
         /// Progress tint: the message pill's spinner while the work behind it is still running.
         static let progress = Color.blue
         /// The command output window's page: a flat surface the log sits directly on.
         static let terminalSurface = adaptive(
             dark: .srgbInk(0.07, alpha: 1), light: .srgbInk(0.99, alpha: 1))
-
-        enum Syntax {
-            static let keyword = pair(dark: 0xFC5FA3, light: 0xAD3DA4)
-            static let string = pair(dark: 0xFC6A5D, light: 0xD12F1B)
-            static let number = pair(dark: 0xD0BF69, light: 0x272AD8)
-            static let type = pair(dark: 0x5DD8FF, light: 0x1F7A85)
-            static let function = pair(dark: 0x67B7A4, light: 0x2B6A72)
-            static let constant = pair(dark: 0xD0A8FF, light: 0x6C36A9)
-            static let attribute = pair(dark: 0xFD8F3F, light: 0x78492A)
-            static let property = pair(dark: 0x6BBCDD, light: 0x0F68A0)
-            static let inserted = pair(dark: 0x67D97E, light: 0x1F7F3A)
-            static let deleted = pair(dark: 0xFC6A5D, light: 0xC0301F)
-
-            private static func pair(dark: UInt32, light: UInt32) -> Color {
-                adaptive(dark: rgb(dark), light: rgb(light))
-            }
-        }
     }
 
     enum IconTile {

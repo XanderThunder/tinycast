@@ -18,12 +18,12 @@ enum BackupArchive {
         }
     }
 
-    /// No `UID`/`GID` to restore a foreign owner, no `IDX` to dangle; `MTM` feeds the note sort.
+    /// No `UID`/`GID` to restore a foreign owner, no `IDX` to dangle.
     private static var keySet: ArchiveHeader.FieldKeySet? {
         ArchiveHeader.FieldKeySet("TYP,PAT,DAT,MOD,MTM")
     }
 
-    /// LZFSE, not LZMA: the payload is dominated by PNGs that are already compressed.
+    /// LZFSE, not LZMA: the payload is small JSON, and LZFSE decodes far faster.
     static func seal(directory: URL, into file: URL) throws {
         guard let keySet,
             let destination = ArchiveByteStream.fileStream(

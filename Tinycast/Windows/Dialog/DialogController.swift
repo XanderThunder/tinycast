@@ -158,13 +158,6 @@ final class DialogController: NSObject, NSWindowDelegate {
     private static let centerLift: CGFloat = 0.08
     // MARK: - NSWindowDelegate
 
-    /// After AppKit's own first-responder pick, which a view's focus request can't outlast.
-    func windowDidBecomeKey(_ notification: Notification) {
-        guard let panel, notification.object as? NSWindow === panel else { return }
-        // A text field must be made first responder by AppKit; SwiftUI's request for one is lost.
-        panel.focusFirstTextField()
-    }
-
     /// Click-away resolves as a dismissal rather than leaving an orphaned dialog behind.
     func windowDidResignKey(_ notification: Notification) {
         guard let panel, notification.object as? NSWindow === panel else { return }

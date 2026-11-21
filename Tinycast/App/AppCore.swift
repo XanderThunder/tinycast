@@ -536,15 +536,6 @@ final class AppCore {
         messageHUD.show(message: message, tone: tone)
     }
 
-    /// The same pill with a spinner, for work the reader started and cannot otherwise see running.
-    func showProgress(_ message: String, onCancel: (() -> Void)? = nil) {
-        messageHUD.showProgress(message: message, onCancel: onCancel)
-    }
-
-    func hideProgress() {
-        messageHUD.dismiss()
-    }
-
     func pickVolume(current: Float32) async -> Float32? {
         await dialogs.pickVolume(current: current)
     }

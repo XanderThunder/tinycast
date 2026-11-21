@@ -104,12 +104,6 @@ final class PaletteState {
         return true
     }
 
-    /// Tab's step deeper into the ring: the screen crossed from is the step back, query and all.
-    func pushCarryingQuery(mode: PaletteMode) {
-        backStack.append(PaletteFrame(mode: self.mode, query: query, selection: selection))
-        self.mode = mode
-    }
-
     /// The search field is one line, so pasted line breaks become spaces; true when it rewrote.
     func collapseQueryLineBreaks() -> Bool {
         guard query.contains(where: \.isNewline) else { return false }
@@ -159,10 +153,6 @@ final class PaletteState {
     func rewriteQuery(_ text: String) {
         query = text
         queryRewriteToken = UUID()
-    }
-
-    func preserveSelection() {
-        restoredSelection = selection
     }
 
     func noteFavoriteSlot(_ index: Int) {
