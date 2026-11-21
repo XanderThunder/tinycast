@@ -11,10 +11,6 @@ enum BackupActions {
     struct RaycastOutcome {
         var summary: SettingsBackup.ApplySummary
         var clipboardImported: Int
-        var snippetsImported: Int
-        var snippetsNeedEnabling: Bool
-        /// Set when the snippet files couldn't be written; the rest of the import still applied.
-        var snippetsError: String?
         var quicklinksImported: Int
         /// Set when the library wouldn't open; the rest of the import still applied.
         var quicklinksError: String?
@@ -144,20 +140,6 @@ enum BackupActions {
             }
         }.value
         // Reported, not thrown: it must not abort the rest of what was asked for.
-        var snippetsImported = 0
-        var snippetsError: String?
-        if !result.snippets.isEmpty {
-            do {
-                // Start the store first, so imported snippets reach the launcher at once.
-                if core.settings.snippetsEnabled {
-                    await core.snippetsStore.start()
-                }
-                snippetsImported =
-                    try await core.snippetsStore.importSnippets(result.snippets).count
-            } catch {
-                snippetsError = error.localizedDescription
-            }
-        }
         var quicklinksImported = 0
         var quicklinksError: String?
         if !result.quicklinks.isEmpty {
@@ -177,9 +159,6 @@ enum BackupActions {
         return RaycastOutcome(
             summary: summary,
             clipboardImported: imported,
-            snippetsImported: snippetsImported,
-            snippetsNeedEnabling: snippetsImported > 0 && !core.settings.snippetsEnabled,
-            snippetsError: snippetsError,
             quicklinksImported: quicklinksImported,
             quicklinksError: quicklinksError,
             missingImages: result.missingImages)
@@ -224,14 +203,12 @@ enum BackupActions {
         }
         var imported: [String] = []
         if summary.clipboard > 0 { imported.append(String(localized: "\(summary.clipboard) clips")) }
-        if summary.snippets > 0 { imported.append(String(localized: "\(summary.snippets) snippets")) }
         if summary.learning > 0 {
             imported.append(String(localized: "\(summary.learning) learning records"))
         }
         if !imported.isEmpty {
             parts.append(String(localized: "Imported \(imported.formatted(.list(type: .and)))."))
         }
-        if summary.snippetsNeedEnabling { parts.append(snippetsNeedEnablingText) }
         parts.append(contentsOf: summary.problems)
         return parts.isEmpty ? nothingImportedText : parts.joined(separator: " ")
     }
@@ -250,10 +227,6 @@ enum BackupActions {
 
     static let nothingImportedText = String(localized: "Nothing to import from this file.")
 
-    /// No import may grant keystroke listening, so say the switch an imported keyword needs is off.
-    private static let snippetsNeedEnablingText =
-        String(localized: "Turn on Snippets in Settings to use their keywords.")
-
     /// Not everything an import applies settles in the running app, so say to relaunch.
     private static let restartAfterImportText = String(localized: "Quit and reopen Tinycast to finish.")
 
@@ -262,13 +235,6 @@ enum BackupActions {
         if let applied = appliedText(outcome.summary) { parts.append(applied) }
         if outcome.clipboardImported > 0 {
             parts.append(String(localized: "Imported \(outcome.clipboardImported) clipboard entries."))
-        }
-        if outcome.snippetsImported > 0 {
-            parts.append(String(localized: "Imported \(outcome.snippetsImported) snippets."))
-        }
-        if outcome.snippetsNeedEnabling { parts.append(snippetsNeedEnablingText) }
-        if let snippetsError = outcome.snippetsError {
-            parts.append(String(localized: "Couldn’t import snippets: \(snippetsError)"))
         }
         if outcome.quicklinksImported > 0 {
             parts.append(String(localized: "Imported \(outcome.quicklinksImported) quicklinks."))

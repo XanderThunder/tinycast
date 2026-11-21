@@ -1,7 +1,7 @@
 enum SettingsTab: CaseIterable, Identifiable {
     case general, applications, systemSettings, systemActions, commands, quicklinks,
         appleShortcuts,
-        fallbacks, clipboard, snippets, fileSearch, windowManagement, navigation,
+        fallbacks, clipboard, fileSearch, windowManagement, navigation,
         permissions, backup, about
     /// The case, never an index: a selectable `List` flattens section and row IDs together.
     var id: Self { self }
@@ -23,7 +23,6 @@ enum SettingsTab: CaseIterable, Identifiable {
         case .appleShortcuts: "apple-shortcuts"
         case .fallbacks: "fallbacks"
         case .clipboard: "clipboard"
-        case .snippets: "snippets"
         case .fileSearch: "file-search"
         case .windowManagement: "window-management"
         case .navigation: "navigation"
@@ -44,7 +43,6 @@ enum SettingsTab: CaseIterable, Identifiable {
         case .appleShortcuts: return String(localized: "Apple Shortcuts")
         case .fallbacks: return String(localized: "Fallbacks")
         case .fileSearch: return String(localized: "File Search")
-        case .snippets: return String(localized: "Snippets")
         case .navigation: return String(localized: "Navigation")
         case .windowManagement: return String(localized: "Window Management")
         case .clipboard: return String(localized: "Clipboard")
@@ -65,7 +63,6 @@ enum SettingsTab: CaseIterable, Identifiable {
         case .appleShortcuts: return "square.2.layers.3d.fill"
         case .fallbacks: return "arrow.turn.down.right"
         case .fileSearch: return "doc.text.magnifyingglass"
-        case .snippets: return "curlybraces"
         case .navigation: return "arrow.left.arrow.right"
         case .windowManagement: return "macwindow"
         case .clipboard: return "list.clipboard.fill"
@@ -85,7 +82,6 @@ enum SettingsTab: CaseIterable, Identifiable {
         case .systemActions: return .orange
         case .appleShortcuts: return .pink
         case .clipboard: return .indigo
-        case .snippets: return .brown
         }
     }
 }
@@ -115,7 +111,7 @@ enum SettingsSection: CaseIterable, Identifiable {
             ]
         case .features:
             return [
-                .clipboard, .snippets, .fileSearch, .windowManagement, .navigation
+                .clipboard, .fileSearch, .windowManagement, .navigation
             ]
         case .advanced: return [.backup, .about]
         }

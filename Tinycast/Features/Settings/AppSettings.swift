@@ -260,24 +260,6 @@ final class AppSettings {
         }
     }
 
-    /// Also keyword-expansion consent, so it confirms first and never rides a backup.
-    var snippetsEnabled: Bool {
-        didSet { defaults.set(snippetsEnabled, forKey: Key.snippetsEnabled.rawValue) }
-    }
-
-    var snippetsShowInLauncher: Bool {
-        didSet { defaults.set(snippetsShowInLauncher, forKey: Key.snippetsShowInLauncher.rawValue) }
-    }
-
-    /// The snippets folder as the user wrote it, `~` allowed; nil keeps it in Application Support.
-    var snippetsFolder: String? {
-        didSet { defaults.set(snippetsFolder, forKey: Key.snippetsFolder.rawValue) }
-    }
-
-    var snippetDefaultAction: SnippetDefaultAction {
-        didSet { defaults.set(snippetDefaultAction.rawValue, forKey: Key.snippetDefaultAction.rawValue) }
-    }
-
     var navigationEnabled: Bool {
         didSet { defaults.set(navigationEnabled, forKey: Key.navigationEnabled.rawValue) }
     }
@@ -496,14 +478,6 @@ final class AppSettings {
         customCommandsShowInLauncher =
             defaults.object(forKey: Key.customCommandsShowInLauncher.rawValue) == nil
             || defaults.bool(forKey: Key.customCommandsShowInLauncher.rawValue)
-        snippetsEnabled = defaults.bool(forKey: Key.snippetsEnabled.rawValue)
-        snippetsShowInLauncher =
-            defaults.object(forKey: Key.snippetsShowInLauncher.rawValue) == nil
-            || defaults.bool(forKey: Key.snippetsShowInLauncher.rawValue)
-        snippetsFolder = defaults.string(forKey: Key.snippetsFolder.rawValue)
-        snippetDefaultAction =
-            defaults.string(forKey: Key.snippetDefaultAction.rawValue)
-            .flatMap(SnippetDefaultAction.init) ?? .paste
         // Opt-in: until it is asked for, EventKit is never loaded.
         // No case is zero, so an unset key falls through to the default.
         // Both default to their zero case, so an unset key needs no presence check.

@@ -53,7 +53,7 @@ final class PaletteWindowController: NSObject, NSWindowDelegate {
 
     /// What the palette covered when it was summoned, for anything it expands into on dismissal.
     var previousTarget: InjectionTarget? {
-        InjectionTarget.behindPalette(ownWindow: previousOwnWindow, app: previousApp)
+        InjectionTarget.behindPalette(app: previousApp)
     }
 
     func show() {
@@ -351,10 +351,6 @@ final class PaletteWindowController: NSObject, NSWindowDelegate {
                 core.quicklinkCoordinator.cancelQuicklinkEditing()
                 return true
             }
-            if core.palette.mode == .snippetEditor, !core.palette.isComposing {
-                core.snippetCoordinator.cancelSnippetEditing()
-                return true
-            }
             return false
         }
         // Handled at the panel: the field editor or a missing main menu eats these first.
@@ -368,8 +364,6 @@ final class PaletteWindowController: NSObject, NSWindowDelegate {
                 switch core.palette.mode {
                 case .quicklinkEditor:
                     core.quicklinkCoordinator.saveQuicklink()
-                case .snippetEditor:
-                    core.snippetCoordinator.requestSnippetSave()
                 case .customCommandEditor:
                     core.customCommandCoordinator.saveCustomCommand()
                 default: break

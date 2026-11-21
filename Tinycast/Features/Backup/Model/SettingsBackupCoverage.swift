@@ -34,8 +34,6 @@ enum SettingsBackupCoverage {
         "fileSearchIncludesHiddenFiles": .fileSearchIncludesHiddenFiles,
         "customCommandsEnabled": .customCommandsEnabled,
         "customCommandsShowInLauncher": .customCommandsShowInLauncher,
-        "snippetsShowInLauncher": .snippetsShowInLauncher,
-        "snippetDefaultAction": .snippetDefaultAction,
         "navigationEnabled": .navigationEnabled,
         "menuSearchDisabledApps": .menuSearchDisabledApps,
         "menuSearchShowsAppleMenu": .menuSearchShowsAppleMenu,
@@ -64,8 +62,6 @@ enum SettingsBackupCoverage {
     static let deliberatelyExcluded: [String: String] = [
         AppSettingsKey.clipboardTextSearchEnabled.rawValue:
             "Background OCR is an opt-in processing choice on this Mac; a backup must not enable it.",
-        AppSettingsKey.snippetsEnabled.rawValue:
-            "Doubles as keyword-expansion consent; an import must not enable keystroke listening.",
         AppSettingsKey.allowedDeepLinks.rawValue:
             "Each entry lets a web page or app run a command unasked; an import must not grant that.",
         AppSettingsKey.palettePosition.rawValue:
@@ -74,8 +70,6 @@ enum SettingsBackupCoverage {
             "Machine-local geometry: every entry names a display this Mac has, and no other one.",
         AppSettingsKey.autoSwitchInputSource.rawValue:
             "Names a keyboard input source installed on this Mac; another Mac may not have it.",
-        AppSettingsKey.snippetsFolder.rawValue:
-            "Names a folder on this Mac; the one a backup lands on may not have it.",
         AppSettingsKey.settingsFileEnabled.rawValue:
             "Lets a file on this Mac change its settings; an import must not hand that to another.",
     ]

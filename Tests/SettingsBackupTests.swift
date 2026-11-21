@@ -63,9 +63,7 @@ struct SettingsBackupTests {
             mirrored["clipboardEnabled"] == .clipboardEnabled)
 
         // Named one by one: a backup now carries content, so it is far likelier to be sent on.
-        for key: AppSettingsKey in [
-            .snippetsEnabled, .allowedDeepLinks
-        ] {
+        for key: AppSettingsKey in [.allowedDeepLinks] {
             check(
                 "\(key.rawValue) stays out of a backup",
                 excluded[key.rawValue] != nil && mirrored.values.allSatisfy { $0 != key })
@@ -79,14 +77,6 @@ struct SettingsBackupTests {
         check(
             naming("every exclusion carries a real reason", Array(emptyReasons)),
             emptyReasons.isEmpty)
-
-        // The privacy property this whole harness exists to protect.
-        check(
-            "snippetsEnabled stays out of a backup",
-            excluded[AppSettingsKey.snippetsEnabled.rawValue] != nil)
-        check(
-            "snippetsEnabled is not backed up under another field",
-            !mirroredKeys.contains(AppSettingsKey.snippetsEnabled.rawValue))
 
         let claimedTwice = external.keys.filter { mirrored[$0] != nil }
         check(

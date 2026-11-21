@@ -16,7 +16,6 @@ struct RootPaletteView: View {
     @Environment(WindowSwitchSession.self) private var windowSwitch
     /// Observed so the join card's countdown redraws on the minute boundary.
     @Environment(QuicklinkStore.self) private var quicklinks
-    @Environment(SnippetsStore.self) private var snippets
     @Environment(AppSettings.self) private var settings
     @Environment(\.metrics) private var metrics
     @FocusState private var searchFocused: Bool
@@ -57,13 +56,6 @@ struct RootPaletteView: View {
         case .quicklinkEditor:
             return QuicklinkEditorScreen(
                 coordinator: core.quicklinkCoordinator, openMenuCorner: menuCorner,
-                openInputMenu: openInputOptions)
-        case .snippets:
-            return SnippetsScreen(
-                store: snippets, core: core, vm: vm, openActions: openActions)
-        case .snippetEditor:
-            return SnippetEditorScreen(
-                coordinator: core.snippetCoordinator, openMenuCorner: menuCorner,
                 openInputMenu: openInputOptions)
         case .fileSearch:
             return FileSearchScreen(
@@ -1242,10 +1234,6 @@ struct RootPaletteView: View {
         }
         if vm.mode == .quicklinkEditor {
             core.quicklinkCoordinator.cancelQuicklinkEditing()
-            return
-        }
-        if vm.mode == .snippetEditor {
-            core.snippetCoordinator.cancelSnippetEditing()
             return
         }
         if !vm.pop() { core.paletteCoordinator.hidePalette() }

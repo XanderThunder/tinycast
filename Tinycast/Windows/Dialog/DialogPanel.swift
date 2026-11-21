@@ -9,14 +9,11 @@ final class DialogPanel: NSPanel, AnimatedPanel {
         case confirm
         case increment
         case decrement
-        case tab
-        case backtab
     }
 
     var onKey: ((Key) -> Void)?
     /// Arrows are a control's keys, not the panel's; a text field needs them for its caret.
     var handlesArrowKeys = false
-    var handlesTabKey = false
     var acceptsLineBreaks = false
 
     init(content: NSView, cornerRadius: CGFloat) {
@@ -56,8 +53,6 @@ final class DialogPanel: NSPanel, AnimatedPanel {
             super.sendEvent(event)
         case kVK_Return, kVK_ANSI_KeypadEnter:
             onKey(.confirm)
-        case kVK_Tab where handlesTabKey && !hasMarkedText:
-            onKey(event.modifierFlags.contains(.shift) ? .backtab : .tab)
         case kVK_LeftArrow where handlesArrowKeys,
             kVK_DownArrow where handlesArrowKeys:
             onKey(.decrement)

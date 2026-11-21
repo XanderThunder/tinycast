@@ -124,8 +124,7 @@ struct HotKeyDispatchTests {
         let actions: [HotKeyAction] = [
             .command(.sample), .customCommand(id: UUID()), .windowCommand(id: .sample),
             .windowLayout(id: UUID()), .windowRoom(id: UUID()), .customWindowSize(id: UUID()),
-            .quicklink(id: UUID()), .appleShortcut(id: UUID()),
-            .snippet(id: "sample")
+            .quicklink(id: UUID()), .appleShortcut(id: UUID())
         ]
         for (offset, action) in actions.enumerated() {
             let shortcut = KeyShortcut(carbonKeyCode: kVK_F1 + offset, carbonModifiers: cmdKey)
@@ -158,17 +157,18 @@ struct HotKeyDispatchTests {
         manager.applyAllowance()
         check("re-allowed action gets its Secure Input equivalent", center.entries[equivalentID] != nil)
 
-        let snippet = HotKeyAction.snippet(id: "sample")
+        let deferred = HotKeyAction.appleShortcut(id: UUID())
+        manager.setBinding(.combo(KeyShortcut(carbonKeyCode: kVK_ANSI_W, carbonModifiers: cmdKey)), for: deferred)
         let relaunched = HotKeyManager(defaults: defaults)
         let relaunchedCenter = HotKeyCenter.current!
-        var snippetsLoaded = false
-        relaunched.allowsAction = { $0 != snippet || snippetsLoaded }
+        var loaded = false
+        relaunched.allowsAction = { $0 != deferred || loaded }
         relaunched.start(
             customCommandIDs: [], quicklinkIDs: [], windowLayoutIDs: [], windowRoomIDs: [],
             customWindowSizeIDs: [])
-        check("snippet waits at launch", relaunchedCenter.entries[snippet.defaultsKey] == nil)
-        snippetsLoaded = true
+        check("a refused action waits at launch", relaunchedCenter.entries[deferred.defaultsKey] == nil)
+        loaded = true
         relaunched.applyAllowance()
-        check("snippet registers once loaded", relaunchedCenter.entries[snippet.defaultsKey] != nil)
+        check("it registers once allowed", relaunchedCenter.entries[deferred.defaultsKey] != nil)
     }
 }

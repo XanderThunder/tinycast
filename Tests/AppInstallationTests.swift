@@ -530,7 +530,7 @@ struct AppInstallationTests {
 
 // Empty feature catalogs keep this harness focused on the shipped launcher.
 enum SettingsTab: Sendable {
-    case windowManagement, quicklinks, snippets, commands
+    case windowManagement, quicklinks, commands
     var tint: IconTint { .gray }
 }
 enum EntryIcon: Hashable, Sendable {
@@ -559,7 +559,7 @@ enum HotKeyAction: Hashable, Sendable {
     case app(bundleID: String), settingsPane(bundleID: String)
     case customCommand(id: UUID), systemAction(id: SystemAction.ID), windowCommand(id: WindowCommand.ID)
     case customWindowSize(id: UUID), windowLayout(id: UUID), windowRoom(id: UUID), quicklink(id: UUID)
-    case appleShortcut(id: UUID), snippet(id: UUID)
+    case appleShortcut(id: UUID)
     init?(entryID: String) { nil }
 }
 struct OtherEntry<Tag: Sendable>: Sendable {
@@ -614,14 +614,6 @@ enum WindowCommandCatalog {
 enum QuicklinkDestination {
     static func detect(_ link: String) -> Self? { nil }
     var defaultSymbol: String { "" }
-}
-struct StoredSnippet {
-    struct Snippet { var isEnabled = true; var name = ""; var keyword: String? }
-    var snippet = Snippet()
-    var entryID = ""
-    var fileURL = URL(fileURLWithPath: "/")
-    static let sfSymbol = ""
-    static func id(fromEntryID id: String) -> UUID? { nil }
 }
 enum SettingsPaneScanner {
     struct Cache: Sendable {}

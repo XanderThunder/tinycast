@@ -78,10 +78,6 @@ enum SettingsFileSchema {
             return bind(settings, \.fileSearchRemovedDefaultPatterns)
         case .fileSearchShowInLauncher: return bind(settings, \.fileSearchShowInLauncher)
         case .fileSearchCommands: return launcher.commandsBinding(for: key, owner: .fileSearch)
-        case .snippetsShowInLauncher: return bind(settings, \.snippetsShowInLauncher)
-        case .snippetsFolder: return bind(settings, \.snippetsFolder, accept: folder)
-        case .snippetDefaultAction: return bind(settings, \.snippetDefaultAction)
-        case .snippetsCommands: return launcher.commandsBinding(for: key, owner: .snippets)
         case .navigationEnabled: return bind(settings, \.navigationEnabled)
         case .menuSearchShowsAppleMenu: return bind(settings, \.menuSearchShowsAppleMenu)
         case .menuSearchDisabledApps: return bind(settings, \.menuSearchDisabledApps)
@@ -112,12 +108,6 @@ enum SettingsFileSchema {
         case .clipboardCommands: return launcher.commandsBinding(for: key, owner: .clipboard)
         }
     }
-
-    /// A folder is absolute or under `~/`; null puts it back in Application Support.
-    private static func folder(_ path: String?) -> String?? {
-        guard let path else { return .some(nil) }
-        return AppPaths.isFolderPath(path) ? path : nil
-    }
 }
 
 extension PopToRootTimeout: SettingsFileRawValue {}
@@ -132,7 +122,6 @@ extension CalcNumberStyle: SettingsFileRawValue {}
 extension SearchSensitivity: SettingsFileRawValue {}
 extension WindowCycle: SettingsFileRawValue {}
 extension ClipboardDefaultAction: SettingsFileRawValue {}
-extension SnippetDefaultAction: SettingsFileRawValue {}
 
 extension ClipboardRetention: SettingsFileToken {
     var settingsToken: SettingsFileJSON {

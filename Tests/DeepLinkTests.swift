@@ -81,10 +81,6 @@ struct DeepLinkTests {
         for (entryID, action) in storedRows(id: id, uuid: uuid) {
             expect(roundTrip(entryID) == action, "\(entryID) round-trips")
         }
-        let snippet = "/Users/me/Snippets/Sign off ✍️.md"
-        expect(
-            roundTrip(StoredSnippet.entryIDPrefix + snippet) == .snippet(id: snippet),
-            "a snippet's file path survives percent-encoding")
 
         expect(
             DeepLink.url(forEntryID: "command:clipboard-history", scheme: scheme)?.absoluteString
@@ -121,7 +117,6 @@ struct DeepLinkTests {
         var actions = CommandID.allCases.compactMap(\.hotKeyAction)
         actions += SystemAction.ID.allCases.map { .systemAction(id: $0) }
         actions += WindowCommand.ID.allCases.map { .windowCommand(id: $0) }
-        actions.append(.snippet(id: "/Users/me/Snippets/a.md"))
         for action in actions {
             expect(
                 action.entryID.flatMap(HotKeyAction.init(entryID:)) == action,
@@ -328,7 +323,7 @@ struct DeepLinkTests {
         expect(
             DeepLinkConsentPolicy.requiresConsent(.command(.searchFiles), input: text),
             "any input asks, since a page chose it")
-        let entryID = "snippet:/Users/me/What?.md"
+        let entryID = "quicklink:What?"
         let keyed = DeepLinkConsentPolicy.key(entryID: entryID, input: text)
         expect(
             keyed != DeepLinkConsentPolicy.key(entryID: entryID, input: plain),

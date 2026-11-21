@@ -14,14 +14,12 @@ enum PaletteMode: String, CaseIterable, Identifiable {
     case customCommands
     case quicklinks
     case quicklinkEditor
-    case snippets
-    case snippetEditor
     case dictionary
 
     var id: String { rawValue }
 
     var isNativeEditor: Bool {
-        self == .snippetEditor || self == .quicklinkEditor || self == .customCommandEditor
+        self == .quicklinkEditor || self == .customCommandEditor
     }
 
     var systemImage: String {
@@ -36,7 +34,6 @@ enum PaletteMode: String, CaseIterable, Identifiable {
         case .roomWindows: return "macwindow.badge.plus"
         case .customCommandEditor, .customCommands: return CustomCommand.sfSymbol
         case .quicklinks, .quicklinkEditor: return Quicklink.sfSymbol
-        case .snippets, .snippetEditor: return "curlybraces"
         case .dictionary: return "book.closed"
         }
     }
@@ -55,8 +52,6 @@ enum PaletteMode: String, CaseIterable, Identifiable {
         case .customCommands: return String(localized: "Search custom commands…")
         case .quicklinks: return String(localized: "Search quicklinks…")
         case .quicklinkEditor: return String(localized: "Quicklink editor")
-        case .snippets: return String(localized: "Search snippets…")
-        case .snippetEditor: return String(localized: "Snippet editor")
         case .dictionary: return String(localized: "Look up a word…")
         }
     }

@@ -97,7 +97,7 @@ final class QuicklinkCoordinator {
     /// The fallback row's query, which fills the first `{argument}` the link still owes.
     func openQuicklink(id: UUID, filling seed: String) {
         guard let quicklink = store.quicklink(id: id) else { return }
-        let arguments = SnippetTemplateEngine.declaredArguments(in: quicklink.link)
+        let arguments = QuicklinkTemplate.declaredArguments(in: quicklink.link)
         guard let target = arguments.first(where: { !$0.isOptional }) ?? arguments.first else {
             return openQuicklink(id: id)
         }
@@ -120,7 +120,7 @@ final class QuicklinkCoordinator {
 
     private struct OpenAttempt {
         var quicklink: Quicklink
-        var context: SnippetTemplateEngine.ExpansionContext
+        var context: QuicklinkTemplate.ExpansionContext
         /// Where a ⌘C may still read the selection from; nil once one has been tried.
         var copySource: NSRunningApplication?
         var values: [String: String]
@@ -151,7 +151,7 @@ final class QuicklinkCoordinator {
 
     private func selectedTextArgument(for quicklink: Quicklink) -> String? {
         guard settings.quicklinkPassesSelectedText,
-            let first = SnippetTemplateEngine.declaredArguments(in: quicklink.link).first,
+            let first = QuicklinkTemplate.declaredArguments(in: quicklink.link).first,
             first.options.isEmpty
         else { return nil }
         return first.name
@@ -161,12 +161,12 @@ final class QuicklinkCoordinator {
     private func open(_ attempt: OpenAttempt) {
         var attempt = attempt
         let quicklink = attempt.quicklink
-        let encoding: SnippetTemplateEngine.ValueEncoding =
+        let encoding: QuicklinkTemplate.ValueEncoding =
             QuicklinkDestination.usesURLEncoding(quicklink.link) ? .percentEncoding : .none
         // The override outlives the trip through the fields, so it is honoured on the way back.
         attempt.forcingDefaultApp =
             attempt.forcingDefaultApp || pendingDefaultAppOverride == quicklink.id
-        let expansion = SnippetTemplateEngine.expand(
+        let expansion = QuicklinkTemplate.expand(
             text: quicklink.link, context: attempt.context, userArguments: attempt.values,
             encoding: encoding)
         guard expansion.missingArguments.isEmpty else {

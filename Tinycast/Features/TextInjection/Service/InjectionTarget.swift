@@ -1,49 +1,24 @@
 import AppKit
 
-/// Where injected text is going — another app over events, or one of our own editors in process.
+/// The app text is read from: the one behind the palette, or the frontmost one for a hotkey.
 enum InjectionTarget {
     case external(NSRunningApplication)
-    case ownEditor(any InjectableTextView)
 
-    /// Where the keystrokes land: our panels never activate, so the frontmost app is not it.
+    /// Our panels never activate, so a key window of ours means the keystroke stayed with us.
     @MainActor
     static func current() -> InjectionTarget? {
-        guard let keyWindow = NSApp.keyWindow else {
-            return NSWorkspace.shared.frontmostApplication.map(InjectionTarget.external)
-        }
-        return (keyWindow.firstResponder as? any InjectableTextView).map(InjectionTarget.ownEditor)
+        guard NSApp.keyWindow == nil else { return nil }
+        return NSWorkspace.shared.frontmostApplication.map(InjectionTarget.external)
     }
 
-    /// What the palette covered when it was summoned: one of our editors, or the app behind it.
+    /// What the palette covered when it was summoned.
     @MainActor
-    static func behindPalette(
-        ownWindow: NSWindow?, app: NSRunningApplication?
-    ) -> InjectionTarget? {
-        if let editor = ownWindow?.firstResponder as? any InjectableTextView {
-            return .ownEditor(editor)
-        }
-        return app.map(InjectionTarget.external)
-    }
-
-    /// Hands the caret back — after a modal argument prompt, or an expansion that went nowhere.
-    @MainActor
-    func restoreFocus() {
-        switch self {
-        case .external(let app):
-            guard !app.isTerminated else { return }
-            app.activate()
-        case .ownEditor(let editor):
-            editor.window?.makeFirstResponder(editor)
-        }
+    static func behindPalette(app: NSRunningApplication?) -> InjectionTarget? {
+        app.map(InjectionTarget.external)
     }
 
     var externalApp: NSRunningApplication? {
         guard case .external(let app) = self else { return nil }
         return app
-    }
-
-    var ownEditor: (any InjectableTextView)? {
-        guard case .ownEditor(let editor) = self else { return nil }
-        return editor
     }
 }

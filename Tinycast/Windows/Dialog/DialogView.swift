@@ -46,9 +46,6 @@ struct DialogView: View {
 
                 switch request.accessory {
                 case .volume(let volume): VolumeSlider(state: volume)
-                case .snippetArguments(let arguments):
-                    SnippetArgumentFields(
-                        state: arguments, onSubmit: { onChoose(request.defaultIndex) })
                 case .clipboardText(let state): ClipboardEditField(state: state)
                 case nil: EmptyView()
                 }

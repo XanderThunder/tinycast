@@ -455,7 +455,7 @@ final class TextInjector {
     }
     func captureExpansionContext(
         target: InjectionTarget?, clipboardHistory: [String]
-    ) -> SnippetTemplateEngine.ExpansionContext {
+    ) -> QuicklinkTemplate.ExpansionContext {
         self.target = target
         return .init(
             clipboardHistory: clipboardHistory, selection: selection, now: .distantPast,

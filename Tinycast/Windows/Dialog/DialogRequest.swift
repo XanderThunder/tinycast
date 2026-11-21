@@ -37,18 +37,11 @@ struct DialogRequest {
 /// A dialog carries at most one control, so the cases are exclusive by construction.
 enum DialogAccessory {
     case volume(VolumeState)
-    case snippetArguments(SnippetArgumentsState)
     case clipboardText(ClipboardEditState)
 
     /// Whether ←/→/↑/↓ belong to the control rather than to whatever has focus inside it.
     var claimsArrowKeys: Bool {
         if case .volume = self { return true }
-        return false
-    }
-
-    /// Whether ⇥ walks the accessory's own fields rather than AppKit's key-view loop.
-    var claimsTabKey: Bool {
-        if case .snippetArguments = self { return true }
         return false
     }
 

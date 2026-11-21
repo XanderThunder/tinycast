@@ -35,6 +35,19 @@ final class ClipboardCoordinator {
         self.core = core
     }
 
+    /// `{clipboard offset=N}`'s history: newest first, led by whatever the pasteboard holds now.
+    func templateHistory() -> [String] {
+        var history = clipboardStore.items
+            .filter { $0.kind == .text }
+            .sorted { $0.createdAt > $1.createdAt }
+            .prefix(20)
+            .compactMap(\.text)
+        if let current = NSPasteboard.general.string(forType: .string), current != history.first {
+            history.insert(current, at: 0)
+        }
+        return history
+    }
+
     /// Off means the poller stops, the database closes and nothing new is ever recorded.
     func applyEnabled() {
         appIndex.setCommandsVisible([.clipboardHistory, .pasteSequentially], settings.clipboardEnabled)

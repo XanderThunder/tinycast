@@ -22,8 +22,6 @@ enum CommandID: String, CaseIterable, Sendable {
     case searchQuicklinks = "command:search-quicklinks"
     case importQuicklinks = "command:import-quicklinks"
     case exportQuicklinks = "command:export-quicklinks"
-    case searchSnippets = "command:search-snippets"
-    case createSnippet = "command:create-snippet"
     case exportSettings = "command:export-settings"
     case importSettings = "command:import-settings"
     case importFromRaycast = "command:import-from-raycast"
@@ -35,10 +33,7 @@ enum CommandID: String, CaseIterable, Sendable {
         .clipboardHistory, .searchFiles, .searchQuicklinks
     ]
 
-    static let compactBarOptions: [CommandID] =
-        defaultCompactBarCommands + [
-            .searchSnippets
-        ]
+    static let compactBarOptions: [CommandID] = defaultCompactBarCommands
 
     static let compactBarLimit = 4
 
@@ -80,8 +75,6 @@ enum CommandID: String, CaseIterable, Sendable {
         case .searchQuicklinks: return "Search Quicklinks"
         case .importQuicklinks: return "Import Quicklinks"
         case .exportQuicklinks: return "Export Quicklinks"
-        case .searchSnippets: return "Search Snippets"
-        case .createSnippet: return "Create Snippet"
         case .exportSettings: return "Export Backup"
         case .importSettings: return "Import Backup"
         case .importFromRaycast: return "Import from Raycast"
@@ -111,8 +104,6 @@ enum CommandID: String, CaseIterable, Sendable {
         case .searchQuicklinks: return Quicklink.sfSymbol
         case .importQuicklinks: return "square.and.arrow.down.fill"
         case .exportQuicklinks: return "square.and.arrow.up.fill"
-        case .searchSnippets: return "curlybraces"
-        case .createSnippet: return "plus.rectangle.on.rectangle.fill"
         case .exportSettings: return "square.and.arrow.up.fill"
         case .importSettings: return "square.and.arrow.down.fill"
         case .importFromRaycast: return "arrow.down.doc.fill"
@@ -133,7 +124,7 @@ enum CommandID: String, CaseIterable, Sendable {
             .createCustomCommand, .searchCustomCommands:
             return .graphite
         case .openCamera, .settings, .about: return .gray
-        case .define, .searchSnippets, .createSnippet: return .brown
+        case .define: return .brown
         case .quit: return .red
         case .createWindowLayout, .captureWindowLayout, .switchRoom, .createRoom: return .mint
         case .exportSettings, .importSettings, .importFromRaycast: return .cyan
@@ -148,7 +139,7 @@ enum CommandID: String, CaseIterable, Sendable {
         switch self {
         case .clipboardHistory: 80
         case .searchFiles: 70
-        case .createQuicklink, .createSnippet: 30
+        case .createQuicklink: 30
         default: nil
         }
     }
