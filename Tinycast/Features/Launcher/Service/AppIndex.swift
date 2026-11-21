@@ -296,7 +296,6 @@ final class AppIndex {
     private(set) var apps: [AppEntry] = []
     private var searchEntries: [AppEntry] = []
 
-
     /// The launcher's rows in order, with the size of each leading section at their head.
     struct Results: Equatable {
         var entries: [AppEntry] = []
