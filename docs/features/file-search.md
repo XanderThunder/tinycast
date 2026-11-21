@@ -11,8 +11,12 @@ design follows [fsearch](https://github.com/noahdunnagan/fsearch).
 - **The crawl runs in `FileIndexHelper`, never in the app.** On macOS 27 malloc keeps freed small blocks
   dirty, so a crawl inside the app would leave its peak behind for good. The helper writes the index and
   exits; the app only maps the file, whose clean pages never count toward its footprint.
-- **Full Disk Access is required, and nothing is indexed without it.** `Permissions.hasFullDiskAccess()`
-  probes a TCC-guarded file, which never prompts. The pane and the palette both say how to grant it.
+- **File Search never asks for Full Disk Access.** The crawl reads what the account can read; a folder
+  macOS guards per app (Desktop, Documents, Downloads, cloud storage) prompts once on first read, with
+  the purpose strings in `Info.plist`; the first build waits for each answer, and a refused or Full Disk
+  Access-only folder is skipped silently. A grant made later in System Settings is announced to nothing,
+  so it reaches the index on the next rebuild. The default ignore rules keep the crawl out of
+  `~/Library/Containers` and Group Containers, which would ask for other apps' data.
 - **Scopes are the crawl roots.** Only what lies under a scope is indexed or searched; a scope inside
   another stays listed but folds into it at crawl time, and a cleared list indexes nothing. The default
   is home (`~`): the rest of the disk is the system's, and apps are the launcher's.
@@ -157,7 +161,7 @@ Videos, Archives. Each case names the `UTType`s it admits. The index records no 
 `contentType(extension:isDirectory:)` derives one from the extension: a folder whose extension is a
 declared package (`.rtfd`, `.pages`) is that document, and any other folder is a folder.
 
-The filter lives on `PaletteState` beside the clipboard's, is reset on every summon, and is never
+The filter lives on `PaletteState`, is reset on every summon, and is never
 persisted. ⌘P and the header button open it through `PaletteFilterAction` and the one `PopoverMenu` path
 `RootPaletteView` uses for every in-window menu; changing it resets the selection, snaps the scroll and
 re-runs the query.
@@ -202,8 +206,7 @@ keep the full-path match.
 ## Palette and actions
 
 `FileSearchScreen.rows` is the exact flat selection order rendered by `FileSearchList`. Results sit in a
-290pt column beside a preview pane, split by the same `Theme.Colors.separator` hairline the clipboard
-draws. The list uses the shared Results header, row metrics, edge dissolve, thin scrollbar and scroll
+290pt column beside a preview pane, split by a `Theme.Colors.separator` hairline. The list uses the shared Results header, row metrics, edge dissolve, thin scrollbar and scroll
 intent; its header reads **Recent** on the blank screen and **Results** under a query. A row shows
 a fitted native file icon and the full filename: a folder prefixed by its parent's name, dimmed, since
 half the folder hits on a developer machine are some `src` or `Tinycast`. The path itself is the preview's
@@ -236,8 +239,6 @@ what the extension declares. `PlainTextSurface` copies QuickLook's own text prev
 **Nothing autoplays**: arrow-keying a list must not start a movie.
 The player view is `KeyboardFocusRefusing`, so clicking its transport leaves the caret in
 the search field; see [palette.md](palette.md#the-keyboard-belongs-to-the-search-field).
-The player is File Search's own, deliberately: the clipboard's preview is a separate surface with its own
-sizing, and copying forty lines of `AVPlayerView` teardown is the cheaper trade.
 
 **The surface outlives the selection**, and there is no timer in front of it. A move hands the same
 `QLPreviewView` another item rather than closing one and building the next, which is the whole cost:
@@ -264,24 +265,21 @@ its default app. A system `QLPreviewPanel` would take key, and the palette hides
 | Add / Remove from Favorites | ⇧⌘F   | saves the file or folder in the launcher’s shared Favorites order                                                                                                                                                                                                                                                                                 |
 | Move to Trash               | ⌃X    | `FileManager.trashItem` off the main actor, then the row leaves the session                                                                                                                                                                                                                                                                       |
 
-None of the copies is marked with `ClipboardManager.internalType`, so a copied file enters clipboard
-history like any other copy. Move to Trash rides the clipboard's own ⌃X, asks nothing first (trashing is
-undoable, as it is for Uninstall and for an extension's `trash`) and has no ⌃⇧X counterpart, since there
+Move to Trash takes ⌃X, asks nothing first (trashing is undoable) and has no ⌃⇧X counterpart, since there
 is no "all" to trash. The three ⌘C chords differ only by their second modifier, which
 `PaletteShortcut` reads in order: ⇧, then ⌥, then ⌃; bare ⌘C stays with the search field.
 
 The first in-flight query says nothing (the rows it is about to replace would only flash a message); an
 empty completed query says what the active filter admits ("No files found", "No images found"), and a
-blank screen with no recents says "Type to search files and folders". Without Full Disk Access the screen
-says so and ↵ opens the Privacy & Security pane; during the first build it shows the running item count.
+blank screen with no recents says "Type to search files and folders". During the first build it shows
+the running item count.
 
 ### Dragging out
 
 A row drags its file or folder straight into another app (a Finder window, a browser's upload field,
-a mail being written) through the same `onRowClick(drag:)` the clipboard uses, so the press, the
-**copy-only** operation and the fly-back are the ones [clipboard.md](clipboard.md#dragging-out)
-explains. Copy matters more here than there: every result is the user's own file, and on the boot
-volume a plain file-URL drag would default to moving it. The image is the row's fitted tile, already
+a mail being written) through `onRowClick(drag:)`: a press that moves past the drag threshold starts
+a **copy-only** drag, and a drop nowhere flies the image back. Copy matters: every result is the
+user's own file, and on the boot volume a plain file-URL drag would default to moving it. The image is the row's fitted tile, already
 warm by the time a pointer can reach it; a landed drop hides the palette through
 `PaletteCoordinator.dragLanded()`. There is no stat first: a result is at most the Pop to Root Search
 delay old, since the reset clears its session.
@@ -317,7 +315,7 @@ fitted cache, purged when the palette hides.
 ## Invocation
 
 Settings ▸ File Search owns the `fileSearchEnabled` switch, which is off when its preference is absent,
-the **Show in launcher** switch beneath it, along with the Full Disk Access status, the index status and **Rebuild Index**, the scope list
+the **Show in launcher** switch beneath it, along with the index status and **Rebuild Index**, the scope list
 with **Include hidden files** (`fileSearchIncludesHiddenFiles`), the ignore patterns and the Search Files
 command row. The lists are ordinary settings carried by Tinycast
 settings backups; importing them grants no permission.

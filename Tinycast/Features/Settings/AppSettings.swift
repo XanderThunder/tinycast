@@ -19,92 +19,6 @@ enum PopToRootTimeout: Int, CaseIterable, Identifiable, Sendable {
     var interval: TimeInterval { TimeInterval(rawValue) }
 }
 
-/// How early the join card appears, and how long past the start it stays. See UpcomingWindow.
-enum JoinWindow: Int, CaseIterable, Identifiable, Sendable {
-    case one = 1
-    case two = 2
-    case five = 5
-    case ten = 10
-    case fifteen = 15
-
-    var id: Int { rawValue }
-
-    var title: String { String(localized: "\(rawValue) minutes") }
-}
-
-/// How early the calendar item picks the next event up. Zero, which `integer(forKey:)` also
-/// returns unset, keeps it for the rest of today.
-enum MenuBarEvents: Int, CaseIterable, Identifiable, Sendable {
-    case today = 0
-    case two = 2
-    case five = 5
-    case ten = 10
-    case thirty = 30
-
-    var id: Int { rawValue }
-
-    var title: String {
-        self == .today ? String(localized: "Today") : String(localized: "\(rawValue) minutes before")
-    }
-}
-
-/// The calendar's independent menu-bar presence. Zero matches an unset preference.
-enum CalendarMenuBarDisplay: Int, CaseIterable, Identifiable, Sendable {
-    case disabled = 0
-    case meetingIcon = 1
-    case meetingTitle = 2
-
-    var id: Int { rawValue }
-
-    var title: String {
-        switch self {
-        case .disabled: String(localized: "Disabled")
-        case .meetingIcon: String(localized: "Meeting Icon")
-        case .meetingTitle: String(localized: "Meeting Title")
-        }
-    }
-}
-
-enum CalendarLauncherLimit: Int, CaseIterable, Identifiable, Sendable {
-    case one = 1
-    case three = 3
-    case five = 5
-    case all = 0
-
-    var id: Int { rawValue }
-
-    var title: String {
-        switch self {
-        case .one, .three, .five: String(localized: "\(rawValue) next")
-        case .all: String(localized: "All")
-        }
-    }
-
-    var maximum: Int? { self == .all ? nil : rawValue }
-}
-
-/// Whether a started event remains in the menu bar long enough to show its time left.
-enum HideCurrentEvent: Int, CaseIterable, Identifiable, Sendable {
-    case dontHide = -1
-    case automatically = 0
-    case afterFive = 5
-    case afterTen = 10
-    case afterThirty = 30
-
-    var id: Int { rawValue }
-
-    var title: String {
-        switch self {
-        case .dontHide: String(localized: "Keep visible — show time left")
-        case .automatically: String(localized: "Automatically")
-        default: String(localized: "After \(rawValue) minutes")
-        }
-    }
-
-    var hidesAtStart: Bool { self == .automatically }
-    var minutes: Int? { rawValue > 0 ? rawValue : nil }
-}
-
 @MainActor
 @Observable
 final class AppSettings {
@@ -129,34 +43,6 @@ final class AppSettings {
         }
     }
 
-    /// Ships on, unlike every other feature switch: a launcher is expected to keep history.
-    var clipboardEnabled: Bool {
-        didSet { defaults.set(clipboardEnabled, forKey: Key.clipboardEnabled.rawValue) }
-    }
-
-    var clipboardTextSearchEnabled: Bool {
-        didSet { defaults.set(clipboardTextSearchEnabled, forKey: Key.clipboardTextSearchEnabled.rawValue) }
-    }
-
-    var clipboardRetention: ClipboardRetention {
-        didSet {
-            defaults.set(clipboardRetention.rawValue, forKey: Key.clipboardRetention.rawValue)
-        }
-    }
-
-    /// Bundle IDs never recorded from; ordered, so the Settings list stays stable.
-    var clipboardDisabledApps: [String] {
-        didSet { defaults.set(clipboardDisabledApps, forKey: Key.clipboardDisabledApps.rawValue) }
-    }
-
-    /// What ↵ does on a clipboard entry; Paste takes the chord the chosen action leaves free.
-    var clipboardDefaultAction: ClipboardDefaultAction {
-        didSet {
-            defaults.set(
-                clipboardDefaultAction.rawValue, forKey: Key.clipboardDefaultAction.rawValue)
-        }
-    }
-
     var launchAtLogin: Bool {
         didSet { LaunchAtLogin.set(launchAtLogin) }
     }
@@ -164,13 +50,6 @@ final class AppSettings {
     /// The launcher icon's visibility; dragging the icon out of the menu bar turns it off.
     var showInMenuBar: Bool {
         didSet { defaults.set(showInMenuBar, forKey: Key.showInMenuBar.rawValue) }
-    }
-
-    var automaticallyCheckForUpdates: Bool {
-        didSet {
-            defaults.set(
-                automaticallyCheckForUpdates, forKey: Key.automaticallyCheckForUpdates.rawValue)
-        }
     }
 
     /// The physical key remapped to the Hyper chord; `HyperKeyManager` reacts via its observer.
@@ -196,16 +75,6 @@ final class AppSettings {
         }
     }
 
-    /// Preferred skin tone applied to modifier-capable emoji at render and copy time.
-    var emojiSkinTone: EmojiSkinTone {
-        didSet { defaults.set(emojiSkinTone.rawValue, forKey: Key.emojiSkinTone.rawValue) }
-    }
-
-    /// Grid density used when the emoji picker opens; in-session zoom remains temporary.
-    var emojiGridColumns: EmojiGridColumns {
-        didSet { defaults.set(emojiGridColumns.rawValue, forKey: Key.emojiGridColumns.rawValue) }
-    }
-
     /// How long a closed palette keeps its state before popping back to the root launcher.
     var popToRootTimeout: PopToRootTimeout {
         didSet { defaults.set(popToRootTimeout.rawValue, forKey: Key.popToRootTimeout.rawValue) }
@@ -218,11 +87,6 @@ final class AppSettings {
     /// Follow macOS, or pin Tinycast to one appearance. Applied by `AppCore.applyAppearance()`.
     var appearance: AppAppearance {
         didSet { defaults.set(appearance.rawValue, forKey: Key.appearance.rawValue) }
-    }
-
-    /// The per-app key System Settings writes too, so the two never disagree.
-    var language: AppLanguage {
-        didSet { defaults.set([language.rawValue], forKey: Key.language.rawValue) }
     }
 
     /// Which separators the calculator reads and writes; `.system` follows Language & Region.
@@ -351,79 +215,6 @@ final class AppSettings {
         }
     }
 
-    var notesEnabled: Bool {
-        didSet { defaults.set(notesEnabled, forKey: Key.notesEnabled.rawValue) }
-    }
-
-    var dictationEnabled: Bool {
-        didSet { defaults.set(dictationEnabled, forKey: Key.dictationEnabled.rawValue) }
-    }
-
-    var dictationMode: DictationMode {
-        didSet { defaults.set(dictationMode.rawValue, forKey: Key.dictationMode.rawValue) }
-    }
-
-    var dictationModel: DictationModel {
-        didSet { defaults.set(dictationModel.rawValue, forKey: Key.dictationModel.rawValue) }
-    }
-
-    /// Nil lets macOS follow the system input device as it changes.
-    var dictationMicrophone: String? {
-        didSet { defaults.set(dictationMicrophone, forKey: Key.dictationMicrophone.rawValue) }
-    }
-
-    var dictationDestination: DictationDestination {
-        didSet { defaults.set(dictationDestination.rawValue, forKey: Key.dictationDestination.rawValue) }
-    }
-
-    var dictationAdaptsCapitalization: Bool {
-        didSet {
-            defaults.set(dictationAdaptsCapitalization, forKey: Key.dictationAdaptsCapitalization.rawValue)
-        }
-    }
-
-    /// Off by default: chunked transcription costs extra inference while recording.
-    var dictationLiveInsertion: Bool {
-        didSet { defaults.set(dictationLiveInsertion, forKey: Key.dictationLiveInsertion.rawValue) }
-    }
-
-    var dictationPlaysSounds: Bool {
-        didSet { defaults.set(dictationPlaysSounds, forKey: Key.dictationPlaysSounds.rawValue) }
-    }
-
-    var dictationIdleRelease: DictationIdleRelease {
-        didSet { defaults.set(dictationIdleRelease.rawValue, forKey: Key.dictationIdleRelease.rawValue) }
-    }
-
-    var dictationLanguage: String? {
-        didSet { defaults.set(dictationLanguage, forKey: Key.dictationLanguage.rawValue) }
-    }
-
-    var notesRendersMarkdown: Bool {
-        didSet { defaults.set(notesRendersMarkdown, forKey: Key.notesRendersMarkdown.rawValue) }
-    }
-
-    var notesShowsFormattingBar: Bool {
-        didSet { defaults.set(notesShowsFormattingBar, forKey: Key.notesShowsFormattingBar.rawValue) }
-    }
-
-    var notesShowsInMenuBar: Bool {
-        didSet { defaults.set(notesShowsInMenuBar, forKey: Key.notesShowsInMenuBar.rawValue) }
-    }
-
-    /// The notes folder as the user wrote it, `~` allowed; nil keeps it in Application Support.
-    var notesFolder: String? {
-        didSet { defaults.set(notesFolder, forKey: Key.notesFolder.rawValue) }
-    }
-
-    /// Off by default: connecting a server is consent to run code Tinycast did not write.
-    var mcpEnabled: Bool {
-        didSet { defaults.set(mcpEnabled, forKey: Key.mcpEnabled.rawValue) }
-    }
-    var aiEnabled: Bool {
-        didSet { defaults.set(aiEnabled, forKey: Key.aiEnabled.rawValue) }
-    }
-
     var customCommandsEnabled: Bool {
         didSet { defaults.set(customCommandsEnabled, forKey: Key.customCommandsEnabled.rawValue) }
     }
@@ -434,29 +225,6 @@ final class AppSettings {
             defaults.set(
                 customCommandsShowInLauncher, forKey: Key.customCommandsShowInLauncher.rawValue)
         }
-    }
-
-    /// Also keyword-expansion consent, so it confirms first and never rides a backup.
-    var snippetsEnabled: Bool {
-        didSet { defaults.set(snippetsEnabled, forKey: Key.snippetsEnabled.rawValue) }
-    }
-
-    /// Off out of the box: on means Tinycast may read a selection anywhere and type over it.
-    var quickActionsEnabled: Bool {
-        didSet { defaults.set(quickActionsEnabled, forKey: Key.quickActionsEnabled.rawValue) }
-    }
-
-    var snippetsShowInLauncher: Bool {
-        didSet { defaults.set(snippetsShowInLauncher, forKey: Key.snippetsShowInLauncher.rawValue) }
-    }
-
-    /// The snippets folder as the user wrote it, `~` allowed; nil keeps it in Application Support.
-    var snippetsFolder: String? {
-        didSet { defaults.set(snippetsFolder, forKey: Key.snippetsFolder.rawValue) }
-    }
-
-    var snippetDefaultAction: SnippetDefaultAction {
-        didSet { defaults.set(snippetDefaultAction.rawValue, forKey: Key.snippetDefaultAction.rawValue) }
     }
 
     var navigationEnabled: Bool {
@@ -472,120 +240,6 @@ final class AppSettings {
         didSet {
             defaults.set(menuSearchShowsAppleMenu, forKey: Key.menuSearchShowsAppleMenu.rawValue)
         }
-    }
-
-    /// Consent to run third-party JavaScript: it confirms, defaults off, rides no backup.
-    var extensionsEnabled: Bool {
-        didSet { defaults.set(extensionsEnabled, forKey: Key.extensionsEnabled.rawValue) }
-    }
-
-    var extensionsShowInLauncher: Bool {
-        didSet {
-            defaults.set(extensionsShowInLauncher, forKey: Key.extensionsShowInLauncher.rawValue)
-        }
-    }
-
-    /// Only an install from GitHub needs one — the store serves extensions already built.
-    var extensionPackageManager: ExtensionPackageManager {
-        didSet {
-            defaults.set(
-                extensionPackageManager.rawValue, forKey: Key.extensionPackageManager.rawValue)
-        }
-    }
-
-    /// For a toolchain Tinycast doesn't know — mise or Nix shims are the common case.
-    var extensionCustomSearchPaths: [String] {
-        didSet {
-            defaults.set(
-                extensionCustomSearchPaths, forKey: Key.extensionCustomSearchPaths.rawValue)
-        }
-    }
-
-    /// Doubles as calendar-access consent, so only `CalendarCoordinator` may write it.
-    var calendarEnabled: Bool {
-        didSet { defaults.set(calendarEnabled, forKey: Key.calendarEnabled.rawValue) }
-    }
-
-    var calendarShowInLauncher: Bool {
-        didSet {
-            defaults.set(calendarShowInLauncher, forKey: Key.calendarShowInLauncher.rawValue)
-        }
-    }
-
-    var calendarLauncherLimit: CalendarLauncherLimit {
-        didSet {
-            defaults.set(calendarLauncherLimit.rawValue, forKey: Key.calendarLauncherLimit.rawValue)
-        }
-    }
-
-    /// Narrows the fetch itself rather than what is shown, so every surface reads the same days.
-    var calendarSpan: MeetingSpan {
-        didSet { defaults.set(calendarSpan.rawValue, forKey: Key.calendarSpan.rawValue) }
-    }
-
-    var joinWindowMinutes: JoinWindow {
-        didSet { defaults.set(joinWindowMinutes.rawValue, forKey: Key.joinWindowMinutes.rawValue) }
-    }
-
-    /// Arms the app to open meeting links unattended, so only the Calendar pane's switch writes it.
-    var autoJoinMeetings: Bool {
-        didSet { defaults.set(autoJoinMeetings, forKey: Key.autoJoinMeetings.rawValue) }
-    }
-
-    var autoJoinConfirms: Bool {
-        didSet { defaults.set(autoJoinConfirms, forKey: Key.autoJoinConfirms.rawValue) }
-    }
-
-    var autoJoinNamedProvidersOnly: Bool {
-        didSet {
-            defaults.set(
-                autoJoinNamedProvidersOnly, forKey: Key.autoJoinNamedProvidersOnly.rawValue)
-        }
-    }
-
-    /// Doubles as camera consent, so only the Calendar pane's switch writes it.
-    var cameraPreview: Bool {
-        didSet { defaults.set(cameraPreview, forKey: Key.cameraPreview.rawValue) }
-    }
-
-    /// Nil opens meeting links in the default browser.
-    var meetingBrowserBundleID: String? {
-        didSet {
-            guard let meetingBrowserBundleID else {
-                defaults.removeObject(forKey: Key.meetingBrowser.rawValue)
-                return
-            }
-            defaults.set(meetingBrowserBundleID, forKey: Key.meetingBrowser.rawValue)
-        }
-    }
-
-    var menuBarEvents: MenuBarEvents {
-        didSet { defaults.set(menuBarEvents.rawValue, forKey: Key.menuBarEvents.rawValue) }
-    }
-
-    var calendarMenuBarDisplay: CalendarMenuBarDisplay {
-        didSet {
-            defaults.set(
-                calendarMenuBarDisplay.rawValue, forKey: Key.calendarMenuBarDisplay.rawValue)
-        }
-    }
-
-    var menuBarLinkedEventsOnly: Bool {
-        didSet {
-            defaults.set(
-                menuBarLinkedEventsOnly, forKey: Key.menuBarLinkedEventsOnly.rawValue)
-        }
-    }
-
-    var calendarMenuBarHidesWhenEmpty: Bool {
-        didSet {
-            defaults.set(
-                calendarMenuBarHidesWhenEmpty, forKey: Key.calendarMenuBarHidesWhenEmpty.rawValue)
-        }
-    }
-
-    var hideCurrentEvent: HideCurrentEvent {
-        didSet { defaults.set(hideCurrentEvent.rawValue, forKey: Key.hideCurrentEvent.rawValue) }
     }
 
     /// Off means fully off: no launcher entries and no registered shortcut.
@@ -674,72 +328,19 @@ final class AppSettings {
         }
     }
 
-    /// Whether the support window may reopen itself; off means never ask again.
-    var supportRemindersEnabled: Bool {
-        didSet { defaults.set(supportRemindersEnabled, forKey: Key.supportReminders.rawValue) }
-    }
-
     /// Whether settings.json mirrors these settings; `AppCore` starts and stops the mirror.
     var settingsFileEnabled: Bool {
         didSet { defaults.set(settingsFileEnabled, forKey: Key.settingsFileEnabled.rawValue) }
     }
 
-    /// Sends this Mac's data to iCloud, so only the iCloud Sync pane may turn it on.
-    var iCloudSyncEnabled: Bool {
-        didSet { defaults.set(iCloudSyncEnabled, forKey: Key.iCloudSyncEnabled.rawValue) }
-    }
-
-    /// The categories this Mac leaves out; stored as exclusions, so a new category starts synced.
-    var iCloudSyncDisabledCategories: Set<SyncCategory> {
-        didSet {
-            defaults.set(
-                iCloudSyncDisabledCategories.map(\.rawValue).sorted(),
-                forKey: Key.iCloudSyncDisabledCategories.rawValue)
-        }
-    }
-
-    /// Rows a link from outside may run without asking; only `DeepLinkCoordinator` adds to it.
-    var allowedDeepLinks: [String] {
-        didSet { defaults.set(allowedDeepLinks, forKey: Key.allowedDeepLinks.rawValue) }
-    }
-
-    /// With no per-app list the bundle follows macOS's languages, so this runs before any lookup.
-    static func pinLanguage() {
-        UserDefaults.standard.set([storedLanguage.rawValue], forKey: Key.language.rawValue)
-    }
-
-    /// The app's own domain only: a plain read falls through to the global list.
-    private static var storedLanguage: AppLanguage {
-        AppLanguage(
-            storedPreferences: Bundle.main.bundleIdentifier
-                .flatMap(UserDefaults.standard.persistentDomain(forName:))?[Key.language.rawValue]
-                as? [String], systemPreferences: SystemLanguages.preferred)
-    }
-
     init() {
         // The only feature switch that defaults on, so absence has to outrank a stored `false`.
-        clipboardEnabled =
-            defaults.object(forKey: Key.clipboardEnabled.rawValue) == nil
-            || defaults.bool(forKey: Key.clipboardEnabled.rawValue)
         // `integer(forKey:)` returns 0 when unset, which no case matches.
-        clipboardTextSearchEnabled = defaults.bool(forKey: Key.clipboardTextSearchEnabled.rawValue)
-        clipboardRetention =
-            ClipboardRetention(rawValue: defaults.integer(forKey: Key.clipboardRetention.rawValue))
-            ?? .threeMonths
         // Password managers ship excluded, until the user first edits the list.
-        clipboardDisabledApps =
-            defaults.stringArray(forKey: Key.clipboardDisabledApps.rawValue)
-            ?? ["com.apple.keychainaccess", "com.apple.Passwords"]
-        clipboardDefaultAction =
-            defaults.string(forKey: Key.clipboardDefaultAction.rawValue)
-            .flatMap(ClipboardDefaultAction.init) ?? .paste
         launchAtLogin = LaunchAtLogin.isEnabled
         showInMenuBar =
             defaults.object(forKey: Key.showInMenuBar.rawValue) == nil
             || defaults.bool(forKey: Key.showInMenuBar.rawValue)
-        automaticallyCheckForUpdates =
-            defaults.object(forKey: Key.automaticallyCheckForUpdates.rawValue) == nil
-            || defaults.bool(forKey: Key.automaticallyCheckForUpdates.rawValue)
         hyperKey =
             defaults.string(forKey: Key.hyperKey.rawValue).flatMap(HyperKeyPhysicalKey.init)
             ?? .none
@@ -753,11 +354,6 @@ final class AppSettings {
             ?? .none
         hyperKeySecureInputCompatibility = defaults.bool(
             forKey: Key.hyperKeySecureInputCompatibility.rawValue)
-        emojiSkinTone =
-            defaults.string(forKey: Key.emojiSkinTone.rawValue).flatMap(EmojiSkinTone.init) ?? .none
-        emojiGridColumns =
-            EmojiGridColumns(rawValue: defaults.integer(forKey: Key.emojiGridColumns.rawValue))
-            ?? .default
         popToRootTimeout =
             PopToRootTimeout(rawValue: defaults.integer(forKey: Key.popToRootTimeout.rawValue))
             ?? .immediately
@@ -766,7 +362,6 @@ final class AppSettings {
             ?? .navigateBackOrClose
         appearance =
             defaults.string(forKey: Key.appearance.rawValue).flatMap(AppAppearance.init) ?? .system
-        language = Self.storedLanguage
         calcNumberStyle =
             defaults.string(forKey: Key.calcNumberStyle.rawValue).flatMap(CalcNumberStyle.init)
             ?? .system
@@ -813,104 +408,14 @@ final class AppSettings {
         fileSearchShowInLauncher = defaults.bool(forKey: Key.fileSearchShowInLauncher.rawValue)
         fileSearchIncludesHiddenFiles = defaults.bool(
             forKey: Key.fileSearchIncludesHiddenFiles.rawValue)
-        notesEnabled = defaults.bool(forKey: Key.notesEnabled.rawValue)
-        dictationEnabled = defaults.bool(forKey: Key.dictationEnabled.rawValue)
-        dictationMode =
-            defaults.string(forKey: Key.dictationMode.rawValue)
-            .flatMap(DictationMode.init) ?? .toggle
-        dictationModel =
-            defaults.string(forKey: Key.dictationModel.rawValue)
-            .flatMap(DictationModel.init) ?? .redux
-        dictationMicrophone = defaults.string(forKey: Key.dictationMicrophone.rawValue)
-        dictationDestination =
-            defaults.string(forKey: Key.dictationDestination.rawValue)
-            .flatMap(DictationDestination.init) ?? .paste
-        dictationAdaptsCapitalization =
-            defaults.object(forKey: Key.dictationAdaptsCapitalization.rawValue) == nil
-            || defaults.bool(forKey: Key.dictationAdaptsCapitalization.rawValue)
-        dictationLiveInsertion = defaults.bool(forKey: Key.dictationLiveInsertion.rawValue)
-        dictationPlaysSounds =
-            defaults.object(forKey: Key.dictationPlaysSounds.rawValue) == nil
-            || defaults.bool(forKey: Key.dictationPlaysSounds.rawValue)
-        dictationIdleRelease =
-            defaults.object(forKey: Key.dictationIdleRelease.rawValue)
-            .flatMap { $0 as? Int }
-            .flatMap(DictationIdleRelease.init(rawValue:)) ?? .oneMinute
-        dictationLanguage =
-            defaults.string(forKey: Key.dictationLanguage.rawValue)
-            .flatMap(DictationLanguage.init(rawValue:))?.rawValue
-        notesRendersMarkdown =
-            defaults.object(forKey: Key.notesRendersMarkdown.rawValue) == nil
-            || defaults.bool(forKey: Key.notesRendersMarkdown.rawValue)
-        notesShowsFormattingBar =
-            defaults.object(forKey: Key.notesShowsFormattingBar.rawValue) == nil
-            || defaults.bool(forKey: Key.notesShowsFormattingBar.rawValue)
-        notesShowsInMenuBar = defaults.bool(forKey: Key.notesShowsInMenuBar.rawValue)
-        notesFolder = defaults.string(forKey: Key.notesFolder.rawValue)
-        aiEnabled = defaults.bool(forKey: Key.aiEnabled.rawValue)
-        mcpEnabled = defaults.bool(forKey: Key.mcpEnabled.rawValue)
         customCommandsEnabled = defaults.bool(forKey: Key.customCommandsEnabled.rawValue)
         // These default on, so absence must be distinguished from a stored `false`.
         customCommandsShowInLauncher =
             defaults.object(forKey: Key.customCommandsShowInLauncher.rawValue) == nil
             || defaults.bool(forKey: Key.customCommandsShowInLauncher.rawValue)
-        snippetsEnabled = defaults.bool(forKey: Key.snippetsEnabled.rawValue)
-        quickActionsEnabled = defaults.bool(forKey: Key.quickActionsEnabled.rawValue)
-        snippetsShowInLauncher =
-            defaults.object(forKey: Key.snippetsShowInLauncher.rawValue) == nil
-            || defaults.bool(forKey: Key.snippetsShowInLauncher.rawValue)
-        snippetsFolder = defaults.string(forKey: Key.snippetsFolder.rawValue)
-        snippetDefaultAction =
-            defaults.string(forKey: Key.snippetDefaultAction.rawValue)
-            .flatMap(SnippetDefaultAction.init) ?? .paste
-        // Opt-in, unlike its siblings: until it is asked for, nothing about extensions is loaded.
-        extensionsEnabled = defaults.bool(forKey: Key.extensionsEnabled.rawValue)
-        extensionsShowInLauncher =
-            defaults.object(forKey: Key.extensionsShowInLauncher.rawValue) == nil
-            || defaults.bool(forKey: Key.extensionsShowInLauncher.rawValue)
-        extensionPackageManager =
-            defaults.string(forKey: Key.extensionPackageManager.rawValue)
-            .flatMap(ExtensionPackageManager.init(rawValue:)) ?? .automatic
-        extensionCustomSearchPaths =
-            defaults.stringArray(forKey: Key.extensionCustomSearchPaths.rawValue) ?? []
-        // Opt-in, like extensions: until it is asked for, EventKit is never loaded.
-        calendarEnabled = defaults.bool(forKey: Key.calendarEnabled.rawValue)
-        calendarShowInLauncher =
-            defaults.object(forKey: Key.calendarShowInLauncher.rawValue) == nil
-            || defaults.bool(forKey: Key.calendarShowInLauncher.rawValue)
-        calendarLauncherLimit =
-            defaults.object(forKey: Key.calendarLauncherLimit.rawValue)
-            .flatMap { $0 as? Int }
-            .flatMap(CalendarLauncherLimit.init(rawValue:)) ?? .five
+        // Opt-in: until it is asked for, EventKit is never loaded.
         // No case is zero, so an unset key falls through to the default.
-        calendarSpan =
-            MeetingSpan(rawValue: defaults.integer(forKey: Key.calendarSpan.rawValue))
-            ?? .todayAndTomorrow
-        joinWindowMinutes =
-            JoinWindow(rawValue: defaults.integer(forKey: Key.joinWindowMinutes.rawValue)) ?? .five
-        autoJoinMeetings = defaults.bool(forKey: Key.autoJoinMeetings.rawValue)
-        autoJoinConfirms =
-            defaults.object(forKey: Key.autoJoinConfirms.rawValue) == nil
-            || defaults.bool(forKey: Key.autoJoinConfirms.rawValue)
-        autoJoinNamedProvidersOnly = defaults.bool(forKey: Key.autoJoinNamedProvidersOnly.rawValue)
-        cameraPreview = defaults.bool(forKey: Key.cameraPreview.rawValue)
-        meetingBrowserBundleID = defaults.string(forKey: Key.meetingBrowser.rawValue)
         // Both default to their zero case, so an unset key needs no presence check.
-        menuBarEvents =
-            MenuBarEvents(rawValue: defaults.integer(forKey: Key.menuBarEvents.rawValue)) ?? .today
-        calendarMenuBarDisplay =
-            CalendarMenuBarDisplay(
-                rawValue: defaults.integer(forKey: Key.calendarMenuBarDisplay.rawValue))
-            ?? .disabled
-        menuBarLinkedEventsOnly =
-            defaults.object(forKey: Key.menuBarLinkedEventsOnly.rawValue) == nil
-            || defaults.bool(forKey: Key.menuBarLinkedEventsOnly.rawValue)
-        calendarMenuBarHidesWhenEmpty =
-            defaults.bool(forKey: Key.calendarMenuBarHidesWhenEmpty.rawValue)
-        hideCurrentEvent =
-            defaults.object(forKey: Key.hideCurrentEvent.rawValue)
-            .flatMap { $0 as? Int }
-            .flatMap(HideCurrentEvent.init(rawValue:)) ?? .dontHide
         navigationEnabled = defaults.bool(forKey: Key.navigationEnabled.rawValue)
         menuSearchDisabledApps =
             defaults.stringArray(forKey: Key.menuSearchDisabledApps.rawValue) ?? []
@@ -946,14 +451,6 @@ final class AppSettings {
         quicklinkConfirmsBeforeDelete =
             defaults.object(forKey: Key.quicklinkConfirmsBeforeDelete.rawValue) == nil
             || defaults.bool(forKey: Key.quicklinkConfirmsBeforeDelete.rawValue)
-        supportRemindersEnabled =
-            defaults.object(forKey: Key.supportReminders.rawValue) == nil
-            || defaults.bool(forKey: Key.supportReminders.rawValue)
         settingsFileEnabled = defaults.bool(forKey: Key.settingsFileEnabled.rawValue)
-        iCloudSyncEnabled = defaults.bool(forKey: Key.iCloudSyncEnabled.rawValue)
-        iCloudSyncDisabledCategories = Set(
-            (defaults.stringArray(forKey: Key.iCloudSyncDisabledCategories.rawValue) ?? [])
-                .compactMap(SyncCategory.init(rawValue:)))
-        allowedDeepLinks = defaults.stringArray(forKey: Key.allowedDeepLinks.rawValue) ?? []
     }
 }

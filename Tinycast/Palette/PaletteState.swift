@@ -18,13 +18,7 @@ final class PaletteState {
     var selection: Int = 0
     /// True while an IME holds marked text, which leaves `query` empty. The panel publishes it.
     var isComposing = false
-    var clipboardFilter: ClipboardFilter = .all {
-        didSet { if oldValue != clipboardFilter { restoredSelection = nil } }
-    }
     var fileSearchFilter: FileSearchFilter = .all
-    var emojiCategoryFilter: EmojiCategoryFilter = .all
-    /// Nil means the configured default; zoom only overrides it for this picker session.
-    var emojiGridColumnsOverride: EmojiGridColumns?
     /// Ordering out leaves the SwiftUI tree mounted, so a media preview needs this to stop playing.
     private(set) var isVisible = false
     /// Changes every time the palette is shown so the search field can re-focus.
@@ -40,9 +34,6 @@ final class PaletteState {
     /// Bumped when AppKit resolves ⌘1…⌘0 to a slot index from the physical number row.
     private(set) var favoriteSlotToken = UUID()
     private(set) var favoriteSlotIndex: Int?
-    /// Bumped for ⌘0 / ⌘+ / ⌘-, which the panel claims before the field editor can.
-    private(set) var emojiGridZoomToken = UUID()
-    private(set) var emojiGridZoom: EmojiGridZoom?
     var forceExpanded = false
     /// The paste target, mirrored on every show; `prepare` resets the screen, not this.
     var pasteTarget: PasteTarget?
@@ -113,12 +104,6 @@ final class PaletteState {
         return true
     }
 
-    /// Tab's step deeper into the ring: the screen crossed from is the step back, query and all.
-    func pushCarryingQuery(mode: PaletteMode) {
-        backStack.append(PaletteFrame(mode: self.mode, query: query, selection: selection))
-        self.mode = mode
-    }
-
     /// The search field is one line, so pasted line breaks become spaces; true when it rewrote.
     func collapseQueryLineBreaks() -> Bool {
         guard query.contains(where: \.isNewline) else { return false }
@@ -141,10 +126,7 @@ final class PaletteState {
         commandArguments = [:]
         pendingArgumentEntryID = nil
         argumentEntryID = nil
-        clipboardFilter = .all
         fileSearchFilter = .all
-        emojiCategoryFilter = .all
-        emojiGridColumnsOverride = nil
         forceExpanded = false
         dropHoverHighlight()
         menuOpen = false
@@ -173,18 +155,9 @@ final class PaletteState {
         queryRewriteToken = UUID()
     }
 
-    func preserveSelection() {
-        restoredSelection = selection
-    }
-
     func noteFavoriteSlot(_ index: Int) {
         favoriteSlotIndex = index
         favoriteSlotToken = UUID()
-    }
-
-    func noteEmojiGridZoom(_ zoom: EmojiGridZoom) {
-        emojiGridZoom = zoom
-        emojiGridZoomToken = UUID()
     }
 
     func noteCommandHeld(_ held: Bool) {

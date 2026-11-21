@@ -1,7 +1,7 @@
 # Development
 
-The local loop: set up, build, run, regenerate. Shipping a build is [release.md](release.md);
-verifying a change is [testing.md](testing.md).
+The local loop: set up, build, run, regenerate. Installing a build is `Scripts/install-local.sh`
+([signing.md](signing.md)); verifying a change is [testing.md](testing.md).
 
 ## Requirements
 
@@ -18,8 +18,16 @@ Create the `Tinycast Self-Signed` code-signing identity once. Builds sign with i
 macOS from forgetting the Accessibility grant on every rebuild. Follow **[signing.md](signing.md) §1**,
 a few `openssl`/`security` commands.
 
-Working on iCloud Sync needs the team's Apple Development signing instead; see
-[signing.md](signing.md#icloud-sync). Without it everything else builds and runs as before.
+Then turn on the pre-push hook, which stands in for CI:
+
+```sh
+git config core.hooksPath Scripts/git-hooks
+```
+
+Before a branch push it runs the `Model/` import grep, `./Scripts/lint.sh` and `./Scripts/run-tests.sh`
+on the checkout, and refuses the push if any fails. It also refuses when the pushed branch is not the
+one checked out, or when uncommitted changes would be tested in place of the commit. Tag pushes and
+deletions pass untested, and `git push --no-verify` skips it.
 
 That is the whole required setup. Editor configuration is personal and the repo does not prescribe it;
 the section below is a note for anyone who wants it, not a step.
@@ -44,25 +52,18 @@ Xcode, prefix with `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer` (t
 project settings in `project.yml`, run `xcodegen generate` and commit the result. There is no
 `Package.swift`, and `Bundle.module` must never be used.
 
-The app target builds and embeds `ClipboardTextHelper` under `Contents/Helpers`, signing it on copy.
-Build the app scheme to include it; copying only the main executable omits OCR support. The helper's
-executable name stays fixed even when release builds override the app's product name for a channel.
-
-Dictation similarly embeds its Swift/Core ML helper, named `Tinycast Dev Dictation` in Debug and
-`Tinycast Dictation` in Release, in an accessory `.app` bundle without a bundled icon. Model weights
-download on demand; none are app resources.
+The app target builds and embeds `FileIndexHelper` under `Contents/Helpers`, signing it on copy.
+Build the app scheme to include it; copying only the main executable leaves File Search without its
+indexer.
 
 ### The dev channel
 
-Debug builds are a separate channel: **`Tinycast Dev.app`**, bundle id `com.abueammar.tinycast.dev`.
+Debug builds are a separate channel: **`Tinycast Dev.app`**, bundle id `com.xanderthunder.tinycast.dev`.
 Every persisted thing is keyed by bundle id: `~/Library/Preferences/<id>.plist` (settings and hotkey
-bindings), `~/Library/Application Support/<id>/` (the onboarding marker, Notes, snippets, quicklinks,
-clipboard history, calculator history, launch ranking and frequent emoji; Notes and snippets unless
-a folder is chosen),
-`~/Library/Caches/<id>/` (exchange rates, the update check, staged downloads), the opt-in
-`~/.config/tinycast-dev/settings.json` (`tinycast` on stable), the `tinycast-dev://` link scheme
-(`tinycast://` on stable), the `SMAppService`
-login item, and the Accessibility / Input Monitoring (TCC) grants, so a local build can neither read
+bindings), `~/Library/Application Support/<id>/` (the onboarding marker, quicklinks, calculator
+history, launch ranking, the file index and parked rooms), `~/Library/Caches/<id>/` (exchange rates,
+backup staging), the opt-in `~/.config/tinycast-dev/settings.json` (`tinycast` on stable), the
+`SMAppService` login item, and the Accessibility / Input Monitoring (TCC) grants, so a local build can neither read
 nor clobber an installed app's state, and both run side by side.
 
 **What earns a place in Caches is refetchable, and nothing else.** Anything the user would notice the
@@ -144,22 +145,17 @@ already-running server does not re-read `.compile`.
 the repo root excludes the generated files and the two off-limits files in `DesignSystem/Scrolling/`.
 The comment policy in [standards.md](standards.md#comments) is deliberately not among its rules.
 
-`lint.sh` also runs `check-localizations.js`, which fails on a string missing from any language, a
-missing plural form, a stale entry, or a translation whose format specifiers differ from the source.
-
 ## Localization
 
 ```sh
-./Scripts/sync-strings.sh   # build, merge new UI strings into Localizable.xcstrings, then check it
+./Scripts/sync-strings.sh   # build, merge new UI strings into Localizable.xcstrings, prune stale ones
 ```
 
 `xcodebuild` extracts strings but never writes them back to the catalog (only a build in Xcode's IDE
-does), so run this after changing UI text, then translate what it added (Xcode's catalog editor, or
-the JSON directly). A string whose source changed leaves its old entry stale; delete it. The rules for
-writing localizable code are in [standards.md](standards.md#localization).
-
-To see a language without changing the setting, launch the Debug build with
-`-AppleLanguages '(de)'`; add `-NSDoubleLocalizedStrings YES` to find labels that truncate.
+does), so run this after changing UI text. The fork is English only, so the script also deletes
+every entry no source extracts any more. The rules for writing localizable code are in
+[standards.md](standards.md#localization). Launch the Debug build with
+`-NSDoubleLocalizedStrings YES` to find labels that truncate.
 
 ## Formatting
 
@@ -173,7 +169,7 @@ and this script cannot disagree. `.swift-format` at the repo root tunes it to th
 stock config defaults to 2-space indent and rewrites all 200 files.
 
 Every `*.generated.swift` file is excluded: formatting one is hand-editing it, and the next
-`node Scripts/gen-emoji.js` would revert it. swift-format also refuses any file that does not parse, so
+`node Scripts/gen-currencies.js` would revert it. swift-format also refuses any file that does not parse, so
 a failure from either command is a syntax error rather than a tooling problem, and it is why ⌘S looks
 like it does nothing while a file is mid-edit with unbalanced braces.
 The two protected scrolling primitives, `EdgeDissolve.swift` and `ThinScrollbar.swift`, are also excluded.
@@ -186,7 +182,7 @@ formatter**, on measured evidence. Formatting is
 Xcode's re-indent (⌃I), as it always has been. Two consequences worth knowing:
 
 - `empty_count` is **disabled**, and `isEmpty`-style rewrites are unsafe here generally:
-  `LauncherRankingRecord` and `PaletteRowIndex` have a `count` that is a hit count, not a collection
+  `LauncherRankingRecord` has a `count` that is a hit count, not a collection
   count. A rule that rewrites `count > 0` to `!isEmpty` on them does not compile.
 - `force_try` is an error; `force_cast` only warns, because the AX and AppKit bridges have four
   legitimate ones.
@@ -196,25 +192,19 @@ PR.
 
 ## Generated data
 
-Three Swift files are emitted by scripts and must never be hand-edited. Each downloads its source, so
+Two Swift files are emitted by scripts and must never be hand-edited. Each downloads its source, so
 run them online, then commit the result:
 
 ```sh
-node Scripts/gen-emoji.js            # -> Tinycast/Features/Emoji/Model/EmojiData.generated.swift
-                                     #    + Tinycast/Resources/EmojiKeywords/<language>.txt
 node Scripts/gen-currencies.js       # -> Tinycast/Features/Calculator/Model/CurrencyData.generated.swift
 node Scripts/gen-countries.js        # -> Tinycast/Features/Calculator/Model/CountryZoneData.generated.swift
 ```
 
-`gen-emoji.js` also writes one CLDR keyword pack per language in its `KEYWORD_LOCALES`; adding a
-language is one line there. Pass a directory to keep the downloads between runs:
-`node Scripts/gen-emoji.js /tmp/emoji-sources`.
-
 `gen-countries.js` joins IANA's `zone.tab` with CLDR's `en` territory names on the ISO 3166 code. Re-run
 it when IANA adds or moves a country's zone; see [calculator.md](features/calculator.md#time-zones).
 
-`gen-currencies.js` joins three sources on the ISO code: the **fiat rate feed**'s own quote list (the
-same feed `CurrencyRateStore` fetches rates from, so the table and the rate source cannot drift apart),
+`gen-currencies.js` joins three sources on the ISO code: the **Coinbase currency list** (`api.coinbase.com/v2/currencies`, from the same provider `CurrencyRateStore`
+fetches rates from, so the table and the rate source cannot drift far apart),
 **Unicode CLDR**'s `en` currency data, which supplies display names, signs and the singular/plural
 noun, and **CLDR's supplemental currency data**, which says which codes are still spent anywhere. That
 last one is not optional: the feed carries no retirement metadata and quotes codes their countries
@@ -223,6 +213,6 @@ host's `Intl`, whose output shifts with the local ICU version and would make the
 
 Only unambiguous data is emitted. Anything two currencies claim (`dollars`, `pounds`, `krona`) is
 left out and decided by hand in `CalcCurrency.contested`. The crypto tickers aren't generated at all:
-they have no external source of truth, so `CalcCurrency.crypto` is hand-written, and that same list is
-the set of symbols the fetch asks for. Re-run the script when a currency is added or retired; nothing
+they have no external source of truth, so `CalcCurrency.crypto` is hand-written, and a feed that
+prices none of them is treated as incomplete. Re-run the script when a currency is added or retired; nothing
 breaks in the meantime, since an unquoted code just reports "no exchange rate".

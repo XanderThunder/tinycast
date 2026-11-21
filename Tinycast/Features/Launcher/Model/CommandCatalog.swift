@@ -54,18 +54,10 @@ extension SettingsTab {
         case .commands: [.createCustomCommand, .searchCustomCommands]
         case .quicklinks:
             [.createQuicklink, .searchQuicklinks, .importQuicklinks, .exportQuicklinks]
-        case .ai: [.quickAI, .aiChat]
-        case .quickActions: [.fixGrammar, .rewrite, .translate, .summarize]
         case .fileSearch: [.searchFiles]
-        case .notes: [.showNotes, .createNote, .searchNotes]
-        case .snippets: [.searchSnippets, .createSnippet]
         case .navigation: [.switchWindows, .switchWindowsBackwards, .searchMenuItems]
         case .windowManagement:
             [.createWindowLayout, .captureWindowLayout, .switchRoom, .createRoom]
-        case .clipboard: [.clipboardHistory, .pasteSequentially]
-        case .emoji: [.searchEmoji]
-        case .calendar:
-            [.joinNextMeeting, .mySchedule, .createEvent, .copyMeetingLink, .openInCalendar]
         default: []
         }
     }
@@ -80,7 +72,5 @@ extension CommandID {
             for command in tab.ownedCommands { table[command] = tab }
         }
 
-    var entryKind: AppEntry.Kind {
-        builtInQuickAction == nil ? .command : .quickAction
-    }
+    var entryKind: AppEntry.Kind { .command }
 }

@@ -10,15 +10,9 @@ extension UTType {
 enum BackupActions {
     struct RaycastOutcome {
         var summary: SettingsBackup.ApplySummary
-        var clipboardImported: Int
-        var snippetsImported: Int
-        var snippetsNeedEnabling: Bool
-        /// Set when the snippet files couldn't be written; the rest of the import still applied.
-        var snippetsError: String?
         var quicklinksImported: Int
         /// Set when the library wouldn't open; the rest of the import still applied.
         var quicklinksError: String?
-        var missingImages: Int
     }
 
     // MARK: - Tinycast native (own file panels; dialogs come from `AppCore`)
@@ -50,7 +44,7 @@ enum BackupActions {
 
     // MARK: - Tinycast backups
 
-    /// Composes off-main, then seals — a clipboard history runs to gigabytes.
+    /// Composes off-main, then seals, so the file IO never blocks the main actor.
     static func exportBackup(
         core: AppCore, categories: Set<BackupCategory>
     ) async throws
@@ -144,20 +138,6 @@ enum BackupActions {
             }
         }.value
         // Reported, not thrown: it must not abort the rest of what was asked for.
-        var snippetsImported = 0
-        var snippetsError: String?
-        if !result.snippets.isEmpty {
-            do {
-                // Start the store first, so imported snippets reach the launcher at once.
-                if core.settings.snippetsEnabled {
-                    await core.snippetsStore.start()
-                }
-                snippetsImported =
-                    try await core.snippetsStore.importSnippets(result.snippets).count
-            } catch {
-                snippetsError = error.localizedDescription
-            }
-        }
         var quicklinksImported = 0
         var quicklinksError: String?
         if !result.quicklinks.isEmpty {
@@ -171,18 +151,9 @@ enum BackupActions {
             }
         }
         let summary = result.backup.apply(to: core)
-        let imported =
-            result.clipboard.isEmpty
-            ? 0 : core.clipboardStore.importEntries(result.clipboard)
         return RaycastOutcome(
-            summary: summary,
-            clipboardImported: imported,
-            snippetsImported: snippetsImported,
-            snippetsNeedEnabling: snippetsImported > 0 && !core.settings.snippetsEnabled,
-            snippetsError: snippetsError,
-            quicklinksImported: quicklinksImported,
-            quicklinksError: quicklinksError,
-            missingImages: result.missingImages)
+            summary: summary, quicklinksImported: quicklinksImported,
+            quicklinksError: quicklinksError)
     }
 
     /// Every Raycast channel (stable, beta, alpha, internal) shares this bundle-id prefix.
@@ -223,37 +194,24 @@ enum BackupActions {
             parts.append(applied)
         }
         var imported: [String] = []
-        if summary.clipboard > 0 { imported.append(String(localized: "\(summary.clipboard) clips")) }
-        if summary.snippets > 0 { imported.append(String(localized: "\(summary.snippets) snippets")) }
-        if summary.notes > 0 { imported.append(String(localized: "\(summary.notes) notes")) }
         if summary.learning > 0 {
             imported.append(String(localized: "\(summary.learning) learning records"))
         }
         if !imported.isEmpty {
             parts.append(String(localized: "Imported \(imported.formatted(.list(type: .and)))."))
         }
-        if summary.snippetsNeedEnabling { parts.append(snippetsNeedEnablingText) }
         parts.append(contentsOf: summary.problems)
         return parts.isEmpty ? nothingImportedText : parts.joined(separator: " ")
     }
 
     static func exportText(_ result: BackupComposer.Result) -> String {
         let labels = BackupCategory.ordered(result.manifest.categories).map(\.descriptor.label)
-        var text =
-            labels.isEmpty
+        return labels.isEmpty
             ? String(localized: "Nothing was selected.")
             : String(localized: "Saved \(labels.formatted(.list(type: .and))).")
-        if result.missingImages > 0 {
-            text += " " + String(localized: "\(result.missingImages) images were unavailable and skipped.")
-        }
-        return text
     }
 
     static let nothingImportedText = String(localized: "Nothing to import from this file.")
-
-    /// No import may grant keystroke listening, so say the switch an imported keyword needs is off.
-    private static let snippetsNeedEnablingText =
-        String(localized: "Turn on Snippets in Settings to use their keywords.")
 
     /// Not everything an import applies settles in the running app, so say to relaunch.
     private static let restartAfterImportText = String(localized: "Quit and reopen Tinycast to finish.")
@@ -261,16 +219,6 @@ enum BackupActions {
     static func raycastText(_ outcome: RaycastOutcome) -> String {
         var parts: [String] = []
         if let applied = appliedText(outcome.summary) { parts.append(applied) }
-        if outcome.clipboardImported > 0 {
-            parts.append(String(localized: "Imported \(outcome.clipboardImported) clipboard entries."))
-        }
-        if outcome.snippetsImported > 0 {
-            parts.append(String(localized: "Imported \(outcome.snippetsImported) snippets."))
-        }
-        if outcome.snippetsNeedEnabling { parts.append(snippetsNeedEnablingText) }
-        if let snippetsError = outcome.snippetsError {
-            parts.append(String(localized: "Couldn’t import snippets: \(snippetsError)"))
-        }
         if outcome.quicklinksImported > 0 {
             parts.append(String(localized: "Imported \(outcome.quicklinksImported) quicklinks."))
         }
@@ -278,10 +226,6 @@ enum BackupActions {
             parts.append(String(localized: "Couldn’t import quicklinks: \(quicklinksError)"))
         }
         var message = parts.isEmpty ? nothingImportedText : parts.joined(separator: " ")
-        if outcome.missingImages > 0 {
-            message +=
-                " " + String(localized: "\(outcome.missingImages) images were unavailable and skipped.")
-        }
         if !parts.isEmpty { message += " \(restartAfterImportText)" }
         return message
     }
@@ -294,9 +238,6 @@ enum BackupActions {
         if s.favorites > 0 { parts.append(String(localized: "\(s.favorites) favorites")) }
         if s.hiddenItems > 0 { parts.append(String(localized: "\(s.hiddenItems) hidden items")) }
         if s.aliases > 0 { parts.append(String(localized: "\(s.aliases) aliases")) }
-        if s.pinnedEmoji > 0 {
-            parts.append(String(localized: "\(s.pinnedEmoji) pinned emoji and symbols"))
-        }
         if s.customCommands > 0 {
             parts.append(String(localized: "\(s.customCommands) custom commands"))
         }

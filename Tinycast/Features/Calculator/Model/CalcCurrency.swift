@@ -163,19 +163,15 @@ enum CalcCurrency {
         ("ETC", "Ethereum Classic", []),
         ("ETH", "Ethereum", ["ethereum", "ether"]),
         ("LTC", "Litecoin", ["litecoin"]),
-        ("LUNA", "Terra", ["terra"]),
-        ("NEO", "Neo", []),
         ("POL", "Polygon", ["polygon"]),
         ("SHIB", "Shiba Inu", ["shiba"]),
         ("SOL", "Solana", ["solana"]),
-        ("TRX", "TRON", ["tron"]),
         ("USDT", "Tether", ["tether"]),
         ("XLM", "Stellar", ["stellar"]),
-        ("XMR", "Monero", ["monero"]),
         ("XRP", "XRP", ["ripple"])
     ]
 
-    /// `CurrencyRateStore` builds its request from this, so the two lists cannot drift apart.
+    /// What `CurrencyFeed.pricesCoins` checks a snapshot against.
     static let cryptoCodes: [String] = crypto.map(\.code)
 
     /// A fixed split of BTC, so it is priced off that rate and never fetched as a coin of its own.

@@ -4,11 +4,11 @@ import Foundation
 enum EntryNaming {
     struct Sources: Sendable, Hashable {
         var name: String
-        /// Ranked like the title: a translation, a renamed file, a snippet keyword.
+        /// Ranked like the title: a translation or a renamed file.
         var alternateTitles: [String] = []
-        /// What the entry comes from, shown beside it: an extension's title.
+        /// What the entry comes from, shown beside it.
         var subtitle: String?
-        /// Found by, never ranked by: a declared name, an extension's keywords.
+        /// Found by, never ranked by: a declared name or keyword.
         var keywords: [String] = []
 
         init(name: String) { self.name = name }

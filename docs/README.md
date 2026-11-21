@@ -12,8 +12,9 @@ contradicts the code is a defect, so fix it in the commit that made it wrong.
 | [standards.md](standards.md)       | How code here is written: posture, naming, style, concurrency, performance budgets, comments            | a convention changes, or a check is added       |
 | [testing.md](testing.md)           | How to verify a change: the definition of done, the harnesses, purity checks, budgets, the manual sweep | a harness moves, or a budget changes            |
 | [development.md](development.md)   | The local loop: setup, build, dev channel, editor, format/lint, generated data                          | the local toolchain changes                     |
-| [release.md](release.md)           | How a build reaches a user: packaging, PR review, releases, the Homebrew casks                          | the pipeline changes                            |
-| [signing.md](signing.md)           | The local self-signed identity, the release Developer ID and notary secrets                             | the signing setup changes                       |
+| [signing.md](signing.md)           | The self-signed identity every build uses, and the hardened-runtime entitlement rule                    | the signing setup changes                       |
+| [upstream.md](upstream.md)         | How upstream changes are reviewed and cherry-picked into this fork                                      | the upstream workflow changes                   |
+| [migrations.md](migrations.md)     | How state a removed or renamed setting left behind is repaired, and when the repair is deleted          | a migration rule changes                        |
 | [ui.md](ui.md)                     | The design system: tokens, panel chrome, row grammar, glass, dialogs and HUDs                           | a token or a presentation rule changes          |
 
 ## Features
@@ -24,37 +25,19 @@ open with an `## Invariants` section; read it before changing anything in that a
 
 [palette](features/palette.md) ·
 [launcher](features/launcher.md) ·
-[AI providers and chat](features/ai.md) ·
-[quick actions](features/quick-actions.md) ·
-[clipboard](features/clipboard.md) ·
 [calculator](features/calculator.md) ·
-[calendar](features/calendar.md) ·
 [camera](features/camera.md) ·
-[emoji](features/emoji.md) ·
 [dictionary](features/dictionary.md) ·
 [file search](features/file-search.md) ·
 [menu search](features/menu-search.md) ·
-[notes](features/notes.md) ·
-[snippets](features/snippets.md) ·
 [quicklinks](features/quicklinks.md) ·
 [Apple Shortcuts](features/apple-shortcuts.md) ·
 [hotkeys](features/hotkeys.md) ·
-[deeplinks](features/deeplinks.md) ·
 [navigation](features/navigation.md) ·
 [window management](features/window-management.md) ·
 [window layouts](features/window-layouts.md) ·
 [rooms](features/window-rooms.md) ·
 [custom commands](features/custom-commands.md) ·
-[uninstall](features/uninstall.md) ·
 [backup](features/backup.md) ·
 [settings file](features/settings-file.md) ·
-[iCloud sync](features/icloud-sync.md) ·
-[Raycast import](features/raycast-import.md) ·
-[Raycast extensions](features/extensions.md) ·
-[updates](features/updates.md) ·
-[support](features/support.md)
-
-## Contributing
-
-[`CONTRIBUTING.md`](../CONTRIBUTING.md) covers the workflow: what to open, what to test, what a PR needs.
-[`SECURITY.md`](../SECURITY.md) covers vulnerability reports.
+[Raycast import](features/raycast-import.md)

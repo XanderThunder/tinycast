@@ -3,7 +3,7 @@ import Foundation
 /// What the user reaches for, offered while the search field is empty.
 enum LauncherSuggestions {
     static let limit = 5
-    /// A just-installed app or extension is offered before it has ever been opened.
+    /// A just-installed app is offered before it has ever been opened.
     static let recentInstallLimit = 2
     static let recentInstallWindow: TimeInterval = 5 * 60
 
@@ -16,7 +16,7 @@ enum LauncherSuggestions {
         var priority: Int?
     }
 
-    /// `items` holds only what may be suggested: no favorites, meetings or Tinycast itself.
+    /// `items` holds only what may be suggested: no favorites or Tinycast itself.
     static func select<Item>(from items: [Item], now: Date, traits: (Item) -> Traits) -> [Item] {
         let all = items.map(traits)
         let signals: (Int) -> LauncherOrder.Signals = { all[$0].signals }

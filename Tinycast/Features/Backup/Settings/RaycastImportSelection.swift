@@ -16,17 +16,10 @@ struct RaycastImportSelection: View {
         .init(option: .favorites, symbol: "star", label: String(localized: "Favorites")),
         .init(
             option: .aliases, symbol: "character.cursor.ibeam", label: String(localized: "Aliases")),
-        .init(
-            option: .emojiSkinTone, symbol: "face.smiling",
-            label: String(localized: "Emoji skin tone")),
         .init(option: .launchAtLogin, symbol: "power", label: String(localized: "Launch at login")),
         .init(
             option: .menuBarVisibility, symbol: "menubar.rectangle",
             label: String(localized: "Menu-bar icon")),
-        .init(
-            option: .clipboardHistory, symbol: "doc.on.clipboard",
-            label: String(localized: "Clipboard history")),
-        .init(option: .snippets, symbol: "curlybraces", label: String(localized: "Snippets")),
         .init(
             option: .quicklinks, symbol: Quicklink.sfSymbol, label: String(localized: "Quicklinks")),
         .init(

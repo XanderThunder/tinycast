@@ -44,9 +44,9 @@ final class QuicklinkStore {
         if !isAvailable { closeDatabase() }
     }
 
-    /// Under Application Support, the same per-channel root snippets use.
+    /// Under Application Support, in the per-channel root.
     private static var defaultDirectory: URL {
-        let bundleID = Bundle.main.bundleIdentifier ?? "com.abueammar.tinycast"
+        let bundleID = Bundle.main.bundleIdentifier ?? "com.xanderthunder.tinycast"
         return FileManager.default
             .urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             .appendingPathComponent(bundleID, isDirectory: true)

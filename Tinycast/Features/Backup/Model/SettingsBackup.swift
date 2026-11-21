@@ -14,29 +14,19 @@ struct SettingsBackup: Codable {
     var hiddenLauncherItems: [String]?
     var hiddenLauncherKinds: [String]?
     var launcherAliases: [String: String]?
-    var pinnedEmoji: [String]?
 
     /// Enums store by raw value, so an unknown one is ignored rather than failing.
     struct SettingsData: Codable {
         // Adding a field here means adding it to SettingsBackupCoverage too, or the harness fails.
-        // Carried, unlike the consent flags: recording your own copies grants no permission class.
-        var clipboardEnabled: Bool?
-        var clipboardRetentionDays: Int?
-        var clipboardDefaultAction: String?
-        var clipboardDisabledApps: [String]?
         var launchAtLogin: Bool?
         var hyperKey: String?
         var hyperKeyIncludesShift: Bool?
         var hyperKeyQuickPress: String?
         var hyperKeySecureInputCompatibility: Bool?
-        var emojiSkinTone: String?
-        var emojiGridColumns: Int?
         var showInMenuBar: Bool?
-        var automaticallyCheckForUpdates: Bool?
         var popToRootSeconds: Int?
         var escapeKeyBehavior: String?
         var appearance: String?
-        var language: String?
         var calcNumberStyle: String?
         var interfaceSize: String?
         var compactMode: Bool?
@@ -54,15 +44,8 @@ struct SettingsBackup: Codable {
         var fileSearchRemovedDefaultPatterns: [String]?
         var fileSearchShowInLauncher: Bool?
         var fileSearchIncludesHiddenFiles: Bool?
-        var notesEnabled: Bool?
-        var notesRendersMarkdown: Bool?
-        var notesShowsFormattingBar: Bool?
-        var notesShowsInMenuBar: Bool?
-        // `snippetsEnabled` is absent: an import must not enable keystroke listening.
         var customCommandsEnabled: Bool?
         var customCommandsShowInLauncher: Bool?
-        var snippetsShowInLauncher: Bool?
-        var snippetDefaultAction: String?
         // Safe to carry: it grants no permission class paste doesn't already prompt for.
         var navigationEnabled: Bool?
         var menuSearchDisabledApps: [String]?
@@ -75,31 +58,15 @@ struct SettingsBackup: Codable {
         var windowKeepsProportions: Bool?
         var windowLayoutsShowInLauncher: Bool?
         var windowRoomsShowInLauncher: Bool?
-        // Carried, unlike `snippetsEnabled`: opening a link grants no permission class of its own.
+        // Carried: opening a link grants no permission class of its own.
         var quicklinksEnabled: Bool?
         var quicklinksShowInLauncher: Bool?
-        var extensionsShowInLauncher: Bool?
         var quicklinkOpensNewWindow: Bool?
         var quicklinkPassesSelectedText: Bool?
         var quicklinkConfirmsBeforeDelete: Bool?
         // Carried like quicklinks: running a shortcut the user built grants no permission class.
         var appleShortcutsEnabled: Bool?
-        // `calendarEnabled` is absent: an import must not grant calendar access.
-        var calendarShowInLauncher: Bool?
-        var calendarLauncherLimit: Int?
         // Carried: it narrows what is read rather than widening what may be reached.
-        var calendarSpan: Int?
-        var joinWindowMinutes: Int?
-        // `autoJoinMeetings` and `cameraPreview` are absent: an import must arm neither.
-        var autoJoinConfirms: Bool?
-        var autoJoinNamedProvidersOnly: Bool?
-        var menuBarEvents: Int?
-        var calendarMenuBarDisplay: Int?
-        var menuBarLinkedEventsOnly: Bool?
-        var calendarMenuBarHidesWhenEmpty: Bool?
-        var hideCurrentEvent: Int?
-        // Safe to carry: it silences a prompt rather than granting anything.
-        var supportReminders: Bool?
     }
 
     struct HotkeyBackup: Codable {
@@ -123,7 +90,6 @@ struct SettingsBackup: Codable {
         var favorites = 0
         var hiddenItems = 0
         var aliases = 0
-        var pinnedEmoji = 0
         var customCommands = 0
         var quicklinks = 0
         var windowLayouts = 0
@@ -140,23 +106,15 @@ extension SettingsBackup {
         let s = core.settings
         var backup = SettingsBackup()
         backup.settings = SettingsData(
-            clipboardEnabled: s.clipboardEnabled,
-            clipboardRetentionDays: s.clipboardRetention.rawValue,
-            clipboardDefaultAction: s.clipboardDefaultAction.rawValue,
-            clipboardDisabledApps: s.clipboardDisabledApps,
             launchAtLogin: s.launchAtLogin,
             hyperKey: s.hyperKey.rawValue,
             hyperKeyIncludesShift: s.hyperKeyIncludesShift,
             hyperKeyQuickPress: s.hyperKeyQuickPress.rawValue,
             hyperKeySecureInputCompatibility: s.hyperKeySecureInputCompatibility,
-            emojiSkinTone: s.emojiSkinTone.rawValue,
-            emojiGridColumns: s.emojiGridColumns.rawValue,
             showInMenuBar: s.showInMenuBar,
-            automaticallyCheckForUpdates: s.automaticallyCheckForUpdates,
             popToRootSeconds: s.popToRootTimeout.rawValue,
             escapeKeyBehavior: s.escapeKeyBehavior.rawValue,
             appearance: s.appearance.rawValue,
-            language: s.language.rawValue,
             calcNumberStyle: s.calcNumberStyle.rawValue,
             interfaceSize: s.interfaceSize.rawValue,
             compactMode: s.compactMode,
@@ -173,14 +131,8 @@ extension SettingsBackup {
             fileSearchRemovedDefaultPatterns: s.fileSearchRemovedDefaultPatterns,
             fileSearchShowInLauncher: s.fileSearchShowInLauncher,
             fileSearchIncludesHiddenFiles: s.fileSearchIncludesHiddenFiles,
-            notesEnabled: s.notesEnabled,
-            notesRendersMarkdown: s.notesRendersMarkdown,
-            notesShowsFormattingBar: s.notesShowsFormattingBar,
-            notesShowsInMenuBar: s.notesShowsInMenuBar,
             customCommandsEnabled: s.customCommandsEnabled,
             customCommandsShowInLauncher: s.customCommandsShowInLauncher,
-            snippetsShowInLauncher: s.snippetsShowInLauncher,
-            snippetDefaultAction: s.snippetDefaultAction.rawValue,
             navigationEnabled: s.navigationEnabled,
             menuSearchDisabledApps: s.menuSearchDisabledApps,
             menuSearchShowsAppleMenu: s.menuSearchShowsAppleMenu,
@@ -194,23 +146,10 @@ extension SettingsBackup {
             windowRoomsShowInLauncher: s.windowRoomsShowInLauncher,
             quicklinksEnabled: s.quicklinksEnabled,
             quicklinksShowInLauncher: s.quicklinksShowInLauncher,
-            extensionsShowInLauncher: s.extensionsShowInLauncher,
             quicklinkOpensNewWindow: s.quicklinkOpensNewWindow,
             quicklinkPassesSelectedText: s.quicklinkPassesSelectedText,
             quicklinkConfirmsBeforeDelete: s.quicklinkConfirmsBeforeDelete,
-            appleShortcutsEnabled: s.appleShortcutsEnabled,
-            calendarShowInLauncher: s.calendarShowInLauncher,
-            calendarLauncherLimit: s.calendarLauncherLimit.rawValue,
-            calendarSpan: s.calendarSpan.rawValue,
-            joinWindowMinutes: s.joinWindowMinutes.rawValue,
-            autoJoinConfirms: s.autoJoinConfirms,
-            autoJoinNamedProvidersOnly: s.autoJoinNamedProvidersOnly,
-            menuBarEvents: s.menuBarEvents.rawValue,
-            calendarMenuBarDisplay: s.calendarMenuBarDisplay.rawValue,
-            menuBarLinkedEventsOnly: s.menuBarLinkedEventsOnly,
-            calendarMenuBarHidesWhenEmpty: s.calendarMenuBarHidesWhenEmpty,
-            hideCurrentEvent: s.hideCurrentEvent.rawValue,
-            supportReminders: s.supportRemindersEnabled)
+            appleShortcutsEnabled: s.appleShortcutsEnabled)
 
         let hk = core.hotKeys
         var hotkeys = HotkeyBackup()
@@ -266,7 +205,6 @@ extension SettingsBackup {
         backup.hiddenLauncherItems = Array(core.visibility.hiddenItemKeys)
         backup.hiddenLauncherKinds = Array(core.visibility.disabledKinds)
         backup.launcherAliases = core.aliases.aliases
-        backup.pinnedEmoji = core.pinnedEmoji.glyphs
         return backup
     }
 
@@ -309,32 +247,12 @@ extension SettingsBackup {
             // Counted after the store, which drops blanks the file may carry.
             summary.aliases = core.aliases.aliases.count
         }
-        if let pinnedEmoji {
-            core.pinnedEmoji.replace(pinnedEmoji)
-            summary.pinnedEmoji = core.pinnedEmoji.glyphs.count
-        }
         return summary
     }
 
     private func applySettings(_ s: SettingsData, to core: AppCore) -> Int {
         let settings = core.settings
         var count = 0
-        if let flag = s.clipboardEnabled {
-            settings.clipboardEnabled = flag
-            count += 1
-        }
-        if let days = s.clipboardRetentionDays, let retention = ClipboardRetention(rawValue: days) {
-            settings.clipboardRetention = retention
-            count += 1
-        }
-        if let apps = s.clipboardDisabledApps {
-            settings.clipboardDisabledApps = apps
-            count += 1
-        }
-        if let raw = s.clipboardDefaultAction, let action = ClipboardDefaultAction(rawValue: raw) {
-            settings.clipboardDefaultAction = action
-            count += 1
-        }
         if let launch = s.launchAtLogin {
             settings.launchAtLogin = launch
             count += 1
@@ -355,20 +273,8 @@ extension SettingsBackup {
             settings.hyperKeySecureInputCompatibility = flag
             count += 1
         }
-        if let raw = s.emojiSkinTone, let tone = EmojiSkinTone(rawValue: raw) {
-            settings.emojiSkinTone = tone
-            count += 1
-        }
-        if let raw = s.emojiGridColumns, let columns = EmojiGridColumns(rawValue: raw) {
-            settings.emojiGridColumns = columns
-            count += 1
-        }
         if let show = s.showInMenuBar {
             settings.showInMenuBar = show
-            count += 1
-        }
-        if let automaticallyCheck = s.automaticallyCheckForUpdates {
-            settings.automaticallyCheckForUpdates = automaticallyCheck
             count += 1
         }
         if let secs = s.popToRootSeconds, let timeout = PopToRootTimeout(rawValue: secs) {
@@ -385,10 +291,6 @@ extension SettingsBackup {
         }
         if let raw = s.appearance, let appearance = AppAppearance(rawValue: raw) {
             settings.appearance = appearance
-            count += 1
-        }
-        if let raw = s.language, let language = AppLanguage(rawValue: raw) {
-            settings.language = language
             count += 1
         }
         if let raw = s.calcNumberStyle, let style = CalcNumberStyle(rawValue: raw) {
@@ -454,36 +356,12 @@ extension SettingsBackup {
             settings.fileSearchIncludesHiddenFiles = flag
             count += 1
         }
-        if let flag = s.notesEnabled {
-            settings.notesEnabled = flag
-            count += 1
-        }
-        if let flag = s.notesRendersMarkdown {
-            settings.notesRendersMarkdown = flag
-            count += 1
-        }
-        if let flag = s.notesShowsFormattingBar {
-            settings.notesShowsFormattingBar = flag
-            count += 1
-        }
-        if let flag = s.notesShowsInMenuBar {
-            settings.notesShowsInMenuBar = flag
-            count += 1
-        }
         if let flag = s.customCommandsEnabled {
             settings.customCommandsEnabled = flag
             count += 1
         }
         if let flag = s.customCommandsShowInLauncher {
             settings.customCommandsShowInLauncher = flag
-            count += 1
-        }
-        if let flag = s.snippetsShowInLauncher {
-            settings.snippetsShowInLauncher = flag
-            count += 1
-        }
-        if let raw = s.snippetDefaultAction, let action = SnippetDefaultAction(rawValue: raw) {
-            settings.snippetDefaultAction = action
             count += 1
         }
         if let flag = s.navigationEnabled {
@@ -534,10 +412,6 @@ extension SettingsBackup {
             settings.quicklinksEnabled = flag
             count += 1
         }
-        if let flag = s.extensionsShowInLauncher {
-            settings.extensionsShowInLauncher = flag
-            count += 1
-        }
         if let flag = s.quicklinksShowInLauncher {
             settings.quicklinksShowInLauncher = flag
             count += 1
@@ -556,56 +430,6 @@ extension SettingsBackup {
         }
         if let flag = s.quicklinkConfirmsBeforeDelete {
             settings.quicklinkConfirmsBeforeDelete = flag
-            count += 1
-        }
-        if let flag = s.calendarShowInLauncher {
-            settings.calendarShowInLauncher = flag
-            count += 1
-        }
-        if let raw = s.calendarLauncherLimit, let limit = CalendarLauncherLimit(rawValue: raw) {
-            settings.calendarLauncherLimit = limit
-            count += 1
-        }
-        if let raw = s.calendarSpan, let span = MeetingSpan(rawValue: raw) {
-            settings.calendarSpan = span
-            count += 1
-        }
-        if let raw = s.joinWindowMinutes, let window = JoinWindow(rawValue: raw) {
-            settings.joinWindowMinutes = window
-            count += 1
-        }
-        if let flag = s.autoJoinConfirms {
-            settings.autoJoinConfirms = flag
-            count += 1
-        }
-        if let flag = s.autoJoinNamedProvidersOnly {
-            settings.autoJoinNamedProvidersOnly = flag
-            count += 1
-        }
-        if let raw = s.menuBarEvents, let lead = MenuBarEvents(rawValue: raw) {
-            settings.menuBarEvents = lead
-            count += 1
-        }
-        if let raw = s.calendarMenuBarDisplay,
-            let display = CalendarMenuBarDisplay(rawValue: raw)
-        {
-            settings.calendarMenuBarDisplay = display
-            count += 1
-        }
-        if let flag = s.menuBarLinkedEventsOnly {
-            settings.menuBarLinkedEventsOnly = flag
-            count += 1
-        }
-        if let flag = s.calendarMenuBarHidesWhenEmpty {
-            settings.calendarMenuBarHidesWhenEmpty = flag
-            count += 1
-        }
-        if let raw = s.hideCurrentEvent, let hide = HideCurrentEvent(rawValue: raw) {
-            settings.hideCurrentEvent = hide
-            count += 1
-        }
-        if let flag = s.supportReminders {
-            settings.supportRemindersEnabled = flag
             count += 1
         }
         return count

@@ -380,16 +380,9 @@ extension View {
         editorPresenter: SettingsEditorPresenter
     ) -> some View {
         environment(\.settingsEditorPresenter, editorPresenter)
-            .environment(
-                \.shortcutDeepLink,
-                ShortcutDeepLink(
-                    url: { [launcher = core.launcherCoordinator] in launcher.deepLink(for: $0) },
-                    copy: { [links = core.deepLinkCoordinator] in links.copy($0) })
-            )
             .environment(navigation)
             .environment(core)
             .environment(core.settings)
-            .environment(core.dictationCoordinator)
             .environment(core.appIndex)
             .environment(core.hotKeys)
             .environment(core.visibility)
@@ -397,8 +390,6 @@ extension View {
             .environment(core.fallbacks)
             .environment(core.customCommands)
             .environment(core.customCommandCoordinator)
-            .environment(core.snippetsStore)
-            .environment(core.snippetCoordinator)
             .environment(core.quicklinks)
             .environment(core.quicklinkCoordinator)
             .environment(core.windowLayouts)
@@ -406,16 +397,6 @@ extension View {
             .environment(core.roomCoordinator)
             .environment(core.customWindowSizes)
             .environment(core.customWindowSizeCoordinator)
-            .environment(core.calendarStore)
-            .environment(core.aiSettings)
-            .environment(core.mcpSettings)
-            .environment(core.mcpCoordinator)
-            .environment(core.quickActionSettings)
-            .environment(core.customQuickActions)
-            .environment(core.chatPresets)
-            .environment(core.aiChatCoordinator)
-            .environment(core.chatGPTSubscription)
-            .environment(core.installedAI)
             .scrollContentBackground(.hidden)
             .motionScope()
     }

@@ -1,6 +1,6 @@
 import Foundation
 
-/// Every settings.json binding, built once and shared by the settings file and iCloud Sync.
+/// Every settings.json binding, built once for the settings file.
 @MainActor
 struct SettingsBindingSet {
     let bindings: [SettingsFileBinding]

@@ -147,8 +147,8 @@ window's app quit between the sweep and the ↵.
   reprojects into both coordinators; each owns only its own commands and its own palette mode, so
   neither knows about the other. `AppIndex.isCommandEnabled` feeds `hotKeys.allowsAction`, so every
   shortcut goes dead with the switch, and each `show()` re-guards the flag anyway.
-- **`menuSearchDisabledApps`** (empty) is the exclusion list. It ships with no seeded entries, unlike
-  the clipboard's: a menu read only ever happens because the user asked for one.
+- **`menuSearchDisabledApps`** (empty) is the exclusion list. It ships with no seeded entries: a menu read
+  only ever happens because the user asked for one.
 - **`menuSearchShowsAppleMenu`** (off) lists the Apple menu's own items. Off by default because that
   menu is identical under every app, so it would pad every snapshot with the same ~50 rows;
   [menu-search.md](menu-search.md) owns how it is applied.
@@ -157,11 +157,9 @@ window's app quit between the sweep and the ↵.
   command through `FeatureCommandRow`, so a command added to `ownedCommands` later still appears
   under `Commands` without a second edit. A list of excluded apps in a box of its own read as
   belonging to the pane rather than to one command, which is what this section exists to fix;
-  `DisabledApplicationsList` is the shared half (the rows and the picker) that Settings ›
-  Clipboard still wraps in a `DisabledApplicationsSection` of its own.
+  `DisabledApplicationsList` draws the rows and the picker.
 - Both settings ride in backups. Neither grants a permission class of its own (Accessibility is
-  already required for paste), which is the call `windowManagementEnabled` made, and the opposite of
-  `snippetsEnabled`.
+  already required for paste), which is the call `windowManagementEnabled` made.
 - **There is deliberately no "Show in launcher" switch.** The per-command checkboxes in
   `FeatureCommandsSection` already are one, and a second would be a switch over rows the pane lists.
 

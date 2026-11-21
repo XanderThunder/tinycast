@@ -44,7 +44,7 @@ enum ColorActionsMenu {
                     title: format.title, icon: .blank,
                     shortcut: format == primary ? "↵" : nil, detail: format.string(for: color)
                 ) {
-                    core.clipboardCoordinator.copyColor(color, as: format)
+                    core.launcherCoordinator.copyColor(color, as: format)
                 }
             })
     }

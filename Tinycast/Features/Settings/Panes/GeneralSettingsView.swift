@@ -19,23 +19,12 @@ struct GeneralSettingsView: View {
             }
 
             Section {
-                Picker(selection: $settings.language) {
-                    ForEach(AppLanguage.allCases) { language in
-                        Text(verbatim: language.title).tag(language)
-                    }
-                } label: {
-                    SettingsRowTitle(.generalGeneral, "Language")
-                }
                 Toggle(isOn: $settings.launchAtLogin) {
                     SettingsRowTitle(.generalGeneral, "Launch at login")
                 }
                 Toggle(isOn: $settings.showInMenuBar) {
                     SettingsRowTitle(.generalGeneral, "Show in menu bar")
                     Text("Shortcuts still work when the menu bar icon is hidden.")
-                }
-                Toggle(isOn: $settings.automaticallyCheckForUpdates) {
-                    SettingsRowTitle(.generalGeneral, "Automatically check for updates")
-                    Text("You can still check for updates manually.")
                 }
                 Picker(selection: $settings.popToRootTimeout) {
                     ForEach(PopToRootTimeout.allCases) { timeout in
@@ -141,8 +130,6 @@ struct GeneralSettingsView: View {
             } header: {
                 SettingsSectionHeader(.generalSearch)
             }
-
-            AllowedDeepLinksSection()
         }
         .formStyle(.grouped)
         .settingsScrollTarget(.general)

@@ -9,15 +9,11 @@ final class DialogPanel: NSPanel, AnimatedPanel {
         case confirm
         case increment
         case decrement
-        case tab
-        case backtab
     }
 
     var onKey: ((Key) -> Void)?
     /// Arrows are a control's keys, not the panel's; a text field needs them for its caret.
     var handlesArrowKeys = false
-    var handlesTabKey = false
-    var acceptsLineBreaks = false
 
     init(content: NSView, cornerRadius: CGFloat) {
         super.init(
@@ -52,12 +48,8 @@ final class DialogPanel: NSPanel, AnimatedPanel {
         switch Int(event.keyCode) {
         case kVK_Escape:
             onKey(.cancel)
-        case kVK_Return where returnBelongsToText(event):
-            super.sendEvent(event)
         case kVK_Return, kVK_ANSI_KeypadEnter:
             onKey(.confirm)
-        case kVK_Tab where handlesTabKey && !hasMarkedText:
-            onKey(event.modifierFlags.contains(.shift) ? .backtab : .tab)
         case kVK_LeftArrow where handlesArrowKeys,
             kVK_DownArrow where handlesArrowKeys:
             onKey(.decrement)
@@ -69,28 +61,6 @@ final class DialogPanel: NSPanel, AnimatedPanel {
         }
     }
 
-    /// An input method commits its marked text on ↵, so that press is never a confirm.
-    private func returnBelongsToText(_ event: NSEvent) -> Bool {
-        hasMarkedText || (acceptsLineBreaks && !event.modifierFlags.contains(.command))
-    }
-
-    private var hasMarkedText: Bool {
-        (firstResponder as? NSTextView)?.hasMarkedText() == true
-    }
-
     override var canBecomeKey: Bool { true }
     override var canBecomeMain: Bool { false }
-
-    func focusFirstTextField() {
-        // SwiftUI builds its text fields on first layout, which may not have run by turning key.
-        contentView?.layoutSubtreeIfNeeded()
-        guard let field = contentView.flatMap(Self.firstTextField(in:)) else { return }
-        makeFirstResponder(field)
-    }
-
-    private static func firstTextField(in view: NSView) -> NSView? {
-        if let field = view as? NSTextField, field.isEditable { return field }
-        if let text = view as? NSTextView, text.isEditable { return text }
-        return view.subviews.lazy.compactMap(firstTextField(in:)).first
-    }
 }

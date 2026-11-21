@@ -20,7 +20,7 @@ in (see Currency below).
   text, so history re-renders in whatever format is chosen later.
 - **`CalcEngine.evaluate` never fetches**: it takes a finished `CurrencyRates?`, nil meaning no
   snapshot has landed yet. `CurrencyRateStore` owns the fetch and the cacheless `.ephemeral` session,
-  and `CurrencyFeed` (pure, so the harness covers it) turns the payloads into that snapshot.
+  and `CurrencyFeed` (pure, so the harness covers it) turns the payload into that snapshot.
 - **The time-zone table is Foundation's, never generated and never hand-listed.**
   `TimeZone.knownTimeZoneIdentifiers` already carries the whole IANA database, so `CalcTimeZone`
   builds its city index from that on first use rather than shipping a copy that would rot every time
@@ -33,7 +33,7 @@ in (see Currency below).
 - **A workday is 8 hours, and nothing consults a calendar.** Weekends and public holidays would make
   the same query answer differently on two Macs, and the only supported source for them is EventKit,
   whose Full Calendar Access grant a calculator must never provoke mid-keystroke. `workdays` is
-  therefore an ordinary time unit, and `calendarEnabled` stays the Calendar feature's own consent.
+  therefore an ordinary time unit.
 - **`CurrencyData.generated.swift` is emitted by `node Scripts/gen-currencies.js`** and never hand-edited.
   Four currency tables are hand-maintained, all in `CalcCurrency`: `contested`, the nouns several
   currencies share (`dollars`, `pounds`); `isoNames`, the standard's own names where CLDR substitutes
@@ -761,19 +761,18 @@ A currency pair also outranks a typed-arithmetic error. Typed arithmetic reads `
 The table is **generated except for the judgement calls**. `node Scripts/gen-currencies.js` joins three
 sources on the ISO code and emits `CurrencyData.generated.swift`:
 
-- **The fiat rate feed** decides which currencies exist: the same feed the rates come from, so the
-  table can never list something the app can't price.
-- **CLDR's supplemental currency data** decides which of those are still spent. The feed carries no
+- **Coinbase** decides which currencies exist: a code must be on its fiat list
+  (`api.coinbase.com/v2/currencies`) _and_ priced by the exchange-rates feed the app reads, so the
+  table never offers a currency the calculator can't convert.
+- **CLDR's supplemental currency data** decides which of those are still spent. The list carries no
   retirement metadata and happily quotes codes their countries abandoned years ago, so a code CLDR
   marks live in some region is kept, a code CLDR retired everywhere is dropped, and a code CLDR never
-  mentions is also kept; absence of evidence is not retirement, and that distinction is what
-  preserves `CNH`, the metals, `XDR` and the Crown Dependencies' pounds, none of which are any
-  region's tender. 159 codes survive.
+  mentions is also kept; absence of evidence is not retirement. 147 codes survive.
 - **CLDR** (`en`) decides what humans call them: display name, currency sign, singular/plural noun.
   Read from the pinned `cldr-json` checkout, not the host's `Intl`, whose output shifts with the
   local ICU version.
 
-Only _unambiguous_ CLDR data is emitted: 26 signs and 130 nouns. CLDR itself supplies the sign
+Only _unambiguous_ CLDR data is emitted: 26 signs and 121 nouns. CLDR itself supplies the sign
 tie-break: it writes every dollar but USD as `CA$`/`A$`/`NT$`, so plain `$` is claimed by exactly one
 currency. Bare Latin letters CLDR lists as symbols (`P` for BWP, `L` for HNL) are dropped, since a
 letter is indistinguishable from a word to the tokenizer. Accented nouns are emitted both as written
@@ -800,11 +799,10 @@ it implies is carried here instead, with CLDR as its source. The standard code a
 ### Crypto
 
 `CalcCurrency.crypto` is the third hand-written table, and the only one with no external source at
-all: no standards body names a coin, and the feed silently omits any symbol it can't price, so it
-can't even report which exist. The list is therefore a product choice, and it is also the symbol
-list the fetch asks for, since `CurrencyRateStore` builds its request from `cryptoCodes`. The two
-cannot drift apart. A symbol the feed drops reports `No exchange rate for <CODE>.`, exactly like an
-unquoted fiat code, and starts working again on its own if the feed picks it back up.
+all: no standards body names a coin. The list is therefore a product choice, kept to coins Coinbase
+prices. A symbol the feed omits reports
+`No exchange rate for <CODE>.`, exactly like an unquoted fiat code, and starts working again on its
+own if the feed picks it back up.
 
 Coins join the same `byName` table as `CurrencyDef`s, so every existing path (the sign tokenizer,
 the `BTC1K` prefix split, `parseConversion`, typed arithmetic) works on them unchanged. They are
@@ -813,7 +811,7 @@ inserted **after** the generated nouns, so a ticker outranks one: `1 sol` is Sol
 
 `CalcCurrency.satoshi` is the one denomination. `SATS` is a fixed split of BTC, 100,000,000 to the
 coin, so `CurrencyRates.rate(for:)` prices it off BTC's rate instead of reading the table. It stays out
-of `crypto`, so the fetch never asks for it, and any snapshot that prices BTC prices sats too: `1 eth
+of `crypto`, and any snapshot that prices BTC prices sats too: `1 eth
 to sats`, `10000 sats to usd`. Only `sats` names it, since `sat` is already Saturday.
 
 Order is the whole disambiguation story. Currency runs **after** the unit path, so a query both sides
@@ -857,23 +855,18 @@ keeps its currency.
 ### Exchange rates
 
 The fetch runs on a private **cacheless** `URLSession` (`.ephemeral`, `urlCache = nil`) rather than
-`URLSession.shared`, so `currency-rates.json` stays the only copy on disk. The feed serves the table
-`Cache-Control: public, max-age=…`, so the shared session would keep a second copy in the on-disk
-`URLCache` that deleting the snapshot doesn't touch.
+`URLSession.shared`, so `currency-rates.json` stays the only copy on disk; the shared session would
+keep a second copy in the on-disk `URLCache` that deleting the snapshot doesn't touch.
 
-Both feeds are served by the website's Worker at `tinycast.dev/api/v1/currencies`, which reshapes the
-CC0 [exchange-api](https://github.com/fawazahmed0/exchange-api) daily snapshot and edge-caches it
-(see `website/worker/currencies.ts`).
+Rates come from `CurrencyRateStore` (`Calculator/Service/`, owned by `AppCore`), which makes one
+unauthenticated request to Coinbase's public `api.coinbase.com/v2/exchange-rates?currency=USD`. It
+quotes fiat and coins alike as units per dollar, each rate a decimal string, so `CurrencyFeed` only
+parses the strings, drops anything non-positive or unparsable, and pins the base row to exactly 1.
+One flat table means `convert(_:from:to:)` cross-rates fiat against crypto with no special case
+anywhere downstream.
 
-Rates come from `CurrencyRateStore` (`Calculator/Service/`, owned by `AppCore`), which issues two
-requests concurrently: the fiat table, keyed `<base><code>` with the base's own row omitted, and the
-coin table, which quotes the **inverse**: one coin priced in the base. `CurrencyFeed` folds both
-into the single units-per-base map `CurrencyRates` stores, inverting the coins on the way in and
-merging them last so a symbol both feeds quote takes the coin feed's own price. One flat table means
-`convert(_:from:to:)` cross-rates fiat against crypto with no special case anywhere downstream.
-
-The fiat half is required; the coins are best-effort. A run that misses them still answers for the
-session but is **not** written to disk, and retries in **30 minutes** rather than waiting out the day.
+A snapshot that prices no coin still answers for the session but is **not** written to disk, and
+retries in **30 minutes** rather than waiting out the day.
 Both halves of that follow from the store scheduling off the newest _whole_ snapshot rather than off
 whatever `rates` currently holds: a partial one answers without resetting the clock, so it can neither
 park the loop for a day nor be reloaded at launch as though it were complete.
@@ -883,9 +876,8 @@ served rather than discarded, but it counts as no age at all, so the store re-fe
 instead of trusting a `fetchedAt` that says the table is hours fresh. `CurrencyFeed.pricesCoins` is
 that test, and it is sound only because a partial snapshot is never persisted.
 
-The table is cached at `~/Library/Caches/<bundle-id>/currency-rates.json` and refreshed every 24h.
-The feed republishes about once a day, so a tighter interval would cost requests without returning
-newer numbers. Age is measured from the persisted `fetchedAt`, not from launch, so relaunching
+The table is cached at `~/Library/Caches/<bundle-id>/currency-rates.json` and refreshed every 24h:
+the calculator needs no fresher numbers than that, and the app makes one request a day. Age is measured from the persisted `fetchedAt`, not from launch, so relaunching
 Tinycast never re-fetches a snapshot that is still fresh; a cold start with a same-day cache makes
 zero requests. Offline, the last snapshot keeps answering; with no snapshot at all the card says so
 rather than guessing, and a currency the feed doesn't quote reports `No exchange rate for <CODE>.`

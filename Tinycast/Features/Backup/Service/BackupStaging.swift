@@ -1,6 +1,6 @@
 import Foundation
 
-/// One run's scratch tree, in Caches so PNGs hardlink and a crashed run's orphan ages out.
+/// One run's scratch tree, in Caches so a crashed run's orphan ages out.
 struct BackupStaging: Sendable {
     let root: URL
 

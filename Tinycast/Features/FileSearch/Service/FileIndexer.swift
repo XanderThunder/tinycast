@@ -7,7 +7,6 @@ import Foundation
 final class FileIndexer {
     enum Status: Equatable {
         case off
-        case needsAccess
         case building(items: Int)
         case ready(items: Int, builtAt: Date)
         case failed
@@ -51,33 +50,16 @@ final class FileIndexer {
         self.policy = policy
         guard isEnabled else { return }
         // Editing a list fires once per change, so a burst of them builds once.
-        if isFirst || status == .needsAccess { activate() } else { build(after: .seconds(1)) }
-    }
-
-    /// Full Disk Access can be granted or revoked at any time, and nothing announces it.
-    func refreshAccess() {
-        guard isEnabled else { return }
-        let granted = Permissions.hasFullDiskAccess()
-        if granted, status == .needsAccess {
-            activate()
-        } else if !granted, status != .needsAccess {
-            deactivate()
-            status = .needsAccess
-        }
+        if isFirst { activate() } else { build(after: .seconds(1)) }
     }
 
     func rebuild() {
-        guard isEnabled, status != .needsAccess else { return }
+        guard isEnabled else { return }
         build(after: .zero)
     }
 
     private func activate() {
         guard isEnabled, let policy else { return }
-        guard Permissions.hasFullDiskAccess() else {
-            deactivate()
-            status = .needsAccess
-            return
-        }
         guard !policy.roots.isEmpty else {
             deactivate()
             status = .ready(items: 0, builtAt: .now)

@@ -1,10 +1,30 @@
-# Tinycast
+# Tinycast (personal fork)
 
-A native macOS menu-bar launcher: fuzzy app launcher, global and per-app hotkeys, a text/image
-clipboard history, an inline calculator, a floating note, snippets, quicklinks, window management
-and an emoji picker. It also **runs Raycast extensions** natively, in JavaScriptCore.
-SwiftUI + AppKit, running as an accessory with no Dock icon (`LSUIElement`). Zero third-party
-dependencies.
+A native macOS menu-bar launcher: fuzzy app launcher, global and per-app hotkeys with a Hyper Key, an
+inline calculator, quicklinks, custom commands, Apple Shortcuts, file and menu search, window
+switching, a dictionary, system actions, window management with layouts and rooms, and a camera
+preview. SwiftUI + AppKit, running as an accessory with no Dock icon (`LSUIElement`). Zero
+third-party dependencies.
+
+## Why this fork exists
+
+This is a personal fork of Tinycast by Abue Ammar, built for one Mac. These reasons settle judgement
+calls:
+
+- **Personal build**, installed only on the owner's Mac with `Scripts/install-local.sh`. Nothing is
+  packaged, notarized or distributed.
+- **No telemetry and no auto-updates.**
+- **Zero dependence on the original developer**: no requests, links, support page or changelog that
+  reach `tinycast.dev` or the upstream GitHub. The only network request is the currency fetch.
+- **Only features the owner uses.** Clipboard, snippets, notes, emoji, calendar, uninstall, Raycast
+  extensions, AI, MCP, quick actions, dictation, iCloud sync, deep links, updates and support were
+  removed. When unsure whether something is still needed, ask rather than guess.
+- **Coinbase** supplies currency rates.
+- **Camera stays**: a mirror-style preview, no calendar.
+- **Window management stays**, and is meant to replace Rectangle Pro.
+- **English only.**
+- **One commit per removal**, and upstream changes arrive only by cherry-pick from the
+  `upstream-base`/`upstream-reviewed` tags, never a merge ([upstream.md](docs/upstream.md)).
 
 ## Posture: modern-first, always
 
@@ -46,7 +66,7 @@ system-wide chord, and HIToolbox's TIS APIs remain the public input-source mecha
 | `Tinycast/Features/`     | one folder per feature; larger ones split `Model/` `Service/` `UI/` `Settings/`         |
 | `Tinycast/Migrations/`   | one-shot repairs of state an older release left behind, each deleted after one release  |
 | `Tests/`                 | the standalone harnesses: one Swift file each, no XCTest target                         |
-| `Scripts/`               | every executable script: test runner, data generators, packaging, linting, editor setup |
+| `Scripts/`               | every executable script: test runner, data generators, install, linting, editor setup   |
 
 | Read it before you                                         | Doc                                                          |
 | ---------------------------------------------------------- | ------------------------------------------------------------ |
@@ -57,7 +77,8 @@ system-wide chord, and HIToolbox's TIS APIs remain the public input-source mecha
 | add or restyle any view                                    | [ui.md](docs/ui.md)                                          |
 | touch one feature's internals                              | [features/](docs/features/) (each opens with its invariants) |
 | remove or rename anything persisted                        | [migrations.md](docs/migrations.md)                          |
-| package or ship a build                                    | [release.md](docs/release.md)                                |
+| install a build, or touch signing                          | [signing.md](docs/signing.md)                                |
+| bring in an upstream change                                | [upstream.md](docs/upstream.md)                              |
 
 ## Non-negotiables
 
@@ -89,42 +110,28 @@ feature's doc, under its own `## Invariants`.
 - **A networked feature fetches on a private `.ephemeral`, `urlCache = nil` session**, never
   `URLSession.shared`, so its own cache file stays the only copy on disk. `CurrencyRateStore` is the
   reference: copy it rather than inventing a second shape. A flag that grants a capability is never
-  carried by a backup or by `settings.json`: `snippetsEnabled` is excluded from settings backups so an
-  import cannot grant keystroke listening.
-- **Extensions stay inside `Features/Extensions/`.** Every view, row, menu, geometry and sizing
-  constant an extension needs is written and owned there, never added to `DesignSystem/`, never bolted
-  onto `Theme`, and never lifted somewhere another feature can build on it. Another surface may render
-  one as an opaque box (`LauncherScreen` does exactly that with `ExtensionArgumentsAccessory`), but it
-  never reaches inside one. An extension renders untrusted third-party code whose shape we do not
-  control, so it must never be able to force a change on a launcher surface.
-  **Duplicating a view or a piece of layout maths to keep it here is the correct trade**, and the one
-  place the no-duplication rule yields. What _is_ shared: `Theme`'s base tokens (spacing, radius,
-  colour), `InterfaceMetrics` as the view over those same base tokens, `PopoverMenuItem` as a data
-  shape, and `Platform/`. What is never shared: anything with
-  "how an extension looks or moves" in it. `ExtensionActionsPanel` and `ExtensionGridGeometry` exist
-  precisely because the palette's own menu and the emoji grid must stay free to change without them.
+  carried by a backup or by `settings.json`: `settingsFileEnabled` is excluded from settings backups
+  so an import cannot let a file change another Mac's settings.
 - **`AppEntry.Kind` is the only thing that says what an entry is.** One case per launcher section and
   per `VisibilityStore` category; never re-derive a category by sniffing an entry ID. Which _pane_
   lists a command is a separate fact, and `SettingsTab.ownedCommands` is the only place that states it.
-- **Generated files are never hand-edited.** `EmojiData.generated.swift` and
-  `Resources/EmojiKeywords/` come from `node Scripts/gen-emoji.js`, `CurrencyData.generated.swift` from `node Scripts/gen-currencies.js`,
-  `CountryZoneData.generated.swift` from `node Scripts/gen-countries.js`, and
-  `Resources/RaycastRuntime.generated.js` from `Scripts/raycast-runtime/build.mjs`; the runtime is
-  committed so building the app never needs Node.
+- **Generated files are never hand-edited.** `CurrencyData.generated.swift` comes from
+  `node Scripts/gen-currencies.js` and `CountryZoneData.generated.swift` from
+  `node Scripts/gen-countries.js`; both are committed so building the app never needs Node.
 - **`DesignSystem/Scrolling/EdgeDissolve.swift` and `ThinScrollbar.swift` are off-limits.** Both are
   tuned by eye against the palette's floating bars, so any edit is a visual regression. Needing to touch
   one to fix a scroll bug means the real fix belongs elsewhere.
 
 ## Conventions worth knowing up front
 
-- **User-facing text is localized through `Localizable.xcstrings`**: SwiftUI literals as they are,
-  `String(localized:)` wherever text travels as a `String`, one literal per sentence. Run
-  `./Scripts/sync-strings.sh` after changing any, and translate all eight languages in the same change.
-  See [standards.md](docs/standards.md#localization).
+- **User-facing text goes through `Localizable.xcstrings`, English only**: SwiftUI literals as they
+  are, `String(localized:)` wherever text travels as a `String`, one literal per sentence. Run
+  `./Scripts/sync-strings.sh` after changing any; it adds new keys and prunes stale ones. No
+  translations. See [standards.md](docs/standards.md#localization).
 - **Every symbol icon comes from the icon pack.** Settings tabs, system actions and built-in commands
   pair an SF Symbol with an `IconTint` in their catalog; a user-made item keeps its symbol and takes its
   feature tab's tint. All draw as `IconTile`. To add one, follow
-  [ui.md#adding-an-icon](docs/ui.md#adding-an-icon), which includes updating the artifact.
+  [ui.md#adding-an-icon](docs/ui.md#adding-an-icon).
 - **A new preference also gets a `SettingsFileKey`** and its binding in `SettingsFileSchema`, so the
   opt-in `settings.json` mirror carries it; the exhaustive switch fails the build until it is bound.
   See [settings-file.md](docs/features/settings-file.md).
@@ -138,7 +145,7 @@ feature's doc, under its own `## Invariants`.
   constant or type instead. Cap 100 characters, delete rather than update, and never comment a change
   you just made. Nothing lints this; get it right the first time.
   Full rules: [standards.md#comments](docs/standards.md#comments).
-- **Debug builds are their own channel** (`Tinycast Dev.app` / `com.abueammar.tinycast.dev`), so a
+- **Debug builds are their own channel** (`Tinycast Dev.app` / `com.xanderthunder.tinycast.dev`), so a
   local run never shares prefs, caches, TCC grants or the login item with an installed copy. Anything
   newly persisted must stay keyed by `Bundle.main.bundleIdentifier`.
 - **XcodeGen owns the project.** `Tinycast.xcodeproj` is committed but generated from `project.yml`;

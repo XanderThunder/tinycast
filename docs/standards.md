@@ -92,8 +92,7 @@ fit the table.
 | `Lock`        | Holds a cross-process exclusive claim that the kernel frees on exit           |
 
 `Manager` is the one worth thinking twice about. It means _lifecycle plus policy_, which is a lot for one
-type, so there are only three: `ClipboardManager` (polls, and owns the capture policy and the
-paste-side handshake), `HotKeyManager` (persists bindings, and drives Carbon registration and
+type, so there are only two: `HotKeyManager` (persists bindings, and drives Carbon registration and
 double-tap dispatch) and `HyperKeyManager` (drives the tap, the remap and their pauses, and owns the
 conflict and Secure Input policy). Another is fine if it genuinely owns both halves, but check first
 whether `Store`, `Monitor` or `Coordinator` describes it better, because usually one of them does.
@@ -159,7 +158,7 @@ Swift 6 language mode: data-race violations are hard errors, and that is the des
   lifetime. Strong capture is valid for intentional bounded work; `[unowned self]` needs a guaranteed
   lifetime. Unwrapping weak `self` before a long suspension still retains it until the work finishes.
 - `DispatchQueue.main.async` is not a fix for an ordering problem. If order matters, make it explicit.
-- `ClipboardStore` uses `isolated deinit` for its SQLite teardown: the idiom to copy for a resource that
+- `QuicklinkStore` uses `isolated deinit` for its SQLite teardown: the idiom to copy for a resource that
   must be torn down on its actor.
 
 Two gotchas worth knowing before they cost an afternoon:
@@ -244,11 +243,12 @@ AppKit element whose label lookup calls itself until the stack overflows (the cr
 
 ## Localization
 
-Tinycast ships English plus German, Spanish, French, Japanese, Korean, Portuguese, Russian and
-Simplified Chinese. Every string lives in `Tinycast/Resources/Localizable.xcstrings`, keyed by its
-English source text; the compiler extracts the keys, and `./Scripts/sync-strings.sh` writes them into
-the catalog (Xcode's own build does the same in the IDE). The six privacy prompts live in
-`InfoPlist.xcstrings`, keyed by their `Info.plist` key.
+This fork ships **English only**; there are no translations to keep in step. Every string still
+lives in `Tinycast/Resources/Localizable.xcstrings`, keyed by its English source text: the compiler
+extracts the keys, and `./Scripts/sync-strings.sh` writes them into the catalog and prunes the ones no
+source uses any more (Xcode's own build adds keys in the IDE). The privacy prompts live in
+`InfoPlist.xcstrings`, keyed by their `Info.plist` key. The rules below keep the source ready for a
+catalog, which costs nothing and keeps upstream cherry-picks clean.
 
 - **SwiftUI's own initializers localize literals already**: `Text("…")`, `Button("…")`, `.help("…")`
   and the rest take a `LocalizedStringKey`. A `String` _variable_ passed to them is shown verbatim, so
@@ -270,17 +270,12 @@ the catalog (Xcode's own build does the same in the IDE). The six privacy prompt
 - **Never localized**: anything from macOS, the user or an extension (app and pane names, user
   content, everything a Raycast extension supplies or receives) and persisted formats, identifiers,
   log text, prompts sent to a model, and what the calculator parses.
-- **Tinycast's own command names are translated and stay findable in English**: `CommandID`,
-  `SystemAction` and `WindowCommand` keep their English source as `englishName`, which the launcher
-  indexes as an alternate title.
+- **Command names keep their English source as `englishName`** (`CommandID`, `SystemAction`,
+  `WindowCommand`), which the launcher indexes as an alternate title.
 
-On a fresh installation, Tinycast selects the Mac's primary language if supported, otherwise English,
-and saves that choice before any localization lookup. It does not keep following the Mac's language.
-Settings › General › Language writes the same per-app `AppleLanguages` key as System Settings ›
-Language & Region › Applications, and it applies on relaunch. An empty or unshipped stored list still
-launches in English. Because that key also changes
-`Locale.preferredLanguages` for this process, anything that indexes what the user _types_ (app
-names, emoji keywords) reads macOS's own list through `SystemLanguages.preferred` instead.
+A per-app language set in System Settings › Language & Region › Applications changes
+`Locale.preferredLanguages` for this process, so anything that indexes what the user _types_ (app
+names) reads macOS's own list through `SystemLanguages.preferred` instead.
 
 ## What is actually checked
 

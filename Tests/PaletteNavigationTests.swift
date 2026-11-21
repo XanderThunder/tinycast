@@ -35,14 +35,11 @@ struct PaletteNavigationTests {
         let vm = searchingLauncher()
         expect(!vm.canGoBack, "a prepared screen is a root with nothing behind it")
 
-        vm.push(mode: .clipboard)
+        vm.push(mode: .fileSearch)
         expect(
-            vm.mode == .clipboard && vm.query.isEmpty && vm.selection == 0,
+            vm.mode == .fileSearch && vm.query.isEmpty && vm.selection == 0,
             "a pushed screen opens as fresh as a prepared one")
         expect(vm.canGoBack, "the screen it was pushed over is still there to return to")
-
-        vm.emojiCategoryFilter = .pinned
-        vm.emojiGridColumnsOverride = .six
 
         expect(vm.pop(), "a pushed screen has a step back")
         expect(
@@ -54,81 +51,54 @@ struct PaletteNavigationTests {
             vm.mode == .launcher && vm.query == "clipboard",
             "a refused back step leaves the screen untouched")
 
-        let freshEmoji = searchingLauncher()
-        freshEmoji.emojiCategoryFilter = .category(.flags)
-        freshEmoji.emojiGridColumnsOverride = .ten
-        freshEmoji.prepare(mode: .emoji)
-        expect(
-            freshEmoji.emojiCategoryFilter == .all && freshEmoji.emojiGridColumnsOverride == nil,
-            "a fresh emoji screen restores all categories and the configured grid default")
-
         // A list snapped to the top would throw away the very selection being restored.
         let tokens = searchingLauncher()
-        tokens.push(mode: .emoji)
+        tokens.push(mode: .fileSearch)
         let reset = tokens.resetToken
         let follow = tokens.followToken
-        expect(tokens.pop(), "the emoji screen goes back to the launcher")
+        expect(tokens.pop(), "the file search screen goes back to the launcher")
         expect(tokens.resetToken == reset, "a back step does not snap the restored list to the top")
         expect(tokens.followToken != follow, "it scrolls the restored row into view instead")
 
         let nested = searchingLauncher()
-        nested.push(mode: .ai)
-        nested.query = "why is the sky blue"
-        nested.push(mode: .aiHistory)
+        nested.push(mode: .quicklinks)
+        nested.query = "docs"
+        nested.push(mode: .quicklinkEditor)
         expect(
-            nested.pop() && nested.mode == .ai && nested.query == "why is the sky blue",
-            "history returns to the chat draft it was opened over")
+            nested.pop() && nested.mode == .quicklinks && nested.query == "docs",
+            "the editor returns to the list it was opened over")
         expect(
             nested.pop() && nested.mode == .launcher && nested.query == "clipboard",
-            "and chat returns to the search that found it")
+            "and the list returns to the search that found it")
 
         // `replace` is for a screen swapping its own contents, which is not a step of its own.
         let replaced = searchingLauncher()
-        replaced.push(mode: .ai)
-        replaced.replace(mode: .ai)
-        expect(replaced.canGoBack, "starting a new chat keeps whatever chat was opened over")
+        replaced.push(mode: .quicklinks)
+        replaced.replace(mode: .quicklinks)
+        expect(replaced.canGoBack, "a replaced screen keeps whatever it was opened over")
         expect(
             replaced.pop() && replaced.mode == .launcher,
             "so one back step still lands on the launcher")
 
         let editing = searchingLauncher()
-        editing.push(mode: .snippets)
-        editing.query = "sign-off"
+        editing.push(mode: .quicklinks)
+        editing.query = "docs"
         editing.selection = 2
-        editing.push(mode: .snippetEditor)
-        expect(editing.query.isEmpty, "the snippet editor does not inherit the browser query")
+        editing.push(mode: .quicklinkEditor)
+        expect(editing.query.isEmpty, "the quicklink editor does not inherit the browser query")
         editing.noteEditingField(true)
         expect(
-            editing.pop(preservingSelection: true) && editing.mode == .snippets && editing.query == "sign-off"
+            editing.pop(preservingSelection: true) && editing.mode == .quicklinks && editing.query == "docs"
                 && editing.selection == 2 && editing.restoredSelection == 2 && !editing.isEditingField,
-            "leaving a snippet editor restores its browser and releases the form keyboard")
+            "leaving a quicklink editor restores its browser and releases the form keyboard")
         editing.query = "new search"
         expect(editing.restoredSelection == nil, "typing a new query releases the restored selection")
         expect(
             editing.pop() && editing.mode == .launcher && editing.query == "clipboard",
-            "the snippet browser still returns to the launcher search")
-        editing.prepare(mode: .snippets)
+            "the quicklink browser still returns to the launcher search")
+        editing.prepare(mode: .quicklinks)
         expect(editing.restoredSelection == nil, "a fresh summon releases the restored selection")
         expect(vm.restoredSelection == nil, "other screens keep their existing navigation behaviour")
-
-        let clipboard = PaletteState()
-        clipboard.prepare(mode: .clipboard)
-        clipboard.query = "draft"
-        clipboard.clipboardFilter = .text
-        clipboard.query = ""
-        clipboard.clipboardFilter = .all
-        clipboard.selection = 2
-        clipboard.preserveSelection()
-        clipboard.clipboardFilter = .all
-        expect(
-            clipboard.selection == 2 && clipboard.restoredSelection == 2,
-            "a programmatic query and filter change keeps its chosen row through the observers")
-        clipboard.clipboardFilter = .link
-        expect(clipboard.restoredSelection == nil, "a new type filter releases the preserved selection")
-        clipboard.selection = 1
-        clipboard.preserveSelection()
-        clipboard.query = "another"
-        expect(clipboard.restoredSelection == nil, "a new query releases the preserved selection")
 
         let quicklink = searchingLauncher()
         quicklink.push(mode: .quicklinks)
@@ -142,25 +112,9 @@ struct PaletteNavigationTests {
             quicklink.pop(preservingSelection: true) && quicklink.mode == .quicklinks
                 && quicklink.query == "GitHub" && quicklink.restoredSelection == 1,
             "leaving a quicklink editor restores its browser query and row")
-        quicklink.pushCarryingQuery(mode: .launcher)
-        expect(quicklink.restoredSelection == nil, "a ring hop does not carry the restored row along")
         expect(
-            !PaletteMode.extensionCommand.isNativeEditor && !PaletteMode.quicklinks.isNativeEditor,
-            "native editor keyboard routing excludes extensions and browsers")
-
-        let event = searchingLauncher()
-        event.query = "Create Event"
-        event.push(mode: .eventEditor)
-        event.noteEditingField(true)
-        expect(
-            event.mode.isNativeEditor && event.query.isEmpty,
-            "the event editor owns its keyboard without inheriting the launcher query")
-        expect(
-            event.pop(preservingSelection: true) && event.mode == .launcher
-                && event.query == "Create Event" && event.restoredSelection == 3 && !event.isEditingField,
-            "leaving an event editor restores the launcher query and selected row")
-        event.prepare(mode: .eventEditor)
-        expect(!event.canGoBack, "an event editor summoned by a hotkey starts without a previous screen")
+            !PaletteMode.quicklinks.isNativeEditor,
+            "native editor keyboard routing excludes browsers")
 
         let command = searchingLauncher()
         command.query = "Create Custom Command"
@@ -190,10 +144,10 @@ struct PaletteNavigationTests {
             "closing a command editor restores its browser query and selection")
         expect(commands.pop() && commands.mode == .launcher, "the command browser returns to root search")
 
-        for mode: PaletteMode in [.snippetEditor, .quicklinkEditor, .eventEditor, .customCommandEditor] {
+        for mode: PaletteMode in [.quicklinkEditor, .customCommandEditor] {
             let switched = searchingLauncher()
             switched.push(mode: mode)
-            switched.push(mode: .clipboard)
+            switched.push(mode: .fileSearch)
             expect(
                 switched.pop() && switched.mode == .launcher && switched.query == "clipboard"
                     && !switched.canGoBack,
@@ -204,41 +158,21 @@ struct PaletteNavigationTests {
                 switched.pop() && switched.mode == .launcher && !switched.canGoBack,
                 "switching between editors preserves only the original browser")
             switched.prepare(mode: mode)
-            switched.push(mode: .clipboard)
+            switched.push(mode: .fileSearch)
             expect(!switched.canGoBack, "a directly summoned editor leaves no dead back frame")
         }
 
         let summoned = searchingLauncher()
-        summoned.push(mode: .clipboard)
-        summoned.prepare(mode: .emoji)
+        summoned.push(mode: .fileSearch)
+        summoned.prepare(mode: .fileSearch)
         expect(!summoned.canGoBack, "a summon is a new root, not a step onto the old stack")
 
         let ringed = searchingLauncher()
-        ringed.push(mode: .clipboard)
+        ringed.push(mode: .fileSearch)
         ringed.resetNavigation()
         expect(
-            !ringed.canGoBack && ringed.mode == .clipboard,
-            "closing the Tab ring drops the stack without disturbing the screen")
-
-        let hopped = searchingLauncher()
-        hopped.pushCarryingQuery(mode: .clipboard)
-        expect(
-            hopped.mode == .clipboard && hopped.query == "clipboard" && hopped.selection == 3,
-            "a ring hop carries the query and the row it was on")
-        expect(
-            hopped.pop() && hopped.mode == .launcher && hopped.query == "clipboard",
-            "and the screen it crossed from is the step back")
-
-        let chatted = searchingLauncher()
-        chatted.push(mode: .ai)
-        chatted.query = "why is the sky blue"
-        chatted.push(mode: .clipboard)
-        expect(
-            chatted.pop() && chatted.mode == .ai && chatted.query == "why is the sky blue",
-            "Tab out of chat leaves the draft to come back to")
-        expect(
-            chatted.pop() && chatted.mode == .launcher,
-            "and a second step back reaches the launcher the ring started on")
+            !ringed.canGoBack && ringed.mode == .fileSearch,
+            "resetting navigation drops the stack without disturbing the screen")
 
         let pasted = searchingLauncher()
         pasted.query = "\nfirst pasted row,\r\nsecond pasted row\u{2028}third\n"
@@ -274,7 +208,7 @@ struct PaletteNavigationTests {
         state.notePointerMoved(to: rest)
         expect(!state.hoverHighlightArmed, "a mouse-moved event that has not moved arms nothing")
         let state2 = armed()
-        state2.prepare(mode: .clipboard)
+        state2.prepare(mode: .fileSearch)
         expect(!state2.hoverHighlightArmed, "switching mode disarms the highlight again")
     }
 

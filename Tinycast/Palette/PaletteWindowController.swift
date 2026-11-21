@@ -21,8 +21,6 @@ final class PaletteWindowController: NSObject, NSWindowDelegate {
     /// Live only between mouse-down and mouse-up on a drag handle; nil means a move was ours.
     private var drag: DragSession?
     private let dropGuides = PaletteDropGuideController()
-    /// ⌘V: `Edit ▸ Paste` claims it before `sendEvent` whenever the board also carries text.
-    private var pasteMonitor: Any?
     /// ⌘esc: the window server claims it, so no keystroke is left for the responder chain to see.
     private lazy var commandEscapeTap = CommandEscapeTap { [weak self] in
         guard let self, self.panel?.isKeyWindow == true else { return }
@@ -55,7 +53,7 @@ final class PaletteWindowController: NSObject, NSWindowDelegate {
 
     /// What the palette covered when it was summoned, for anything it expands into on dismissal.
     var previousTarget: InjectionTarget? {
-        InjectionTarget.behindPalette(ownWindow: previousOwnWindow, app: previousApp)
+        InjectionTarget.behindPalette(app: previousApp)
     }
 
     func show() {
@@ -85,10 +83,7 @@ final class PaletteWindowController: NSObject, NSWindowDelegate {
             panel.contentView?.layoutSubtreeIfNeeded()
             core.inputSourceSwitcher.beginSession(
                 preferredInputSourceID: core.settings.autoSwitchInputSourceID)
-            // Events go stale while the palette is closed, and the countdown only ticks while up.
-            core.calendarCoordinator.paletteDidShow()
             core.palette.noteVisible(true)
-            core.clipboardStore.setTextSearchActive(true)
             // Non-activating, so summoning never raises our own aux windows behind it.
             panel.makeKeyAndOrderFront(nil)
             panel.orderFrontRegardless()
@@ -100,11 +95,6 @@ final class PaletteWindowController: NSObject, NSWindowDelegate {
         }
     }
 
-    // Isolated so teardown may touch the main-actor monitor; the block is already weak.
-    isolated deinit {
-        if let pasteMonitor { NSEvent.removeMonitor(pasteMonitor) }
-    }
-
     /// The character a bare-⌘ chord names, through the ASCII layout so an IME cannot move it.
     private static func commandCharacter(from event: NSEvent) -> String? {
         guard !event.isARepeat,
@@ -114,50 +104,12 @@ final class PaletteWindowController: NSObject, NSWindowDelegate {
             ?? event.charactersIgnoringModifiers?.lowercased()
     }
 
-    /// Shift is allowed, since ⌘+ is a shifted = on most layouts; the base key decides.
-    private static func emojiGridZoom(from event: NSEvent) -> EmojiGridZoom? {
-        guard !event.isARepeat, event.modifierFlags.isDisjoint(with: [.option, .control]) else {
-            return nil
-        }
-        switch ASCIIKeyboardLayout.character(for: event) {
-        case "0": return .actualSize
-        case "=", "+": return .zoomIn
-        case "-": return .zoomOut
-        default: return nil
-        }
-    }
-
-    /// A local monitor sees the key before menu dispatch; returning nil swallows it.
-    private func installPasteMonitor() {
-        pasteMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) {
-            [weak self] event in
-            guard let self, self.panel?.isKeyWindow == true,
-                Self.commandCharacter(from: event) == "v"
-            else { return event }
-            return self.attachPastedFile() ? nil : event
-        }
-    }
-
-    /// Read once here: ⌘V is a keystroke path, and both routes want the same answer.
-    private func attachPastedFile() -> Bool {
-        let files = PasteboardFiles.urls(on: .general)
-        switch core.palette.mode {
-        case .ai: return core.quickAICoordinator.attachPastedFile(files: files)
-        case .launcher: return core.quickAICoordinator.attachPastedFileFromLauncher(files: files)
-        default: return false
-        }
-    }
-
     func hide(restoreFocus: Bool) {
-        NotesPanel.refusesInheritedKey = previousOwnWindow?.isVisible != true
         panel?.orderOut(nil)
-        NotesPanel.refusesInheritedKey = false
         commandEscapeTap.disable()
         core.inputSourceSwitcher.endSession()
-        core.calendarCoordinator.paletteDidHide()
         core.roomCoordinator.paletteDidHide()
         core.palette.noteVisible(false)
-        core.clipboardStore.setTextSearchActive(false)
         // Drop the anchor, so the next summon re-resolves for the screen in use then.
         anchor = nil
         // The guides must never outlive the panel they point at.
@@ -178,7 +130,6 @@ final class PaletteWindowController: NSObject, NSWindowDelegate {
     }
 
     private func schedulePopToRoot() {
-        guard !core.extensions.isSigningIn else { return }
         popToRootTimer?.invalidate()
         let timeout = core.settings.popToRootTimeout
         guard timeout != .immediately else {
@@ -209,22 +160,13 @@ final class PaletteWindowController: NSObject, NSWindowDelegate {
         popToRoot()
     }
 
-    /// True while a hidden palette keeps its screen: a reset is pending, or a sign-in holds it.
+    /// True while a hidden palette keeps its screen: a reset is pending.
     func consumePreservedState() -> Bool {
-        guard let timer = popToRootTimer else { return core.extensions.isSigningIn }
+        guard let timer = popToRootTimer else { return false }
         timer.invalidate()
         popToRootTimer = nil
         queryWasPreserved = true
         return true
-    }
-
-    @discardableResult
-    func pasteKeepingWindowOpen(_ item: ClipboardItem, store: ClipboardStore) -> Bool {
-        Paster.pasteInPlace(item, store: store, into: previousApp)
-    }
-
-    func pasteStringKeepingWindowOpen(_ text: String) {
-        Paster.pasteStringInPlace(text, into: previousApp)
     }
 
     // MARK: - NSWindowDelegate
@@ -383,35 +325,19 @@ final class PaletteWindowController: NSObject, NSWindowDelegate {
             guard let core = self?.core, core.palette.query.isEmpty else { return false }
             // A form field owns the key: the text it deletes is the field's, not a query's.
             if core.palette.isEditingField { return false }
-            if core.palette.mode == .extensionCommand {
-                core.extensionCoordinator.exitExtensionScreen()
-                return true
-            }
-            if core.palette.mode == .ai, core.quickAICoordinator.removeLastAttachment() {
-                return true
-            }
             if core.palette.pop() { return true }
             guard core.palette.mode != .launcher else { return false }
             core.palette.prepare(mode: .launcher)
             return true
         }
-        installPasteMonitor()
         panel.onEscape = { [weak self] in
             guard let self else { return false }
             if core.palette.mode == .customCommandEditor, !core.palette.isComposing {
                 core.customCommandCoordinator.cancelCustomCommandEditing()
                 return true
             }
-            if core.palette.mode == .eventEditor, !core.palette.isComposing {
-                core.calendarCoordinator.cancelEventEditing()
-                return true
-            }
             if core.palette.mode == .quicklinkEditor, !core.palette.isComposing {
                 core.quicklinkCoordinator.cancelQuicklinkEditing()
-                return true
-            }
-            if core.palette.mode == .snippetEditor, !core.palette.isComposing {
-                core.snippetCoordinator.cancelSnippetEditing()
                 return true
             }
             return false
@@ -427,22 +353,14 @@ final class PaletteWindowController: NSObject, NSWindowDelegate {
                 switch core.palette.mode {
                 case .quicklinkEditor:
                     core.quicklinkCoordinator.saveQuicklink()
-                case .snippetEditor:
-                    core.snippetCoordinator.requestSnippetSave()
-                case .eventEditor:
-                    core.calendarCoordinator.saveEvent()
                 case .customCommandEditor:
                     core.customCommandCoordinator.saveCustomCommand()
                 default: break
                 }
                 return true
             }
-            if self.core.palette.mode == .emoji, let zoom = Self.emojiGridZoom(from: event) {
-                self.core.palette.noteEmojiGridZoom(zoom)
-                return true
-            }
             guard Self.commandCharacter(from: event) != nil else { return false }
-            if self.core.palette.mode == .launcher || self.core.palette.mode == .clipboard,
+            if self.core.palette.mode == .launcher,
                 let index = FavoriteSlots.index(forKeyCode: event.keyCode)
             {
                 self.core.palette.noteFavoriteSlot(index)

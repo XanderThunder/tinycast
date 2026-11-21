@@ -12,13 +12,9 @@ final class LauncherCoordinator {
     private let quicklinkCoordinator: QuicklinkCoordinator
     private let windowCommandCoordinator: WindowCommandCoordinator
     private let windowLayoutCoordinator: WindowLayoutCoordinator
-    private let snippetCoordinator: SnippetCoordinator
     private let fileSearchCoordinator: FileSearchCoordinator
     private let menuSearchCoordinator: MenuSearchCoordinator
     private let windowSwitchCoordinator: WindowSwitchCoordinator
-    private let notesCoordinator: NotesCoordinator
-    private let extensionCoordinator: ExtensionCoordinator
-    private let calendarCoordinator: CalendarCoordinator
     /// The backup commands only, which need the live stores to gather from and apply to.
     private unowned let core: AppCore
 
@@ -32,13 +28,9 @@ final class LauncherCoordinator {
         quicklinkCoordinator: QuicklinkCoordinator,
         windowCommandCoordinator: WindowCommandCoordinator,
         windowLayoutCoordinator: WindowLayoutCoordinator,
-        snippetCoordinator: SnippetCoordinator,
         fileSearchCoordinator: FileSearchCoordinator,
         menuSearchCoordinator: MenuSearchCoordinator,
         windowSwitchCoordinator: WindowSwitchCoordinator,
-        notesCoordinator: NotesCoordinator,
-        extensionCoordinator: ExtensionCoordinator,
-        calendarCoordinator: CalendarCoordinator,
         core: AppCore
     ) {
         self.ranking = ranking
@@ -50,13 +42,9 @@ final class LauncherCoordinator {
         self.quicklinkCoordinator = quicklinkCoordinator
         self.windowCommandCoordinator = windowCommandCoordinator
         self.windowLayoutCoordinator = windowLayoutCoordinator
-        self.snippetCoordinator = snippetCoordinator
         self.fileSearchCoordinator = fileSearchCoordinator
         self.menuSearchCoordinator = menuSearchCoordinator
         self.windowSwitchCoordinator = windowSwitchCoordinator
-        self.notesCoordinator = notesCoordinator
-        self.extensionCoordinator = extensionCoordinator
-        self.calendarCoordinator = calendarCoordinator
         self.core = core
     }
 
@@ -82,15 +70,6 @@ final class LauncherCoordinator {
                 return
             }
             runCommand(id)
-            return
-        }
-        if app.kind == .quickAction {
-            if let command = CommandCatalog.command(for: app) {
-                runCommand(command)
-                return
-            }
-            guard let id = CustomQuickAction.id(fromEntryID: app.id) else { return }
-            core.quickActionCoordinator.run(id: id)
             return
         }
         if app.kind == .customCommand {
@@ -124,16 +103,6 @@ final class LauncherCoordinator {
             windowLayoutCoordinator.runWindowLayout(id: id)
             return
         }
-        // Before the palette hides: a view command takes the palette over rather than closing it.
-        if app.kind == .extensionCommand {
-            extensionCoordinator.runExtensionCommand(app, arguments: arguments)
-            return
-        }
-        if app.kind == .meeting {
-            guard let id = MeetingEvent.id(fromEntryID: app.id) else { return }
-            calendarCoordinator.activateMeeting(id: id)
-            return
-        }
         // Before the palette hides: an unfilled quicklink stays up to ask first.
         if app.kind == .quicklink {
             guard let id = Quicklink.id(fromEntryID: app.id) else { return }
@@ -145,7 +114,6 @@ final class LauncherCoordinator {
             core.appleShortcutCoordinator.run(id: id)
             return
         }
-        let previous = windowController.previousTarget
         paletteCoordinator.hidePalette(restoreFocus: false)
         switch app.kind {
         case .application:
@@ -153,11 +121,8 @@ final class LauncherCoordinator {
         case .systemSettings:
             guard let bundleID = app.bundleID else { return }
             AppLauncher.openSettingsPane(bundleID: bundleID)
-        case .snippet:
-            guard let snippetID = StoredSnippet.id(fromEntryID: app.id) else { return }
-            snippetCoordinator.expandSnippet(id: snippetID, target: previous)
-        case .command, .quickAction, .customCommand, .systemAction, .windowCommand, .windowLayout,
-            .windowRoom, .quicklink, .appleShortcut, .extensionCommand, .meeting:
+        case .command, .customCommand, .systemAction, .windowCommand, .windowLayout,
+            .windowRoom, .quicklink, .appleShortcut:
             break  // handled above
         }
     }
@@ -165,27 +130,8 @@ final class LauncherCoordinator {
     /// The one funnel a built-in command runs through, from a palette row or its global shortcut.
     func runCommand(_ id: CommandID) {
         switch id {
-        case .quickAI:
-            core.quickAICoordinator.show()
-        case .aiChat:
-            dismissPalette()
-            core.aiChatCoordinator.toggleWindow()
-        case .fixGrammar:
-            core.quickActionCoordinator.run(.fixGrammar)
-        case .rewrite:
-            core.quickActionCoordinator.run(.rewrite)
-        case .translate:
-            core.quickActionCoordinator.run(.translate)
-        case .summarize:
-            core.quickActionCoordinator.run(.summarize)
         case .calculatorHistory:
             paletteCoordinator.togglePalette(mode: .calculatorHistory)
-        case .clipboardHistory:
-            paletteCoordinator.togglePalette(mode: .clipboard)
-        case .pasteSequentially:
-            core.clipboardCoordinator.pasteNextInSequence()
-        case .searchEmoji:
-            paletteCoordinator.togglePalette(mode: .emoji)
         case .searchFiles:
             fileSearchCoordinator.show()
         case .searchMenuItems:
@@ -201,31 +147,8 @@ final class LauncherCoordinator {
             core.dictionaryCoordinator.show()
         case .openInBrowser, .runShellCommand:
             break  // Query-driven: each runs where the typed text is, never through this funnel.
-        case .joinNextMeeting:
-            calendarCoordinator.joinNextMeeting()
-        case .copyMeetingLink:
-            calendarCoordinator.copyNextMeetingLink()
-        case .mySchedule:
-            calendarCoordinator.showSchedule()
-        case .openInCalendar:
-            calendarCoordinator.openNextMeetingInCalendar()
-        case .createEvent:
-            calendarCoordinator.createEvent()
-        case .showNotes:
-            dismissPalette()
-            notesCoordinator.toggle()
-        case .createNote:
-            dismissPalette()
-            notesCoordinator.createNote()
-        case .searchNotes:
-            dismissPalette()
-            notesCoordinator.searchNotes()
         case .searchQuicklinks:
             paletteCoordinator.togglePalette(mode: .quicklinks)
-        case .searchSnippets:
-            snippetCoordinator.showSnippets()
-        case .createSnippet:
-            snippetCoordinator.createSnippetFromSelection()
         case .createWindowLayout:
             dismissPalette()
             windowLayoutCoordinator.editWindowLayout(nil)
@@ -257,18 +180,12 @@ final class LauncherCoordinator {
         case .importFromRaycast:
             dismissPalette()
             settingsCoordinator.showBackupSettings()
-        case .checkForUpdates:
-            dismissPalette()
-            core.updateCoordinator.checkForUpdates()
         case .settings:
             dismissPalette()
             settingsCoordinator.showSettings()
         case .about:
             dismissPalette()
             settingsCoordinator.showAbout()
-        case .support:
-            dismissPalette()
-            core.supportCoordinator.showSupport()
         case .quit:
             NSApp.terminate(nil)
         }
@@ -284,6 +201,11 @@ final class LauncherCoordinator {
 
     func resetRanking(for app: AppEntry) {
         ranking.reset(itemKey: app.preferenceKey)
+    }
+
+    func copyColor(_ color: ColorValue, as format: ColorFormat) {
+        paletteCoordinator.hidePalette(restoreFocus: false)
+        Paster.copyPlainText(format.string(for: color))
     }
 
     func showInFinder(_ app: AppEntry) {
@@ -302,33 +224,8 @@ final class LauncherCoordinator {
             guard let command = core.customCommands.command(entryID: entry.id) else { return [:] }
             return CustomCommandArgumentsAccessory.values(for: command, vm: palette)
         default:
-            var values: [String: String] = [:]
-            for argument in extensionCoordinator.commandArguments(for: entry) ?? [] {
-                let typed = palette.commandArguments[PaletteState.argumentKey(entry.id, argument.name)]
-                if let typed, !typed.isEmpty { values[argument.name] = typed }
-            }
-            return values
+            return [:]
         }
-    }
-
-    func deepLink(for app: AppEntry) -> URL? {
-        let values = argumentValues(for: app)
-        guard app.kind != .extensionCommand else {
-            return extensionCoordinator.deepLink(forEntryID: app.id, arguments: values)
-        }
-        return core.deepLinkCoordinator.url(forEntryID: app.id, values: values)
-    }
-
-    func deepLink(for action: HotKeyAction) -> URL? {
-        if case .extensionCommand(let entryID) = action {
-            return extensionCoordinator.deepLink(forEntryID: entryID, arguments: [:])
-        }
-        return action.entryID.flatMap { core.deepLinkCoordinator.url(forEntryID: $0) }
-    }
-
-    func copyDeepLink(_ url: URL) {
-        paletteCoordinator.hidePalette(restoreFocus: false)
-        core.deepLinkCoordinator.copy(url)
     }
 
     /// Focus is never handed back: the relaunch takes it, or the app that refused has it.

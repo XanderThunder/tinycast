@@ -46,10 +46,6 @@ struct DialogView: View {
 
                 switch request.accessory {
                 case .volume(let volume): VolumeSlider(state: volume)
-                case .snippetArguments(let arguments):
-                    SnippetArgumentFields(
-                        state: arguments, onSubmit: { onChoose(request.defaultIndex) })
-                case .clipboardText(let state): ClipboardEditField(state: state)
                 case nil: EmptyView()
                 }
             }
@@ -106,9 +102,7 @@ struct DialogView: View {
 
     /// Only the keys the panel handles are advertised, so a tooltip can't drift.
     private func keyCaps(for index: Int) -> [String] {
-        if index == request.defaultIndex {
-            return request.accessory?.acceptsLineBreaks == true ? ["⌘", "↵"] : ["↵"]
-        }
+        if index == request.defaultIndex { return ["↵"] }
         if index == request.cancelIndex { return ["esc"] }
         return []
     }

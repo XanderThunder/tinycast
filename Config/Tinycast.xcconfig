@@ -1,2 +1,2 @@
-// Contributors build self-signed with no iCloud; a signer's own gitignored Local.xcconfig adds it.
+// A machine's own gitignored overrides, such as a different signing identity.
 #include? "Local.xcconfig"
