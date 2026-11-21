@@ -181,7 +181,6 @@ run CalcTests              Tinycast/Features/Calculator/Model/*.swift
 run index CalcPerformanceTests Tinycast/Features/Calculator/Model/*.swift
 # `Q` is the URL detector a drag payload builds its link with, rather than a second one.
 Q=Tinycast/Features/Quicklinks/Model/QuicklinkDestination.swift
-run PaletteSelectionTests  Tinycast/Features/PaletteRowIndex.swift
 run AppearanceTests        Tinycast/Platform/Appearance.swift \
                            Tinycast/DesignSystem/Theme.swift \
                            Tinycast/DesignSystem/InterfaceMetrics.swift \
@@ -217,7 +216,6 @@ run FormInputTests         Tinycast/Platform/Appearance.swift \
                            Tinycast/DesignSystem/FormTextArea.swift \
                            Tinycast/DesignSystem/IconTint.swift
 run ScrollRevealTests      Tinycast/DesignSystem/Scrolling/SelectionReveal.swift
-run RedactionTests         Tinycast/DesignSystem/RedactedPlaceholder.swift
 run KeyboardFocusTests     Tinycast/DesignSystem/Interaction/KeyboardFocus.swift
 run CommandEscapeTapTests  Tinycast/Palette/CommandEscapeTap.swift
 run PaletteEscapeTests     Tinycast/Palette/PaletteMode.swift \

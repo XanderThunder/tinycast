@@ -24,24 +24,6 @@ struct DisabledApplicationsList: View {
     }
 }
 
-struct DisabledApplicationsSection: View {
-    @Binding var bundleIDs: [String]
-    let anchor: SettingsAnchor
-    let footer: String
-
-    var body: some View {
-        Section {
-            DisabledApplicationsList(bundleIDs: $bundleIDs)
-        } header: {
-            SettingsSectionHeader(anchor)
-        } footer: {
-            Text(footer)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        }
-    }
-}
-
 /// One excluded app; only the bundle ID is stored, so name and icon resolve on the fly.
 private struct DisabledAppRow: View {
     let bundleID: String
