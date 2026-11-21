@@ -278,9 +278,7 @@ or pass `includingTop: true` for a bounded popup whose title and rows scroll tog
 
 ## Icon pack
 
-Source: `DesignSystem/IconTile.swift`, `DesignSystem/IconTint.swift`, `Theme.IconTile`. Every icon,
-previewed, with this guide: the **Tinycast Icon Pack** artifact
-(https://claude.ai/artifact/9jWyGYLNGDFPQHiNb3s3KB, files `icons.js` and `glyphs/`).
+Source: `DesignSystem/IconTile.swift`, `DesignSystem/IconTint.swift`, `Theme.IconTile`.
 
 Every launcher entry drawn from a symbol is an `IconTile`: a white SF Symbol on its tint's gradient,
 the way System Settings draws its sidebar. The Settings sidebar uses the same tile.
@@ -316,8 +314,6 @@ the way System Settings draws its sidebar. The Settings sidebar uses the same ti
 2. Pick the tint of the feature it belongs to. Add a new `IconTint` (and its pair in
    `Theme.IconTile.fill(_:)`) only for a new feature whose sidebar neighbours use every fitting one.
 3. Add both to the catalog's switches, next to the case.
-4. Add the row to the artifact's `icons.js`, render its preview with `tools/render-symbols.swift.txt`,
-   and republish, so the reference stays complete.
 
 ## Rows, selection, hover
 
