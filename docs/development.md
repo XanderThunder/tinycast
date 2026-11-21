@@ -18,6 +18,17 @@ Create the `Tinycast Self-Signed` code-signing identity once. Builds sign with i
 macOS from forgetting the Accessibility grant on every rebuild. Follow **[signing.md](signing.md) §1**,
 a few `openssl`/`security` commands.
 
+Then turn on the pre-push hook, which stands in for CI:
+
+```sh
+git config core.hooksPath Scripts/git-hooks
+```
+
+Before a branch push it runs the `Model/` import grep, `./Scripts/lint.sh` and `./Scripts/run-tests.sh`
+on the checkout, and refuses the push if any fails. It also refuses when the pushed branch is not the
+one checked out, or when uncommitted changes would be tested in place of the commit. Tag pushes and
+deletions pass untested, and `git push --no-verify` skips it.
+
 That is the whole required setup. Editor configuration is personal and the repo does not prescribe it;
 the section below is a note for anyone who wants it, not a step.
 

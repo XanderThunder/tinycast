@@ -15,8 +15,10 @@ The mechanical bar, in one place so it cannot drift. All five pass before a chan
 | A clean build                                      | `xcodebuild … -configuration Debug CODE_SIGNING_ALLOWED=NO`, zero **new** warnings   |
 | Docs still true                                    | any doc your change made wrong, fixed in the same commit                             |
 
-There is no CI: every item is on you, run locally. Each is expanded below; the manual sweep at the
-end of this file is the sixth, judged by what you touched.
+There is no CI: every item is on you, run locally. The pre-push hook
+([development.md](development.md#first-time-setup)) runs the first three before every branch push.
+Each is expanded below; the manual sweep at the end of this file is the sixth, judged by what you
+touched.
 
 ## The harnesses
 
