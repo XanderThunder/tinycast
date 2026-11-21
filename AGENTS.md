@@ -8,8 +8,8 @@ third-party dependencies.
 
 ## Why this fork exists
 
-This is a personal fork of [Tinycast](https://github.com/abue-ammar/tinycast), built for one Mac. These
-reasons settle judgement calls:
+This is a personal fork of Tinycast by Abue Ammar, built for one Mac. These reasons settle judgement
+calls:
 
 - **Personal build**, installed only on the owner's Mac with `Scripts/install-local.sh`. Nothing is
   packaged, notarized or distributed.

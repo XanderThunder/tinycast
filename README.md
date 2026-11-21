@@ -3,8 +3,8 @@
   Tinycast (personal fork)
 </h1>
 
-A personal build of [Tinycast](https://github.com/abue-ammar/tinycast), the native macOS menu-bar
-launcher, trimmed to the features its owner uses and cut off from the original developer's services.
+A personal build of Tinycast by Abue Ammar, the native macOS menu-bar launcher, trimmed to the
+features its owner uses and cut off from the original developer's services.
 It is built and installed on one Mac only; nobody else receives it.
 
 SwiftUI + AppKit, Swift 6, macOS 26 or later (macOS 27 preferred). No third-party dependencies, no
