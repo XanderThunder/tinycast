@@ -279,9 +279,6 @@ enum SettingsSearchCatalog {
             .fileSearchFileSearch, "Enable File Search",
             keywords: ["index", "disk", "show in launcher", "root search"]),
         .init(
-            group: .fileSearchFullDiskAccess, "Full Disk Access",
-            keywords: ["permission", "privacy", "grant", "fda"]),
-        .init(
             group: .fileSearchIndex, "File index",
             keywords: ["rebuild", "refresh", "reindex", "indexed files"]),
         .init(
@@ -388,9 +385,6 @@ enum SettingsSearchCatalog {
         .init(
             .permissionsAccessibility, "Accessibility",
             keywords: ["paste", "keystrokes", "privacy", "grant"]),
-        .init(
-            .permissionsFullDiskAccess, "Full Disk Access",
-            keywords: ["files", "folders", "privacy", "grant", "fda"]),
 
     ]
 

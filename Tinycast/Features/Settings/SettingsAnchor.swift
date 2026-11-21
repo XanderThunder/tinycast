@@ -46,7 +46,6 @@ extension SettingsAnchor {
     static let fallbacksFallbacks = Self(tab: .fallbacks, title: "Fallbacks")
 
     static let fileSearchFileSearch = Self(tab: .fileSearch, title: "File Search")
-    static let fileSearchFullDiskAccess = Self(tab: .fileSearch, title: "Full Disk Access")
     static let fileSearchIndex = Self(tab: .fileSearch, title: "Index")
     static let fileSearchCommands = Self(tab: .fileSearch, title: "Commands")
     static let fileSearchSearchScopes = Self(tab: .fileSearch, title: "Search Scopes")
@@ -66,7 +65,6 @@ extension SettingsAnchor {
     static let windowManagementCustomSizes = Self(tab: .windowManagement, title: "Custom Sizes")
 
     static let permissionsAccessibility = Self(tab: .permissions, title: "Accessibility")
-    static let permissionsFullDiskAccess = Self(tab: .permissions, title: "Full Disk Access")
 
     static let backupExport = Self(tab: .backup, title: "Export")
     static let backupImport = Self(tab: .backup, title: "Import")

@@ -11,8 +11,12 @@ design follows [fsearch](https://github.com/noahdunnagan/fsearch).
 - **The crawl runs in `FileIndexHelper`, never in the app.** On macOS 27 malloc keeps freed small blocks
   dirty, so a crawl inside the app would leave its peak behind for good. The helper writes the index and
   exits; the app only maps the file, whose clean pages never count toward its footprint.
-- **Full Disk Access is required, and nothing is indexed without it.** `Permissions.hasFullDiskAccess()`
-  probes a TCC-guarded file, which never prompts. The pane and the palette both say how to grant it.
+- **File Search never asks for Full Disk Access.** The crawl reads what the account can read; a folder
+  macOS guards per app (Desktop, Documents, Downloads, cloud storage) prompts once on first read, with
+  the purpose strings in `Info.plist`; the first build waits for each answer, and a refused or Full Disk
+  Access-only folder is skipped silently. A grant made later in System Settings is announced to nothing,
+  so it reaches the index on the next rebuild. The default ignore rules keep the crawl out of
+  `~/Library/Containers` and Group Containers, which would ask for other apps' data.
 - **Scopes are the crawl roots.** Only what lies under a scope is indexed or searched; a scope inside
   another stays listed but folds into it at crawl time, and a cleared list indexes nothing. The default
   is home (`~`): the rest of the disk is the system's, and apps are the launcher's.
@@ -267,8 +271,8 @@ is no "all" to trash. The three ⌘C chords differ only by their second modifier
 
 The first in-flight query says nothing (the rows it is about to replace would only flash a message); an
 empty completed query says what the active filter admits ("No files found", "No images found"), and a
-blank screen with no recents says "Type to search files and folders". Without Full Disk Access the screen
-says so and ↵ opens the Privacy & Security pane; during the first build it shows the running item count.
+blank screen with no recents says "Type to search files and folders". During the first build it shows
+the running item count.
 
 ### Dragging out
 
@@ -311,7 +315,7 @@ fitted cache, purged when the palette hides.
 ## Invocation
 
 Settings ▸ File Search owns the `fileSearchEnabled` switch, which is off when its preference is absent,
-the **Show in launcher** switch beneath it, along with the Full Disk Access status, the index status and **Rebuild Index**, the scope list
+the **Show in launcher** switch beneath it, along with the index status and **Rebuild Index**, the scope list
 with **Include hidden files** (`fileSearchIncludesHiddenFiles`), the ignore patterns and the Search Files
 command row. The lists are ordinary settings carried by Tinycast
 settings backups; importing them grants no permission.

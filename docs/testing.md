@@ -404,8 +404,8 @@ prefs, caches, TCC grants and login item, so this cannot disturb an installed co
 ### File Search
 
 - With File Search **off**: Search Files is absent, its shortcut no-ops, and no index folder exists
-- Without Full Disk Access the pane shows **Required** with the hint, the palette says so, and ↵ and the
-  button both open Privacy & Security › Full Disk Access; granting it starts a build with no relaunch
+- Without Full Disk Access the first build asks once each for Desktop, Documents and Downloads, with
+  Tinycast's purpose strings; a refused folder is left out and the build still finishes
 - The first build shows a rising item count in Settings and the palette, then a final count and date;
   Activity Monitor shows the helper's memory, and Tinycast's own footprint is back at its baseline after
 - Enabling in Settings exposes Search Files immediately; it persists across relaunch and backup import

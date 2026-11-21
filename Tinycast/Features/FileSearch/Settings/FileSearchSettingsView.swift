@@ -1,4 +1,3 @@
-import Combine
 import SwiftUI
 
 struct FileSearchSettingsView: View {
@@ -10,13 +9,12 @@ struct FileSearchSettingsView: View {
             FeatureSwitchSection(
                 anchor: .fileSearchFileSearch,
                 enableTitle: "Enable File Search",
-                enableSubtitle: "Indexes your disk for instant results. Needs Full Disk Access.",
+                enableSubtitle: "Indexes your files for instant results.",
                 isEnabled: $settings.fileSearchEnabled,
                 showsInLauncher: $settings.fileSearchShowInLauncher,
                 showsIcon: true,
                 showsHeader: false)
 
-            FileSearchAccessSection()
             FileSearchIndexSection()
                 .settingsEnabled(settings.fileSearchEnabled)
             FeatureCommandsSection(owner: .fileSearch, anchor: .fileSearchCommands)
@@ -28,62 +26,6 @@ struct FileSearchSettingsView: View {
         }
         .formStyle(.grouped)
         .settingsScrollTarget(.fileSearch)
-    }
-}
-
-private struct FileSearchAccessSection: View {
-    @Environment(AppCore.self) private var core
-    @State private var granted = Permissions.hasFullDiskAccess()
-    /// Nothing announces a grant made in System Settings, so the pane asks while it is open.
-    private let refreshTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
-
-    var body: some View {
-        Section {
-            LabeledContent {
-                HStack(spacing: Theme.Spacing.lg) {
-                    HStack(spacing: Theme.Spacing.xs) {
-                        Image(systemName: granted ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
-                            .accessibilityHidden(true)
-                        Text(granted ? "Granted" : "Required")
-                    }
-                    .foregroundStyle(granted ? Color.green : Color.orange)
-                    Button(granted ? "Open…" : "Open Privacy Settings…") {
-                        Permissions.openFullDiskAccessSettings()
-                    }
-                    .help("Opens Privacy & Security › Full Disk Access.")
-                }
-            } label: {
-                VStack(alignment: .leading, spacing: Theme.Spacing.xxs) {
-                    SettingsRowTitle(.fileSearchFullDiskAccess, "Full Disk Access")
-                    Text(granted ? "Tinycast can index every folder." : "File Search can’t index without it.")
-                        .foregroundStyle(.secondary)
-                }
-            }
-        } header: {
-            SettingsSectionHeader(.fileSearchFullDiskAccess)
-        } footer: {
-            if !granted {
-                Text(
-                    """
-                    File Search reads your disk directly to build a private index on this Mac. \
-                    In System Settings › Privacy & Security › Full Disk Access, turn on \
-                    Tinycast. If it isn’t listed, click + and choose Tinycast from \
-                    Applications. If access still shows as required, quit and reopen Tinycast.
-                    """
-                )
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            }
-        }
-        .onAppear(perform: refresh)
-        .onReceive(refreshTimer) { _ in refresh() }
-    }
-
-    private func refresh() {
-        let now = Permissions.hasFullDiskAccess()
-        guard now != granted else { return }
-        granted = now
-        core.fileIndexer.refreshAccess()
     }
 }
 
@@ -122,7 +64,7 @@ private struct FileSearchIndexSection: View {
     private var canRebuild: Bool {
         switch indexer.status {
         case .ready, .failed: return true
-        case .off, .needsAccess, .building: return false
+        case .off, .building: return false
         }
     }
 
@@ -131,8 +73,6 @@ private struct FileSearchIndexSection: View {
         switch indexer.status {
         case .off:
             Text("Not indexed")
-        case .needsAccess:
-            Text("Waiting for Full Disk Access")
         case .building(let items):
             HStack(spacing: Theme.Spacing.xs) {
                 ProgressView().controlSize(.mini)

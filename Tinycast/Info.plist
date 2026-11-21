@@ -23,6 +23,10 @@
 	<!-- Exported, but deliberately no CFBundleDocumentTypes: claiming the type would make a
 	     double-clicked .tinycast launch straight into writing over someone's data. The identifier
 	     is fixed rather than per-channel so Dev and stable can read each other's exports. -->
+	<key>NSNetworkVolumesUsageDescription</key>
+	<string>Tinycast indexes file names on network volumes you add as File Search scopes.</string>
+	<key>NSRemovableVolumesUsageDescription</key>
+	<string>Tinycast indexes file names on removable volumes you add as File Search scopes.</string>
 	<key>UTExportedTypeDeclarations</key>
 	<array>
 		<dict>
@@ -56,6 +60,14 @@
 	<string>Tinycast shows a camera preview so you can check yourself, and take a photo to the clipboard.</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>Tinycast uses Bluetooth access only when you run the Toggle Bluetooth action.</string>
+	<key>NSDesktopFolderUsageDescription</key>
+	<string>Tinycast indexes file names in your Desktop folder so File Search can find them.</string>
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string>Tinycast indexes file names in your Documents folder so File Search can find them.</string>
+	<key>NSDownloadsFolderUsageDescription</key>
+	<string>Tinycast indexes file names in your Downloads folder so File Search can find them.</string>
+	<key>NSFileProviderDomainUsageDescription</key>
+	<string>Tinycast indexes file names in cloud storage folders so File Search can find them.</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>Tinycast</string>
 </dict>

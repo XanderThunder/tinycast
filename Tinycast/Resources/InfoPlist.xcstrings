@@ -34,6 +34,72 @@
         }
       }
     },
+    "NSDesktopFolderUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tinycast indexes file names in your Desktop folder so File Search can find them."
+          }
+        }
+      }
+    },
+    "NSDocumentsFolderUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tinycast indexes file names in your Documents folder so File Search can find them."
+          }
+        }
+      }
+    },
+    "NSDownloadsFolderUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tinycast indexes file names in your Downloads folder so File Search can find them."
+          }
+        }
+      }
+    },
+    "NSFileProviderDomainUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tinycast indexes file names in cloud storage folders so File Search can find them."
+          }
+        }
+      }
+    },
+    "NSNetworkVolumesUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tinycast indexes file names on network volumes you add as File Search scopes."
+          }
+        }
+      }
+    },
+    "NSRemovableVolumesUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tinycast indexes file names on removable volumes you add as File Search scopes."
+          }
+        }
+      }
+    },
     "Tinycast Backup" : {
       "localizations" : {
         "en" : {

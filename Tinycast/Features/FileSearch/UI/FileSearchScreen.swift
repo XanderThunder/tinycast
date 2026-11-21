@@ -16,13 +16,7 @@ struct FileSearchScreen: PaletteScreen {
 
     private var indexer: FileIndexer { core.fileIndexer }
 
-    private var needsAccess: Bool { indexer.status == .needsAccess }
-
-    /// ↵ on the access hint opens the one pane that can fix it.
-    var actsWithoutRows: Bool { needsAccess }
-
     var primaryActionTitle: String {
-        if needsAccess { return String(localized: "Open Privacy Settings") }
         guard let result = result(at: vm.selection) else { return String(localized: "Open File") }
         return result.isDirectory ? String(localized: "Open Folder") : String(localized: "Open File")
     }
@@ -39,10 +33,6 @@ struct FileSearchScreen: PaletteScreen {
     }
 
     func activate(at selection: Int) {
-        if needsAccess {
-            core.fileSearchCoordinator.openFullDiskAccessSettings()
-            return
-        }
         guard let result = result(at: selection) else { return }
         core.fileSearchCoordinator.open(result)
     }
@@ -94,18 +84,9 @@ struct FileSearchScreen: PaletteScreen {
     /// Nothing is said while a query runs: the rows it replaces would only flash a message.
     @ViewBuilder
     private var emptyState: some View {
-        if needsAccess {
+        if !indexer.hasIndex, case .building(let items) = indexer.status {
             EmptyResults(
-                text: String(localized: "Full Disk Access required"),
-                detail: String(
-                    localized: """
-                        File Search indexes your whole disk. Press ↵ to open Privacy & Security, \
-                        then turn on Tinycast under Full Disk Access.
-                        """),
-                systemImage: "lock.shield")
-        } else if !indexer.hasIndex, case .building(let items) = indexer.status {
-            EmptyResults(
-                text: String(localized: "Indexing your disk…"),
+                text: String(localized: "Indexing your files…"),
                 detail: String(
                     localized: "\(items.formatted()) items so far. Results appear when it finishes."),
                 systemImage: "externaldrive")

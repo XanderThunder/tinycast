@@ -1037,9 +1037,6 @@
     "Allow Tinycast to use Accessibility in System Settings" : {
 
     },
-    "Allows File Search to index protected folders." : {
-
-    },
     "Allows managing windows and reading selected text in active apps." : {
 
     },
@@ -1994,15 +1991,6 @@
     "File Search" : {
 
     },
-    "File Search can’t index without it." : {
-
-    },
-    "File Search indexes your whole disk. Press ↵ to open Privacy & Security, then turn on Tinycast under Full Disk Access." : {
-
-    },
-    "File Search reads your disk directly to build a private index on this Mac. In System Settings › Privacy & Security › Full Disk Access, turn on Tinycast. If it isn’t listed, click + and choose Tinycast from Applications. If access still shows as required, quit and reopen Tinycast." : {
-
-    },
     "File index" : {
 
     },
@@ -2082,12 +2070,6 @@
 
     },
     "Fuel Economy" : {
-
-    },
-    "Full Disk Access" : {
-
-    },
-    "Full Disk Access required" : {
 
     },
     "Fullscreen" : {
@@ -2397,10 +2379,10 @@
     "Indexed Items" : {
 
     },
-    "Indexes your disk for instant results. Needs Full Disk Access." : {
+    "Indexes your files for instant results." : {
 
     },
-    "Indexing your disk…" : {
+    "Indexing your files…" : {
 
     },
     "Indexing… %@ items" : {
@@ -3004,12 +2986,6 @@
     "Open Keyboard Settings…" : {
 
     },
-    "Open Privacy Settings" : {
-
-    },
-    "Open Privacy Settings…" : {
-
-    },
     "Open Quicklink" : {
 
     },
@@ -3056,9 +3032,6 @@
 
     },
     "Opens Privacy & Security › Accessibility." : {
-
-    },
-    "Opens Privacy & Security › Full Disk Access." : {
 
     },
     "Opens a list of choices" : {
@@ -3420,9 +3393,6 @@
           }
         }
       }
-    },
-    "Required" : {
-
     },
     "Required before running" : {
 
@@ -4128,9 +4098,6 @@
     "Tinycast Settings" : {
 
     },
-    "Tinycast can index every folder." : {
-
-    },
     "Tinycast has no access to the camera." : {
 
     },
@@ -4316,9 +4283,6 @@
     },
     "W" : {
       "comment" : "One-letter Width field label"
-    },
-    "Waiting for Full Disk Access" : {
-
     },
     "Waiting for a shortcut…" : {
 

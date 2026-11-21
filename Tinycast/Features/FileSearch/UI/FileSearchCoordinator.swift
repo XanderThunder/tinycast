@@ -83,15 +83,9 @@ final class FileSearchCoordinator {
         indexer.rebuild()
     }
 
-    func openFullDiskAccessSettings() {
-        paletteCoordinator.hidePalette(restoreFocus: false)
-        Permissions.openFullDiskAccessSettings()
-    }
-
     /// `query` is the fallback row's: the screen opens already narrowed to what was typed.
     func show(query: String = "") {
         guard settings.fileSearchEnabled else { return }
-        indexer.refreshAccess()
         paletteCoordinator.togglePalette(mode: .fileSearch, seeding: query.isEmpty ? nil : query)
     }
 
